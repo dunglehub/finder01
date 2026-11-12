@@ -57,9 +57,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .wrap { max-width: 980px; margin: 0 auto; padding: 22px 16px 56px; }
 
       /* ---------- header ---------- */
-      .hero { position: relative; padding: 6px 0 4px; min-height: 120px; }
-      @media (min-width: 821px) { .hero { min-height: 196px; } }
-      .hero .art { position: absolute; right: 0; top: 0; width: min(36%, 310px); height: auto; border-radius: 16px; box-shadow: var(--shadow); pointer-events: none; }
+      .hero { position: relative; overflow: hidden; border-radius: 22px; padding: 34px 28px 30px; min-height: 236px;
+        background:
+          linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 92%, transparent) 34%, color-mix(in srgb, var(--bg) 35%, transparent) 62%, transparent 100%),
+          linear-gradient(180deg, transparent 55%, var(--bg) 100%),
+          var(--hero) center 58% / cover no-repeat;
+        box-shadow: var(--shadow); border: 1px solid var(--line); }
+      @media (max-width: 820px) {
+        .hero { padding: 22px 18px 20px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 78%, transparent) 100%),
+            var(--hero) center / cover no-repeat; }
+      }
       .title { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0; }
       .title h1 { font-size: clamp(1.6rem, 4.6vw, 2.35rem); line-height: 1.1; margin: 0; letter-spacing: -.02em; }
       .title h1 em { font-style: normal; color: var(--blue); }
@@ -73,10 +82,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .lead { font-size: 1.08rem; margin: 10px 0 2px; max-width: 34em; }
       .built { color: var(--muted); font-size: .9rem; margin: 0; }
       .built .ico { margin-right: 4px; }
-      @media (max-width: 820px) { .hero .art { display: none; } }
 
       /* ---------- top navigation ---------- */
-      .nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; position: relative; z-index: 1; }
+      .nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; position: relative; z-index: 1; }
       .nav button { font: inherit; font-weight: 600; font-size: .95rem; display: inline-flex; align-items: center; gap: 8px;
         padding: 10px 18px; border-radius: 14px 14px 0 0; cursor: pointer; color: var(--muted);
         background: color-mix(in srgb, var(--card) 70%, transparent); border: 1px solid transparent; border-bottom: none; }
@@ -228,8 +236,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
   </head>
   <body>
     <main class="wrap" id="app" data-api={config.api || ''}>
-      <header class="hero">
-        <img class="art" src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/hero.jpg`} alt="" width="720" height="437" loading="eager" />
+      <header class="hero" style={`--hero:url(${import.meta.env.BASE_URL.replace(/\/$/, "")}/hero.jpg)`}>
         <div class="title">
           <svg class="cap" viewBox="0 0 48 48" fill="none" aria-hidden="true">
             <path d="M24 8 3 18l21 10 21-10L24 8Z" fill="currentColor"/>
