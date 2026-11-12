@@ -49,6 +49,12 @@ const elseList = watchlist.filter((c) => c.region !== 'BC');
         background: var(--bg); color: var(--text); font: inherit; }
       .bar input[type=search] { flex: 1 1 200px; min-width: 0; }
       .bar label { display: flex; gap: 6px; align-items: center; font-size: .92rem; color: var(--muted); }
+      .nav { display: flex; flex-wrap: wrap; gap: 4px; margin: 18px 0 0; border-bottom: 1px solid var(--line); }
+      .nav button { font: inherit; padding: 9px 16px; cursor: pointer; background: none; border: none;
+        border-bottom: 3px solid transparent; color: var(--muted); margin-bottom: -1px; }
+      .nav button[aria-pressed=true] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+      .view[hidden] { display: none; }
+      .view > h2:first-child { margin-top: 20px; }
       .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
       .tabs button { font: inherit; font-size: .92rem; padding: 7px 14px; border-radius: 999px; cursor: pointer;
         border: 1px solid var(--line); background: var(--card); color: var(--text); }
@@ -105,6 +111,14 @@ const elseList = watchlist.filter((c) => c.region !== 'BC');
         Last built {checked} (Pacific).
       </p>
 
+      <nav class="nav" id="nav" aria-label="Sections">
+        <button type="button" data-view="jobs" aria-pressed="true">Jobs</button>
+        <button type="button" data-view="bc" aria-pressed="false">Employers to check directly</button>
+        <button type="button" data-view="else" aria-pressed="false">Elsewhere</button>
+      </nav>
+      <div class="status" id="status"></div>
+
+      <section class="view" data-view="jobs">
       <div class="bar">
         <input type="search" id="q" placeholder="Search title, company, location" aria-label="Search jobs" />
         <select id="region" aria-label="Region">
@@ -122,15 +136,14 @@ const elseList = watchlist.filter((c) => c.region !== 'BC');
         <button type="button" data-tab="applied" aria-pressed="false">&#10003; Applied<span class="n"></span></button>
         <button type="button" data-tab="skip" aria-pressed="false">&#10005; Skipped<span class="n"></span></button>
       </div>
-      <div class="status" id="status"></div>
 
       <div class="count" id="count"></div>
       <div id="list"></div>
+      </section>
 
+      <section class="view" data-view="bc" hidden>
       <h2>Employers to check directly</h2>
-      <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op". Use the buttons to keep track of the ones you've looked at.</p>
-
-      <h3 style="font-size:1rem;margin:16px 0 8px">In BC</h3>
+      <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op". Use the buttons to keep track of the ones you've looked at. These are the BC ones.</p>
       <div class="grid">
         {bcList.map((c) => (
           <div class="co" data-id={`co:${c.name}`}>
@@ -141,7 +154,11 @@ const elseList = watchlist.filter((c) => c.region !== 'BC');
         ))}
       </div>
 
-      <h3 style="font-size:1rem;margin:20px 0 8px">Elsewhere</h3>
+      </section>
+
+      <section class="view" data-view="else" hidden>
+      <h2>Elsewhere</h2>
+      <p class="sub">Employers outside BC. Same idea: open the careers page and search for "intern" or "co-op".</p>
       <div class="grid">
         {elseList.map((c) => (
           <div class="co" data-id={`co:${c.name}`}>
@@ -150,6 +167,7 @@ const elseList = watchlist.filter((c) => c.region !== 'BC');
           </div>
         ))}
       </div>
+      </section>
 
       <p class="foot">
         Don't forget UBC's own co-op job portal, which needs a login and can't be listed here.
@@ -403,6 +421,22 @@ const elseList = watchlist.filter((c) => c.region !== 'BC');
         ['q', 'region', 'sw', 'mismatch'].forEach(function (id) {
           $(id).addEventListener(id === 'q' ? 'input' : 'change', renderJobs);
         });
+
+        function showView(v) {
+          if (v !== 'jobs' && v !== 'bc' && v !== 'else') v = 'jobs';
+          var secs = document.querySelectorAll('.view');
+          for (var i = 0; i < secs.length; i++) secs[i].hidden = secs[i].getAttribute('data-view') !== v;
+          var nb = $('nav').querySelectorAll('button');
+          for (var k = 0; k < nb.length; k++) nb[k].setAttribute('aria-pressed', nb[k].getAttribute('data-view') === v ? 'true' : 'false');
+        }
+        $('nav').addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-view]');
+          if (!b) return;
+          var v = b.getAttribute('data-view');
+          showView(v);
+          try { history.replaceState(null, '', '#' + v); } catch (err) {}
+        });
+        showView((location.hash || '').slice(1));
 
         renderAll();
         syncDown();
