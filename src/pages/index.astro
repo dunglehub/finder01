@@ -58,8 +58,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
       /* ---------- header ---------- */
       .hero { position: relative; padding: 6px 0 4px; min-height: 120px; }
-      .hero .art { position: absolute; right: -8px; top: 6px; width: min(36%, 340px); pointer-events: none; opacity: .95; }
-      .hero .art svg { width: 100%; height: auto; }
+      @media (min-width: 821px) { .hero { min-height: 196px; } }
+      .hero .art { position: absolute; right: 0; top: 0; width: min(36%, 310px); height: auto; border-radius: 16px; box-shadow: var(--shadow); pointer-events: none; }
       .title { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0; }
       .title h1 { font-size: clamp(1.6rem, 4.6vw, 2.35rem); line-height: 1.1; margin: 0; letter-spacing: -.02em; }
       .title h1 em { font-style: normal; color: var(--blue); }
@@ -229,38 +229,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
   <body>
     <main class="wrap" id="app" data-api={config.api || ''}>
       <header class="hero">
-        <div class="art" aria-hidden="true">
-          <svg viewBox="0 0 440 190" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="mt1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6aa5f5"/><stop offset="1" stop-color="#3b6fd8"/></linearGradient>
-              <linearGradient id="mt2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c9fb"/><stop offset="1" stop-color="#7ea6ec"/></linearGradient>
-              <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34c28a"/><stop offset="1" stop-color="#0f8f63"/></linearGradient>
-            </defs>
-            <polygon points="120,190 250,40 330,120 380,70 440,190" fill="url(#mt2)"/>
-            <polygon points="60,190 190,60 300,190" fill="url(#mt1)"/>
-            <polygon points="190,60 168,90 190,84 205,96" fill="#fff" opacity=".85"/>
-            <g fill="#2f5fb8" opacity=".9">
-              <rect x="268" y="112" width="20" height="78"/><rect x="292" y="96" width="24" height="94"/><rect x="320" y="124" width="18" height="66"/>
-              <rect x="342" y="104" width="22" height="86"/>
-            </g>
-            <g fill="#dbe8ff" opacity=".9">
-              <rect x="274" y="122" width="4" height="6"/><rect x="274" y="136" width="4" height="6"/><rect x="298" y="108" width="4" height="6"/>
-              <rect x="306" y="122" width="4" height="6"/><rect x="298" y="136" width="4" height="6"/><rect x="348" y="116" width="4" height="6"/>
-              <rect x="356" y="132" width="4" height="6"/>
-            </g>
-            <g fill="url(#gr)">
-              <polygon points="20,190 36,128 52,190"/><polygon points="38,190 58,112 78,190"/><polygon points="392,190 408,130 424,190"/>
-              <polygon points="410,190 428,118 446,190"/>
-            </g>
-            <rect x="0" y="176" width="440" height="14" fill="#2b4a8a" opacity=".25"/>
-            <path d="M92 176c0-14 10-22 26-24l22-14c6-4 14-6 22-6h34c10 0 18 4 24 10l10 10c12 2 20 8 20 24z" fill="#f4f8ff" stroke="#9db6e6" stroke-width="2"/>
-            <path d="M150 138h38c6 0 11 3 14 8l-60 0z" fill="#b9d3fb"/>
-            <circle cx="132" cy="178" r="12" fill="#1b2f55"/><circle cx="132" cy="178" r="5" fill="#cfd9ee"/>
-            <circle cx="224" cy="178" r="12" fill="#1b2f55"/><circle cx="224" cy="178" r="5" fill="#cfd9ee"/>
-            <path d="M386 26c-10 6-14 18-10 28 12-4 16-18 10-28z" fill="#34c28a"/>
-            <path d="M235 22l-12 22h10l-6 20 18-26h-11l8-16z" fill="#f5b53b"/>
-          </svg>
-        </div>
+        <img class="art" src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/hero.jpg`} alt="" width="720" height="437" loading="eager" />
         <div class="title">
           <svg class="cap" viewBox="0 0 48 48" fill="none" aria-hidden="true">
             <path d="M24 8 3 18l21 10 21-10L24 8Z" fill="currentColor"/>
