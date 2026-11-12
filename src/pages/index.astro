@@ -1,0 +1,187 @@
+---
+import autoJobs from '../../data/jobs.json';
+import manualJobs from '../../data/manual-jobs.json';
+import watchlist from '../../data/watchlist.json';
+import { enrich } from '../../scripts/lib/classify.mjs';
+
+// Manual jobs are enriched the same way as automatic ones, then tagged "hand-picked".
+const manual = manualJobs.map((j) =>
+  enrich({ ...j, source: 'manual', description: `${j.start ? 'Starting ' + j.start + '. ' : ''}${j.note || ''}` }),
+);
+const jobs = [...manual, ...autoJobs];
+
+const checked = new Date().toLocaleString('en-CA', {
+  dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Vancouver',
+});
+
+const bcList = watchlist.filter((c) => c.region === 'BC');
+const elseList = watchlist.filter((c) => c.region !== 'BC');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Co-op Finder: Summer 2027</title>
+    <meta name="description" content="Intern and co-op postings in battery, EV and clean-energy engineering, starting May 2027." />
+    <style is:global>
+      :root {
+        --bg: #f7f8fa; --card: #ffffff; --text: #1b2430; --muted: #5d6b7c; --line: #e2e6ec;
+        --accent: #0b6e4f; --accent-bg: #e3f4ec; --warn: #8a5a00; --warn-bg: #fff2d6; --grey-bg: #eceff3;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #11161c; --card: #19212a; --text: #e8edf3; --muted: #9aa8b8; --line: #2a3541;
+          --accent: #5fd6a4; --accent-bg: #16382c; --warn: #f2c261; --warn-bg: #3a2f14; --grey-bg: #25303b; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text);
+        font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+      h1 { font-size: 1.6rem; margin: 0 0 4px; }
+      h2 { font-size: 1.15rem; margin: 36px 0 12px; }
+      .sub { color: var(--muted); margin: 0 0 20px; }
+      .bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+        background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+      .bar input[type=search], .bar select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line);
+        background: var(--bg); color: var(--text); font: inherit; }
+      .bar input[type=search] { flex: 1 1 200px; min-width: 0; }
+      .bar label { display: flex; gap: 6px; align-items: center; font-size: .92rem; color: var(--muted); }
+      .count { color: var(--muted); font-size: .9rem; margin: 12px 2px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+      .card h3 { margin: 0 0 2px; font-size: 1.05rem; }
+      .card h3 a { color: inherit; text-decoration: none; }
+      .card h3 a:hover { text-decoration: underline; }
+      .meta { color: var(--muted); font-size: .92rem; }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+      .tag { font-size: .78rem; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--muted); }
+      .tag.good { background: var(--accent-bg); color: var(--accent); }
+      .tag.warn { background: var(--warn-bg); color: var(--warn); }
+      .note { margin: 8px 0 0; font-size: .92rem; }
+      .empty { padding: 24px; text-align: center; color: var(--muted); background: var(--card);
+        border: 1px dashed var(--line); border-radius: 12px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+      .co { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+      .co a { font-weight: 600; color: inherit; }
+      .co p { margin: 4px 0 0; font-size: .88rem; color: var(--muted); }
+      .foot { margin-top: 40px; color: var(--muted); font-size: .85rem; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Co-op Finder: Summer 2027</h1>
+      <p class="sub">
+        Intern and co-op roles in mechanical, battery, EV and clean-energy engineering. BC first, rest of Canada second.
+        Last built {checked} (Pacific).
+      </p>
+
+      <div class="bar">
+        <input type="search" id="q" placeholder="Search title, company, location" aria-label="Search jobs" />
+        <select id="region" aria-label="Region">
+          <option value="all">All locations</option>
+          <option value="bc">BC only</option>
+          <option value="other">Outside BC</option>
+        </select>
+        <label><input type="checkbox" id="sw" /> SolidWorks mentioned</label>
+        <label><input type="checkbox" id="mismatch" /> Show other start dates</label>
+      </div>
+
+      <div class="count" id="count"></div>
+      <div id="list"></div>
+
+      <h2>Employers to check directly</h2>
+      <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op".</p>
+
+      <h3 style="font-size:1rem;margin:16px 0 8px">In BC</h3>
+      <div class="grid">
+        {bcList.map((c) => (
+          <div class="co">
+            <a href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+            {c.mode === 'auto' && <span class="tag good" style="margin-left:6px">auto</span>}
+            <p>{c.note}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 style="font-size:1rem;margin:20px 0 8px">Elsewhere</h3>
+      <div class="grid">
+        {elseList.map((c) => (
+          <div class="co">
+            <a href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+            <p>{c.note}</p>
+          </div>
+        ))}
+      </div>
+
+      <p class="foot">
+        Don't forget UBC's own co-op job portal, which needs a login and can't be listed here.
+        Always confirm start dates and details on the employer's posting.
+      </p>
+    </div>
+
+    <script id="jobs-data" type="application/json" set:html={JSON.stringify(jobs)}></script>
+    <script is:inline>
+      (function () {
+        var jobs = JSON.parse(document.getElementById('jobs-data').textContent);
+        var $ = function (id) { return document.getElementById(id); };
+        var list = $('list'), count = $('count');
+
+        // Best matches first: fits May 2027, then unknown date, then others; BC before elsewhere; then relevance.
+        function rank(j) { return j.fitsMay === true ? 0 : j.fitsMay === null ? 1 : 2; }
+        jobs.sort(function (a, b) {
+          return rank(a) - rank(b) || (b.bc - a.bc) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
+        });
+
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (text != null) e.textContent = text;
+          return e;
+        }
+        function tag(text, kind) { return el('span', 'tag' + (kind ? ' ' + kind : ''), text); }
+
+        function card(j) {
+          var c = el('div', 'card');
+          var h = el('h3');
+          var a = el('a', null, j.title);
+          a.href = j.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          h.appendChild(a); c.appendChild(h);
+          c.appendChild(el('div', 'meta', j.company + (j.location ? ' · ' + j.location : '')));
+          var t = el('div', 'tags');
+          if (j.fitsMay === true) t.appendChild(tag('Starts ' + j.startLabel + ' ✓', 'good'));
+          else if (j.fitsMay === false) t.appendChild(tag('Starts ' + j.startLabel + ' (not May 2027)', 'warn'));
+          else t.appendChild(tag('Start date not listed', 'warn'));
+          if (j.bc) t.appendChild(tag('BC', 'good')); else t.appendChild(tag('Outside BC'));
+          if (j.solidworks) t.appendChild(tag('SolidWorks', 'good'));
+          if (j.source === 'manual') t.appendChild(tag('Hand-picked'));
+          if (j.posted) t.appendChild(tag('Posted ' + j.posted));
+          c.appendChild(t);
+          if (j.source === 'manual' && j.note) c.appendChild(el('p', 'note', j.note));
+          return c;
+        }
+
+        function render() {
+          var q = $('q').value.trim().toLowerCase();
+          var region = $('region').value, sw = $('sw').checked, mm = $('mismatch').checked;
+          var shown = jobs.filter(function (j) {
+            if (!mm && j.fitsMay === false) return false;
+            if (sw && !j.solidworks) return false;
+            if (region === 'bc' && !j.bc) return false;
+            if (region === 'other' && j.bc) return false;
+            if (q && (j.title + ' ' + j.company + ' ' + j.location).toLowerCase().indexOf(q) === -1) return false;
+            return true;
+          });
+          list.textContent = '';
+          shown.forEach(function (j) { list.appendChild(card(j)); });
+          if (!shown.length) list.appendChild(el('div', 'empty', 'No postings match these filters yet. Try "Show other start dates" or check the employer list below.'));
+          var hidden = jobs.length - shown.length;
+          count.textContent = shown.length + ' shown' + (hidden ? ' · ' + hidden + ' hidden by filters' : '');
+        }
+
+        ['q', 'region', 'sw', 'mismatch'].forEach(function (id) {
+          $(id).addEventListener(id === 'q' ? 'input' : 'change', render);
+        });
+        render();
+      })();
+    </script>
+  </body>
+</html>
