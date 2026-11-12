@@ -116,6 +116,19 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .chk { display: inline-flex; gap: 8px; align-items: center; font-size: .92rem; color: var(--text); cursor: pointer;
         padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); }
       .chk input { accent-color: var(--blue); width: 16px; height: 16px; }
+      .addbtn { font: inherit; font-weight: 700; font-size: .92rem; display: none; align-items: center; gap: 7px; padding: 11px 16px;
+        border-radius: 12px; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+      .addbtn.show { display: inline-flex; }
+      .addbtn:hover { filter: brightness(1.06); }
+      .rm { font: inherit; font-size: .82rem; background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px 4px; margin-left: auto; }
+      .rm:hover { color: var(--red); text-decoration: underline; }
+      #add-dialog { width: min(520px, calc(100vw - 32px)); }
+      #add-dialog .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      #add-dialog textarea { width: 100%; min-height: 78px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
+      #add-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+      @media (max-width: 480px) { #add-dialog .two { grid-template-columns: 1fr; } }
       .linkbtn { font: inherit; font-size: .9rem; background: none; border: none; color: var(--blue); cursor: pointer;
         padding: 6px 4px; display: inline-flex; align-items: center; gap: 6px; }
       .linkbtn:hover { text-decoration: underline; }
@@ -251,7 +264,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       </header>
 
       <nav class="nav" id="nav" aria-label="Sections">
-        <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt">{jobs.length}</span></button>
+        <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt" id="jobs-count">{jobs.length}</span></button>
         <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers to check directly <span class="cnt">{bcList.length}</span></button>
         <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt">{elseList.length}</span></button>
       </nav>
@@ -270,6 +283,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             </select>
             <label class="chk"><input type="checkbox" id="sw" /> SolidWorks mentioned</label>
             <label class="chk"><input type="checkbox" id="mismatch" /> Show other start dates</label>
+            <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span>Add posting</button>
             <button type="button" class="linkbtn" id="clear"><span class="ico" data-i="refresh"></span>Clear filters</button>
           </div>
 
@@ -341,16 +355,42 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
     <dialog id="setup">
       <form method="dialog" id="setup-form">
-        <h3>Who's marking?</h3>
-        <p class="who" style="margin:0">Your name shows next to your marks so everyone knows who picked what.</p>
-        <label for="s-name">Your name or nickname</label>
-        <input id="s-name" maxlength="30" autocomplete="off" required />
-        <label for="s-pass" id="s-pass-label">Passcode</label>
-        <input id="s-pass" type="password" autocomplete="off" />
+        <h3>Log in</h3>
+        <p class="who" style="margin:0" id="s-help">Enter your own passcode. Your name then shows next to what you mark.</p>
+        <label for="s-name" id="s-name-label">Your name or nickname</label>
+        <input id="s-name" maxlength="30" autocomplete="off" />
+        <label for="s-pass" id="s-pass-label">Your passcode</label>
+        <input id="s-pass" type="password" autocomplete="current-password" />
         <div class="err" id="s-err"></div>
         <div class="row">
           <button type="button" id="s-cancel">Cancel</button>
-          <button type="submit" class="primary">Save</button>
+          <button type="submit" class="primary" id="s-save">Log in</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="add-dialog">
+      <form method="dialog" id="add-form">
+        <h3>Add a posting for Benny</h3>
+        <p class="who" style="margin:0">A job or an event you found. It goes straight into the Shortlist for everyone.</p>
+        <label for="a-kind">Type</label>
+        <select id="a-kind"><option value="job">Job or co-op</option><option value="event">Event to register for</option></select>
+        <label for="a-title">Title *</label>
+        <input id="a-title" maxlength="150" autocomplete="off" required />
+        <label for="a-url">Link *</label>
+        <input id="a-url" type="url" placeholder="https://..." autocomplete="off" required />
+        <div class="two">
+          <div><label for="a-company">Company or organizer</label><input id="a-company" maxlength="100" autocomplete="off" /></div>
+          <div><label for="a-loc">Location</label><input id="a-loc" maxlength="100" autocomplete="off" /></div>
+        </div>
+        <label for="a-date" id="a-date-label">Start date (optional)</label>
+        <input id="a-date" maxlength="40" placeholder="for example May 2027" autocomplete="off" />
+        <label for="a-note">Note for Benny (optional)</label>
+        <textarea id="a-note" maxlength="600"></textarea>
+        <div class="err" id="a-err"></div>
+        <div class="row">
+          <button type="button" id="a-cancel">Cancel</button>
+          <button type="submit" class="primary" id="a-save">Add to Shortlist</button>
         </div>
       </form>
     </dialog>
@@ -358,7 +398,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
     <script id="jobs-data" type="application/json" set:html={JSON.stringify(jobs)}></script>
     <script is:inline>
       (function () {
-        var jobs = JSON.parse(document.getElementById('jobs-data').textContent);
+        var baseJobs = JSON.parse(document.getElementById('jobs-data').textContent);
+        var jobs = baseJobs.slice();
+        var posts = [];
         var API = (document.getElementById('app').getAttribute('data-api') || '').replace(/\/$/, '');
         var $ = function (id) { return document.getElementById(id); };
         var list = $('list'), count = $('count');
@@ -376,6 +418,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           x: '<svg ' + P + '><path d="M6 6l12 12M18 6 6 18"/></svg>',
           cal: '<svg ' + P + '><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
           bulb: '<svg ' + P + '><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg>',
+          plus: '<svg ' + P + '><path d="M12 5v14M5 12h14"/></svg>',
           empty: '<svg ' + P + '><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M9 14h6"/></svg>',
         };
         function icon(name) { var s = document.createElement('span'); s.className = 'ico'; s.innerHTML = ICONS[name] || ''; return s; }
@@ -394,8 +437,28 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         try { marks = JSON.parse(lsGet('cf_marks') || '{}') || {}; } catch (e) { marks = {}; }
         var who = lsGet('cf_name') || '';
         var pass = lsGet('cf_pass') || '';
+        try { posts = JSON.parse(lsGet('cf_posts') || '[]') || []; } catch (e) { posts = []; }
         var tab = 'review';
-        var link = API ? 'connecting' : 'local'; // connecting | online | offline | local
+        var link = API ? 'connecting' : 'local'; // connecting | online | offline | locked | local
+        if (API && !pass) { marks = {}; posts = []; link = 'locked'; who = ''; lsDel('cf_marks'); lsDel('cf_posts'); lsDel('cf_name'); }
+
+        // ---- posts added by hand (shared) ----
+        var BC_RE = /\b(BC|B\.C\.|British Columbia|Vancouver|Burnaby|Surrey|Richmond|Victoria|Kelowna|Langley|Delta|Pitt Meadows|Coquitlam|Abbotsford|Nanaimo|Squamish)\b/i;
+        function postToJob(x) {
+          var text = [x.title, x.company, x.note].join(' ');
+          return {
+            id: x.id, title: x.title, company: x.company || (x.kind === 'event' ? 'Event' : 'Added by hand'),
+            location: x.location || '', url: x.url, posted: new Date(x.ts || Date.now()).toISOString().slice(0, 10),
+            source: 'added', kind: x.kind, eventDate: x.date || '', note: x.note || '', addedBy: x.by || '',
+            bc: BC_RE.test(x.location || ''), solidworks: /solid\s?works/i.test(text),
+            startLabel: x.kind === 'job' ? (x.date || null) : null, fitsMay: null, score: 0,
+          };
+        }
+        function rebuildJobs() {
+          jobs = baseJobs.concat(posts.map(postToJob));
+          var c = $('jobs-count'); if (c) c.textContent = jobs.length;
+        }
+        rebuildJobs();
 
         // ---- sorting ----
         function rank(j) { return j.fitsMay === true ? 0 : j.fitsMay === null ? 1 : 2; }
@@ -431,17 +494,39 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         // ---- marks: save locally, then to the shared store ----
         function saveLocal() { lsSet('cf_marks', JSON.stringify(marks)); }
 
+        function logout(msg) {
+          pass = ''; who = ''; marks = {}; posts = [];
+          lsDel('cf_pass'); lsDel('cf_name'); lsDel('cf_marks'); lsDel('cf_posts');
+          link = 'locked'; tab = 'review'; rebuildJobs();
+          if (msg) flash(msg);
+          renderAll();
+        }
+
         function syncDown() {
-          if (!API) return;
-          fetch(API + '/marks', { cache: 'no-store' })
-            .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-            .then(function (d) { marks = d.marks || {}; saveLocal(); link = 'online'; renderAll(); })
-            .catch(function () { link = 'offline'; renderStatus(); });
+          if (!API) return Promise.resolve();
+          if (!pass) { link = 'locked'; renderStatus(); return Promise.resolve(); }
+          var h = { 'X-Passcode': pass };
+          return Promise.all([
+            fetch(API + '/marks', { cache: 'no-store', headers: h }).then(function (r) {
+              if (r.status === 401) throw new Error('401');
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              return r.json();
+            }),
+            fetch(API + '/posts', { cache: 'no-store', headers: h }).then(function (r) { return r.ok ? r.json() : { posts: null }; }).catch(function () { return { posts: null }; }),
+          ]).then(function (res) {
+            marks = res[0].marks || {}; saveLocal();
+            if (Array.isArray(res[1].posts)) { posts = res[1].posts; lsSet('cf_posts', JSON.stringify(posts)); rebuildJobs(); }
+            link = 'online'; renderAll();
+          }).catch(function (e) {
+            if (e && e.message === '401') logout('Your passcode is not valid any more. Please log in again.');
+            else { link = 'offline'; renderStatus(); }
+          });
         }
 
         function setMark(id, state) {
           if (API && (!who || !pass)) { openSetup(function () { setMark(id, state); }); return; }
           if (!API && !who) who = 'me';
+          if (API && !pass) { openSetup(function () { setMark(id, state); }); return; }
           var next = stateOf(id) === state ? null : state;
           if (next) marks[id] = { state: next, by: who, ts: Date.now() };
           else delete marks[id];
@@ -454,9 +539,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             body: JSON.stringify({ id: id, state: next, by: who }),
           }).then(function (r) {
             if (r.status === 401) {
-              pass = ''; lsDel('cf_pass');
-              flash('That passcode was not accepted. Tap a button again to re-enter it.');
-              syncDown();
+              logout('Your passcode was not accepted. Please log in again.');
               return;
             }
             if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -481,25 +564,47 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           afterSetup = cb || null;
           $('s-name').value = who;
           $('s-pass').value = '';
+          $('s-name').style.display = API ? 'none' : '';
+          $('s-name-label').style.display = API ? 'none' : '';
           $('s-pass').style.display = API ? '' : 'none';
           $('s-pass-label').style.display = API ? '' : 'none';
+          $('s-help').textContent = API
+            ? 'Enter your own passcode. Your name then shows next to what you mark.'
+            : 'Your name shows next to your marks.';
           $('s-err').textContent = '';
           var d = $('setup');
           if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          (API ? $('s-pass') : $('s-name')).focus();
         }
         function closeSetup() { var d = $('setup'); if (d.close) d.close(); else d.removeAttribute('open'); }
         $('s-cancel').addEventListener('click', function () { afterSetup = null; closeSetup(); });
         $('setup-form').addEventListener('submit', function (e) {
           e.preventDefault();
-          var n = $('s-name').value.trim(), p = $('s-pass').value.trim();
-          if (!n) { $('s-err').textContent = 'Please enter a name.'; return; }
-          if (API && !p && !pass) { $('s-err').textContent = 'Please enter the passcode.'; return; }
-          who = n; lsSet('cf_name', who);
-          if (API && p) { pass = p; lsSet('cf_pass', pass); }
-          closeSetup();
-          renderAll();
-          var cb = afterSetup; afterSetup = null;
-          if (cb) cb();
+          var cb;
+          if (!API) {
+            var n = $('s-name').value.trim();
+            if (!n) { $('s-err').textContent = 'Please enter a name.'; return; }
+            who = n; lsSet('cf_name', who); closeSetup(); renderAll();
+            cb = afterSetup; afterSetup = null; if (cb) cb();
+            return;
+          }
+          var p = $('s-pass').value.trim();
+          if (!p) { $('s-err').textContent = 'Please enter your passcode.'; return; }
+          var btn = $('s-save'); btn.disabled = true; btn.textContent = 'Checking...';
+          fetch(API + '/me', { cache: 'no-store', headers: { 'X-Passcode': p } })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status !== 200 || !res.d.name) {
+                $('s-err').textContent = res.status === 401 ? 'That passcode was not recognised.' : (res.d.error || 'Could not log in. Please try again.');
+                return;
+              }
+              who = res.d.name; pass = p; lsSet('cf_name', who); lsSet('cf_pass', pass);
+              closeSetup(); link = 'connecting'; renderAll();
+              cb = afterSetup; afterSetup = null;
+              return syncDown().then(function () { if (cb) cb(); });
+            })
+            .catch(function () { $('s-err').textContent = 'Could not reach the server. Please try again.'; })
+            .then(function () { btn.disabled = false; btn.textContent = 'Log in'; });
         });
 
         // ---- rendering ----
@@ -547,15 +652,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           }
           body.appendChild(meta);
           var t = el('div', 'tags');
-          if (j.fitsMay === true) t.appendChild(tag('Starts ' + j.startLabel, 'good', 'check'));
+          if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' \u00b7 ' + j.eventDate : ''), 'warn', 'cal'));
+          else if (j.fitsMay === true) t.appendChild(tag('Starts ' + j.startLabel, 'good', 'check'));
           else if (j.fitsMay === false) t.appendChild(tag('Starts ' + j.startLabel + ' (not May 2027)', 'warn', 'cal'));
+          else if (j.source === 'added' && j.startLabel) t.appendChild(tag('Start: ' + j.startLabel, 'warn', 'cal'));
           else t.appendChild(tag('Start date not listed', 'warn', 'cal'));
           t.appendChild(j.bc ? tag('BC', 'good') : tag('Outside BC'));
           if (j.solidworks) t.appendChild(tag('SolidWorks', 'good'));
           if (j.source === 'manual') t.appendChild(tag('Hand-picked', 'info'));
+          if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
           if (j.posted) t.appendChild(tag('Posted ' + j.posted, 'info', 'cal'));
           body.appendChild(t);
-          if (j.source === 'manual' && j.note) {
+          if ((j.source === 'manual' || j.source === 'added') && j.note) {
             var n = el('p', 'note', j.note);
             body.appendChild(n);
             if (j.note.length > 140) {
@@ -568,7 +676,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               body.appendChild(m);
             }
           }
-          body.appendChild(actionsRow(j.id, false));
+          var arow = actionsRow(j.id, false);
+          if (j.source === 'added' && API) {
+            var rm = el('button', 'rm', 'Remove'); rm.type = 'button';
+            rm.addEventListener('click', function () { removePost(j); });
+            arow.appendChild(rm);
+          }
+          body.appendChild(arow);
           c.appendChild(body);
           return c;
         }
@@ -597,12 +711,20 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             link === 'online' ? 'Shared list connected.'
             : link === 'connecting' ? 'Connecting to the shared list…'
             : link === 'offline' ? 'Shared list unreachable right now. Marks are kept on this device.'
+            : link === 'locked' ? 'Log in to see and share picks with your family.'
             : 'Marks are saved on this device only (shared list not set up yet).'));
           s.appendChild(first);
           if (who) s.appendChild(el('span', null, 'Marking as ' + who + '.'));
-          var b = el('button', 'linkbtn', who ? 'Change name or passcode' : 'Set your name');
-          b.type = 'button';
-          b.addEventListener('click', function () { openSetup(null); });
+          var b;
+          if (API && who) {
+            b = el('button', 'linkbtn', 'Log out');
+            b.type = 'button';
+            b.addEventListener('click', function () { logout(); });
+          } else {
+            b = el('button', 'linkbtn', API ? 'Log in' : (who ? 'Change name' : 'Set your name'));
+            b.type = 'button';
+            b.addEventListener('click', function () { openSetup(null); });
+          }
           s.appendChild(b);
           if (flashMsg) s.appendChild(el('span', 'err', flashMsg));
         }
@@ -662,6 +784,62 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         $('clear').addEventListener('click', function () {
           $('q').value = ''; $('region').value = 'all'; $('sw').checked = false; $('mismatch').checked = false; $('sort').value = 'best';
           renderJobs();
+        });
+
+        // ---- add / remove postings ----
+        function removePost(j) {
+          if (!confirm('Remove "' + j.title + '" for everyone?')) return;
+          if (!pass) { openSetup(function () { removePost(j); }); return; }
+          fetch(API + '/posts?id=' + encodeURIComponent(j.id), { method: 'DELETE', headers: { 'X-Passcode': pass } })
+            .then(function (r) {
+              if (r.status === 401) { logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              posts = posts.filter(function (x) { return x.id !== j.id; });
+              delete marks[j.id]; saveLocal(); lsSet('cf_posts', JSON.stringify(posts));
+              rebuildJobs(); renderAll();
+            }).catch(function () { flash('Could not remove it right now. Please try again.'); });
+        }
+        function openAdd() {
+          if (!pass) { openSetup(openAdd); return; }
+          ['a-title', 'a-url', 'a-company', 'a-loc', 'a-date', 'a-note'].forEach(function (id) { $(id).value = ''; });
+          $('a-kind').value = 'job'; syncKindLabels();
+          $('a-err').textContent = '';
+          var d = $('add-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          $('a-title').focus();
+        }
+        function closeAdd() { var d = $('add-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        function syncKindLabels() {
+          var ev = $('a-kind').value === 'event';
+          $('a-date-label').textContent = ev ? 'Event date or deadline (optional)' : 'Start date (optional)';
+          $('a-date').placeholder = ev ? 'for example Dec 5, 2026' : 'for example May 2027';
+        }
+        $('a-kind').addEventListener('change', syncKindLabels);
+        $('a-cancel').addEventListener('click', closeAdd);
+        $('add-open').addEventListener('click', openAdd);
+        if (API) $('add-open').classList.add('show');
+        $('add-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var body = {
+            kind: $('a-kind').value, title: $('a-title').value.trim(), url: $('a-url').value.trim(),
+            company: $('a-company').value.trim(), location: $('a-loc').value.trim(),
+            date: $('a-date').value.trim(), note: $('a-note').value.trim(), by: who,
+          };
+          if (!body.title) { $('a-err').textContent = 'Please add a title.'; return; }
+          var btn = $('a-save'); btn.disabled = true; btn.textContent = 'Adding...';
+          fetch(API + '/posts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify(body) })
+            .then(function (r) {
+              return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d }; });
+            })
+            .then(function (res) {
+              if (res.status === 401) { closeAdd(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (res.status !== 200 || !res.d.post) { $('a-err').textContent = res.d.error || 'Could not add it. Please try again.'; return; }
+              posts.unshift(res.d.post); lsSet('cf_posts', JSON.stringify(posts));
+              marks[res.d.post.id] = { state: 'shortlist', by: who, ts: res.d.post.ts }; saveLocal();
+              rebuildJobs(); tab = 'shortlist'; renderAll(); closeAdd();
+              showView('jobs');
+            })
+            .catch(function () { $('a-err').textContent = 'Could not reach the shared list. Please try again.'; })
+            .then(function () { btn.disabled = false; btn.textContent = 'Add to Shortlist'; });
         });
 
         // ---- top-level tabs ----
