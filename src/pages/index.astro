@@ -711,7 +711,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             link === 'online' ? 'Shared list connected.'
             : link === 'connecting' ? 'Connecting to the shared list…'
             : link === 'offline' ? 'Shared list unreachable right now. Marks are kept on this device.'
-            : link === 'locked' ? 'Log in to see and share picks with your family.'
+            : link === 'locked' ? 'Log in to see and share picks.'
             : 'Marks are saved on this device only (shared list not set up yet).'));
           s.appendChild(first);
           if (who) s.appendChild(el('span', null, 'Marking as ' + who + '.'));
