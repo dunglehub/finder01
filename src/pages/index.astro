@@ -395,12 +395,25 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       </form>
     </dialog>
 
+    <script id="emp-data" type="application/json" set:html={JSON.stringify(Object.fromEntries(watchlist.map((c) => [c.name, c.note || ''])))}></script>
     <script id="jobs-data" type="application/json" set:html={JSON.stringify(jobs)}></script>
     <script is:inline>
       (function () {
         var baseJobs = JSON.parse(document.getElementById('jobs-data').textContent);
         var jobs = baseJobs.slice();
         var posts = [];
+        var EMP = {};
+        try { EMP = JSON.parse(document.getElementById('emp-data').textContent) || {}; } catch (e) { EMP = {}; }
+        var BATTERY_RE = /batter(y|ies)|energy storage|cell engineer|lithium|electric vehicle|\bEVs?\b|power ?pack/i;
+        var MECH_RE = /mechanical|mechatronic|\bmech\.? eng/i;
+        // Keyword tags: from the posting's own text, plus (for battery) what the employer does.
+        function topicTags(j) {
+          var own = [j.title, j.note, j.description].join(' ');
+          return {
+            battery: BATTERY_RE.test(own) || BATTERY_RE.test(EMP[j.company] || ''),
+            mech: MECH_RE.test(own),
+          };
+        }
         var API = (document.getElementById('app').getAttribute('data-api') || '').replace(/\/$/, '');
         var $ = function (id) { return document.getElementById(id); };
         var list = $('list'), count = $('count');
@@ -655,6 +668,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           else t.appendChild(tag('Start date not listed', 'warn', 'cal'));
           t.appendChild(j.bc ? tag('BC', 'good') : tag('Outside BC'));
           if (j.solidworks) t.appendChild(tag('SolidWorks', 'good'));
+          var tt = topicTags(j);
+          if (tt.battery) t.appendChild(tag('Battery', 'good'));
+          if (tt.mech) t.appendChild(tag('Mechanical engineering', 'good'));
           if (j.source === 'manual') t.appendChild(tag('Hand-picked', 'info'));
           if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
           if (j.posted) t.appendChild(tag('Posted ' + j.posted, 'info', 'cal'));
