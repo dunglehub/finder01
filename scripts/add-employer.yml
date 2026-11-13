@@ -1,0 +1,63 @@
+name: Add employer
+
+# Run this from the Actions tab: pick "Add employer", click "Run workflow", fill in the form.
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Employer name'
+        required: true
+      url:
+        description: 'Careers page link (a Greenhouse or Lever link gets an automatic feed)'
+        required: true
+      region:
+        description: 'Where is the employer'
+        type: choice
+        options: [BC, Elsewhere]
+        default: BC
+      type:
+        description: 'Kind of employer'
+        type: choice
+        options: [Company, Startup, Big company, Utility]
+        default: Company
+      note:
+        description: 'Short note (optional)'
+        required: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Add the employer to data/watchlist.json
+        env:
+          EMP_NAME: ${{ inputs.name }}
+          EMP_URL: ${{ inputs.url }}
+          EMP_REGION: ${{ inputs.region }}
+          EMP_TYPE: ${{ inputs.type }}
+          EMP_NOTE: ${{ inputs.note }}
+        run: node scripts/add-employer.mjs
+
+      - name: Save the change
+        run: |
+          git config user.name "coop-finder bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/watchlist.json
+          git commit -m "Add employer: ${{ inputs.name }}"
+          git pull --rebase
+          git push
+
+      # Pushes made by this workflow do not start other workflows, so start the rebuild directly.
+      - name: Rebuild the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update.yml
