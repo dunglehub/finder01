@@ -95,9 +95,5 @@
     "note": "Co-op jobs, Ontario plants." },
   { "name": "Honda Canada Manufacturing", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
     "url": "https://www.hondacanadamfg.ca/?p=71",
-    "note": "Alliston, ON." },
-  { "name": "Test Energy Co", "region": "BC", "type": "Startup", "system": "Greenhouse", "mode": "auto",
-    "url": "https://job-boards.greenhouse.io/momentenergy",
-    "feed": { "type": "greenhouse", "board": "momentenergy" },
-    "note": "That link is Moment’s own board" }
+    "note": "Alliston, ON." }
 ]
