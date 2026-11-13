@@ -95,5 +95,8 @@
     "note": "Co-op jobs, Ontario plants." },
   { "name": "Honda Canada Manufacturing", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
     "url": "https://www.hondacanadamfg.ca/?p=71",
-    "note": "Alliston, ON." }
+    "note": "Alliston, ON." },
+  { "name": "Celestica", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "url": "https://careers.celestica.com/",
+    "note": "Electronics manufacturing. Student intern roles, e.g. Newmarket ON process and manufacturing engineer." }
 ]
