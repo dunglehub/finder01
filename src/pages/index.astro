@@ -505,17 +505,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function syncDown() {
           if (!API) return Promise.resolve();
           if (!pass) { link = 'locked'; renderStatus(); return Promise.resolve(); }
-          var h = { 'X-Passcode': pass };
-          return Promise.all([
-            fetch(API + '/marks', { cache: 'no-store', headers: h }).then(function (r) {
-              if (r.status === 401) throw new Error('401');
-              if (!r.ok) throw new Error('HTTP ' + r.status);
-              return r.json();
-            }),
-            fetch(API + '/posts', { cache: 'no-store', headers: h }).then(function (r) { return r.ok ? r.json() : { posts: null }; }).catch(function () { return { posts: null }; }),
-          ]).then(function (res) {
-            marks = res[0].marks || {}; saveLocal();
-            if (Array.isArray(res[1].posts)) { posts = res[1].posts; lsSet('cf_posts', JSON.stringify(posts)); rebuildJobs(); }
+          return fetch(API + '/state', { cache: 'no-store', headers: { 'X-Passcode': pass } }).then(function (r) {
+            if (r.status === 401) throw new Error('401');
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          }).then(function (d) {
+            marks = d.marks || {}; saveLocal();
+            if (Array.isArray(d.posts)) { posts = d.posts; lsSet('cf_posts', JSON.stringify(posts)); rebuildJobs(); }
             link = 'online'; renderAll();
           }).catch(function (e) {
             if (e && e.message === '401') logout('Your passcode is not valid any more. Please log in again.');
@@ -862,7 +858,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         renderAll();
         syncDown();
         document.addEventListener('visibilitychange', function () { if (!document.hidden) syncDown(); });
-        if (API) setInterval(syncDown, 60000);
+        if (API) setInterval(function () { if (!document.hidden) syncDown(); }, 120000);
       })();
     </script>
   </body>
