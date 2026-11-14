@@ -99,5 +99,50 @@
     "Club volleyball coach, Volleydome (Jan 2024 to Aug 2026): leadership and communication",
     "Community event volunteer (2023)"
   ],
-  "looking_for": "Internships and co-ops; applying to UBC design teams."
+  "looking_for": "Internships and co-ops; applying to UBC design teams.",
+  "fullName": "Minh Le",
+  "application": {
+    "work_authorization": "Canadian citizen",
+    "available": "May 2027",
+    "school": "University of British Columbia, BASc Mechanical Engineering, second year, expected graduation May 2029",
+    "links": {
+      "Portfolio": "https://minhl6.github.io/portfolio/",
+      "Resume": "https://minhl6.github.io/portfolio/resume",
+      "LinkedIn": "https://www.linkedin.com/in/minh-le-26b0103b1/",
+      "GitHub": "https://github.com/minhl6"
+    },
+    "tools_sentence": "My tools include SolidWorks, Fusion 360, KiCad, Arduino and 3D printing, and I’m comfortable machining and fabricating parts myself."
+  },
+  "interest_sentences": {
+    "Battery / EV": "I’m especially interested in battery and electric-vehicle hardware.",
+    "Renewable energy": "I’m drawn to renewable energy and the mechanical side of sustainable technology.",
+    "Thermal / fluids": "I’m interested in thermal management and fluid systems.",
+    "SolidWorks / CAD": "I enjoy design work in SolidWorks and turning a model into a real part.",
+    "Mechanical": "I’m looking for hands-on mechanical design experience.",
+    "Hands-on build": "I learn best by building and prototyping.",
+    "Electronics / PCB": "I enjoy combining mechanical design with electronics.",
+    "default": "I’m looking for hands-on engineering experience where I can keep learning."
+  },
+  "project_blurbs": [
+    {
+      "name": "Two-speed hand-crank generator",
+      "tags": "battery|energy|generator|solar|renewable|electric|drivetrain|gear|mechanical|solidworks|test|3d print",
+      "sentence": "designed and built a two-speed hand-crank generator that charges a phone, modelling the gearbox in SolidWorks, 3D printing the parts, and logging data with an Arduino to measure drivetrain efficiency"
+    },
+    {
+      "name": "Leader-follower robotic arm",
+      "tags": "robot|automation|controls|electronics|pcb|embedded|arduino|firmware|mechatronic",
+      "sentence": "designed and built a 4-DOF leader-follower robotic arm, modelling it in SolidWorks, designing a custom KiCad circuit board, and writing the firmware"
+    },
+    {
+      "name": "Chompy underwater retrieval claw",
+      "tags": "sheet metal|fabricat|manufactur|design|machin|prototyp|assembly|hands-on",
+      "sentence": "designed a sheet-metal underwater retrieval claw for an APSC 101 design competition"
+    },
+    {
+      "name": "Rainwater harvester simulation",
+      "tags": "water|simulat|model|analysis|system|sustainab|fluid|pump|data|process",
+      "sentence": "built a five-year Excel simulation of an off-grid rainwater harvesting system with a team of five, placing 2nd of 10"
+    }
+  ]
 }
