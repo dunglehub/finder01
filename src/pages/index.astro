@@ -3,6 +3,7 @@ import autoJobs from '../../data/jobs.json';
 import manualJobs from '../../data/manual-jobs.json';
 import watchlist from '../../data/watchlist.json';
 import config from '../../data/config.json';
+import profile from '../../data/profile.json';
 import { enrich } from '../../scripts/lib/classify.mjs';
 
 // Manual jobs are enriched the same way as automatic ones, then tagged "hand-picked".
@@ -186,6 +187,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .tag.good { background: var(--green-soft); color: var(--green); }
       .tag.warn { background: var(--amber-soft); color: var(--amber); }
       .tag.info { background: var(--blue-soft); color: var(--blue); }
+      .tag.match { background: var(--blue-soft); color: var(--blue); }
+      .tag.match.strong { background: var(--blue); color: #fff; }
+      .why { margin: 8px 0 0; font-size: .86rem; color: var(--muted); }
       .note { margin: 10px 0 0; font-size: .92rem; color: var(--text); opacity: .88;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       .note.open { -webkit-line-clamp: unset; display: block; }
@@ -395,6 +399,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       </form>
     </dialog>
 
+    <script id="profile-data" type="application/json" set:html={JSON.stringify(profile)}></script>
     <script id="emp-data" type="application/json" set:html={JSON.stringify(Object.fromEntries(watchlist.map((c) => [c.name, c.note || ''])))}></script>
     <script id="jobs-data" type="application/json" set:html={JSON.stringify(jobs)}></script>
     <script is:inline>
@@ -414,6 +419,36 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             mech: MECH_RE.test(own),
           };
         }
+        // ---- match score: how well a posting fits the profile in data/profile.json ----
+        var PROFILE = { interests: [], avoid: [] };
+        try { PROFILE = JSON.parse(document.getElementById('profile-data').textContent) || PROFILE; } catch (e) { /* no profile */ }
+        var RULES = [];
+        (PROFILE.interests || []).concat(PROFILE.avoid || []).forEach(function (r) {
+          try { RULES.push({ label: r.label, weight: r.weight, re: new RegExp(r.pattern, 'i') }); } catch (e) { /* bad pattern: skip */ }
+        });
+        // A keyword in the title counts in full; one only in the description or employer note counts half.
+        function matchOf(j) {
+          if (j.match) return j.match;
+          var title = j.title || '';
+          var rest = [j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ');
+          var total = 0, why = [];
+          RULES.forEach(function (r) {
+            var inTitle = r.re.test(title), inRest = r.re.test(rest);
+            if (!inTitle && !inRest) return;
+            var pts = inTitle ? r.weight : r.weight / 2;
+            total += pts;
+            if (pts > 0) why.push({ label: r.label, pts: pts });
+          });
+          why.sort(function (a, b) { return b.pts - a.pts; });
+          j.match = {
+            score: total,
+            tier: total >= 6 ? 'strong' : total >= 3 ? 'good' : '',
+            why: why.slice(0, 3).map(function (w) { return w.label; }),
+          };
+          return j.match;
+        }
+        function fitScore(j) { return matchOf(j).score + (j.bc ? 2 : 0); }
+
         var API = (document.getElementById('app').getAttribute('data-api') || '').replace(/\/$/, '');
         var $ = function (id) { return document.getElementById(id); };
         var list = $('list'), count = $('count');
@@ -477,7 +512,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function rank(j) { return j.fitsMay === true ? 0 : j.fitsMay === null ? 1 : 2; }
         var SORTS = {
           best: function (a, b) {
-            return rank(a) - rank(b) || (b.bc - a.bc) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
+            return rank(a) - rank(b) || (fitScore(b) - fitScore(a)) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
           },
           new: function (a, b) { return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b); },
           company: function (a, b) { return String(a.company).localeCompare(String(b.company)) || SORTS.best(a, b); },
@@ -660,7 +695,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             meta.appendChild(loc);
           }
           body.appendChild(meta);
+          var mt = matchOf(j);
           var t = el('div', 'tags');
+          if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong match' : 'Good match', mt.tier === 'strong' ? 'match strong' : 'match', 'check'));
           if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' \u00b7 ' + j.eventDate : ''), 'warn', 'cal'));
           else if (j.fitsMay === true) t.appendChild(tag('Starts ' + j.startLabel, 'good', 'check'));
           else if (j.fitsMay === false) t.appendChild(tag('Starts ' + j.startLabel + ' (not May 2027)', 'warn', 'cal'));
@@ -675,6 +712,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
           if (j.posted) t.appendChild(tag('Posted ' + j.posted, 'info', 'cal'));
           body.appendChild(t);
+          if (mt.tier && mt.why.length) body.appendChild(el('p', 'why', 'Why: ' + mt.why.join(' \u00b7 ')));
           if ((j.source === 'manual' || j.source === 'added') && j.note) {
             var n = el('p', 'note', j.note);
             body.appendChild(n);
