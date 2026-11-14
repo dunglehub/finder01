@@ -730,13 +730,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           }).sort(function (a, b) { return b.n - a.n || a.i - b.i; });
           var picks = ranked.slice(0, 2).map(function (r) { return r.p.sentence; });
           var parts = [];
-          parts.push('Dear ' + (j.company || 'Hiring') + ' hiring team,');
-          parts.push('I’m a second-year mechanical engineering student at UBC, and I’m applying for the ' + j.title + ' position' + (j.location ? ' in ' + j.location : '') + '. ' + interest);
-          if (picks.length) parts.push('Outside of class, I ' + picks[0] + '.' + (picks[1] ? ' I also ' + picks[1] + '.' : ''));
-          if (app.tools_sentence) parts.push(app.tools_sentence);
+          var nm = (app.names && app.names['Preferred first name']) || PROFILE.fullName || '';
+          parts.push('Hi ' + (j.company || 'there') + ' team,');
+          parts.push('I\u2019m a second-year mechanical engineering student at UBC, applying for the ' + j.title + ' role' + (j.location ? ' in ' + j.location : '') + '. ' + interest);
+          if (picks.length) parts.push('Outside class, I ' + picks[0] + '.' + (picks[1] ? ' I also ' + picks[1] + '.' : ''));
           var links = app.links || {};
-          parts.push('I’m available to start in ' + (app.available || 'May 2027') + '. My resume is attached' + (links.Portfolio ? ', and my portfolio is at ' + links.Portfolio : '') + '. Thank you for your time and consideration.');
-          parts.push('Sincerely,\n' + (PROFILE.fullName || ''));
+          parts.push('I\u2019m free to start in ' + (app.available || 'May 2027') + '. ' + (links.Portfolio ? 'My portfolio is at ' + links.Portfolio + ', and my' : 'My') + ' resume is attached. Thanks for reading.');
+          parts.push(nm);
           return parts.join('\n\n');
         }
         function openPrep(j) {
