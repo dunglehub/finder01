@@ -163,5 +163,10 @@
     "Hands-on build": "hands-on building and prototyping",
     "Electronics / PCB": "combining mechanical design with electronics",
     "default": "hands-on engineering work, including design, prototyping, and problem solving"
-  }
+  },
+  "style_example": [
+    "I’m a first-year Mechanical Engineering student at the University of British Columbia applying for the Mechanical Engineering Summer Student role with The City of Calgary. I’m interested in hands-on mechanical design work, including drawings, CAD modelling, documentation, and problem solving, in a public-service environment.",
+    "Through coursework and projects, I’ve gained practical experience with CAD and prototyping, including a 3D-printed adaptive toothpaste dispenser designed in SolidWorks and a pick-and-place crane prototype using an ultrasonic sensor and a servo motor. I’m comfortable with Microsoft Office and ready to learn Autodesk Inventor quickly.",
+    "Thank you for your consideration. I’d appreciate the opportunity to discuss how I can contribute and grow with your team this summer."
+  ]
 }
