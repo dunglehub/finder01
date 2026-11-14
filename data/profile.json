@@ -31,10 +31,12 @@
     ]
   },
   "projects": [
-    "Two-speed hand-crank generator (SolidWorks, 3D printed, hand-machined shafts, Arduino data logging)",
-    "Leader-follower 4-DOF robotic arm (SolidWorks, custom KiCad PCB, firmware)",
-    "Chompy: sheet-metal underwater retrieval claw for the APSC 101 design competition",
-    "Rainwater harvester system simulation in Excel (team of 5, placed 2nd of 10)"
+    "a two-speed hand-crank generator that charges a phone, modelled in SolidWorks and 3D printed",
+    "a 4-DOF robotic arm with a custom KiCad circuit board",
+    "a 3D-printed adaptive toothpaste dispenser designed in SolidWorks",
+    "a pick-and-place crane prototype using an ultrasonic sensor and a servo motor",
+    "a sheet-metal underwater retrieval claw for an APSC 101 design competition",
+    "a five-year Excel simulation of an off-grid rainwater system, built with a team of five"
   ],
   "interests": [
     {
@@ -115,38 +117,51 @@
       "First name": "Minh",
       "Last name": "Le",
       "Preferred first name": "Benny"
-    }
-  },
-  "interest_sentences": {
-    "Battery / EV": "I’m interested in battery and EV hardware and want to see how it’s built and tested.",
-    "Renewable energy": "I want to work on renewable energy hardware.",
-    "Thermal / fluids": "I’m interested in thermal management and fluid systems.",
-    "SolidWorks / CAD": "I like design work in SolidWorks, especially when the part actually gets made.",
-    "Mechanical": "I’m looking for hands-on mechanical design experience.",
-    "Hands-on build": "I learn best by building things.",
-    "Electronics / PCB": "I like mixing mechanical design with electronics.",
-    "default": "I’m looking for hands-on engineering experience."
+    },
+    "location": "Calgary, Alberta",
+    "experience_with": "CAD, 3D printing, and prototyping",
+    "comfortable_with": "Microsoft Office"
   },
   "project_blurbs": [
     {
       "name": "Two-speed hand-crank generator",
       "tags": "battery|energy|generator|solar|renewable|electric|drivetrain|gear|mechanical|solidworks|test|3d print",
-      "sentence": "built a two-speed hand-crank generator that charges a phone. I modelled it in SolidWorks, 3D printed the parts, and logged data with an Arduino to measure how efficient the drivetrain was (up to about 48%)"
+      "phrase": "a two-speed hand-crank generator that charges a phone, modelled in SolidWorks and 3D printed"
     },
     {
       "name": "Leader-follower robotic arm",
       "tags": "robot|automation|controls|electronics|pcb|embedded|arduino|firmware|mechatronic",
-      "sentence": "built a 4-DOF robotic arm that copies a hand-held twin in real time. I modelled it in SolidWorks, designed the circuit board in KiCad, and wrote the firmware"
+      "phrase": "a 4-DOF robotic arm with a custom KiCad circuit board"
+    },
+    {
+      "name": "Adaptive toothpaste dispenser",
+      "tags": "product design|prototyp|3d print|solidworks|cad|consumer|drawing|mechanical|design",
+      "phrase": "a 3D-printed adaptive toothpaste dispenser designed in SolidWorks"
+    },
+    {
+      "name": "Pick-and-place crane",
+      "tags": "automation|robot|sensor|controls|mechatronic|servo|embedded|prototyp",
+      "phrase": "a pick-and-place crane prototype using an ultrasonic sensor and a servo motor"
     },
     {
       "name": "Chompy underwater retrieval claw",
-      "tags": "sheet metal|fabricat|manufactur|design|machin|prototyp|assembly|hands-on",
-      "sentence": "designed a sheet-metal underwater claw for an APSC 101 design competition"
+      "tags": "sheet metal|fabricat|manufactur|machin|assembly|hands-on",
+      "phrase": "a sheet-metal underwater retrieval claw for an APSC 101 design competition"
     },
     {
       "name": "Rainwater harvester simulation",
       "tags": "water|simulat|model|analysis|system|sustainab|fluid|pump|data|process",
-      "sentence": "built a five-year Excel simulation of an off-grid rainwater system with a team of five, and we placed 2nd of 10"
+      "phrase": "a five-year Excel simulation of an off-grid rainwater system, built with a team of five"
     }
-  ]
+  ],
+  "interest_phrases": {
+    "Battery / EV": "battery and EV hardware, including design, prototyping, and testing",
+    "Renewable energy": "renewable energy hardware, including mechanical design and hands-on prototyping",
+    "Thermal / fluids": "thermal management and fluid systems, including analysis and design",
+    "SolidWorks / CAD": "hands-on mechanical design work, including CAD modelling and drawings",
+    "Mechanical": "hands-on mechanical design work, including drawings, CAD modelling, and problem solving",
+    "Hands-on build": "hands-on building and prototyping",
+    "Electronics / PCB": "combining mechanical design with electronics",
+    "default": "hands-on engineering work, including design, prototyping, and problem solving"
+  }
 }
