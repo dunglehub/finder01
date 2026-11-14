@@ -566,11 +566,21 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function saveLocal() { lsSet('cf_marks', JSON.stringify(marks)); }
 
         function logout(msg) {
-          pass = ''; who = ''; marks = {}; posts = [];
+          pass = ''; who = ''; marks = {}; posts = []; PRIVATE = {};
           lsDel('cf_pass'); lsDel('cf_name'); lsDel('cf_marks'); lsDel('cf_posts');
           link = 'locked'; tab = 'review'; rebuildJobs();
           if (msg) flash(msg);
           renderAll();
+        }
+
+        // Benny's email and phone live in the Worker (behind the login), never in the public files.
+        var PRIVATE = {};
+        function loadPrivate() {
+          if (!API || !pass || PRIVATE.email || PRIVATE.phone) return;
+          fetch(API + '/private', { cache: 'no-store', headers: { 'X-Passcode': pass } })
+            .then(function (r) { return r.ok ? r.json() : {}; })
+            .then(function (d) { PRIVATE = { email: d.email || '', phone: d.phone || '' }; })
+            .catch(function () { /* optional */ });
         }
 
         function syncDown() {
@@ -583,7 +593,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           }).then(function (d) {
             marks = d.marks || {}; saveLocal();
             if (Array.isArray(d.posts)) { posts = d.posts; lsSet('cf_posts', JSON.stringify(posts)); rebuildJobs(); }
-            link = 'online'; renderAll();
+            link = 'online'; renderAll(); loadPrivate();
           }).catch(function (e) {
             if (e && e.message === '401') logout('Your passcode is not valid any more. Please log in again.');
             else { link = 'offline'; renderStatus(); }
@@ -734,7 +744,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           $('prep-title').textContent = 'Prepare application: ' + j.title + (j.company ? ' at ' + j.company : '');
           $('prep-letter').value = buildLetter(j);
           var qa = $('prep-qa'); qa.textContent = '';
-          var rows = [['Work authorization', app.work_authorization], ['Available from', app.available], ['School', app.school]];
+          var rows = [];
+          Object.keys(app.names || {}).forEach(function (k) { rows.push([k, app.names[k]]); });
+          rows.push(['Email', PRIVATE.email], ['Phone', PRIVATE.phone]);
+          rows.push(['Work authorization', app.work_authorization], ['Available from', app.available], ['School', app.school]);
           Object.keys(app.links || {}).forEach(function (k) { rows.push([k, app.links[k]]); });
           rows.forEach(function (r) {
             if (!r[1]) return;
