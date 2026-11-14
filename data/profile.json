@@ -111,7 +111,12 @@
       "LinkedIn": "https://www.linkedin.com/in/minh-le-26b0103b1/",
       "GitHub": "https://github.com/minhl6"
     },
-    "tools_sentence": "My tools include SolidWorks, Fusion 360, KiCad, Arduino and 3D printing, and I’m comfortable machining and fabricating parts myself."
+    "tools_sentence": "My tools include SolidWorks, Fusion 360, KiCad, Arduino and 3D printing, and I’m comfortable machining and fabricating parts myself.",
+    "names": {
+      "First name": "Minh",
+      "Last name": "Le",
+      "Preferred first name": "Benny"
+    }
   },
   "interest_sentences": {
     "Battery / EV": "I’m especially interested in battery and electric-vehicle hardware.",
