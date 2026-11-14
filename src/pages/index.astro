@@ -192,6 +192,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #prep-dialog { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
       #prep-dialog textarea { width: 100%; min-height: 300px; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
+      #prep-dialog #prep-desc { min-height: 90px; }
       #prep-dialog .qa { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
       #prep-dialog .qa .k { color: var(--muted); }
       #prep-dialog .qa .v { word-break: break-word; }
@@ -388,6 +389,14 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <label for="prep-letter">Cover letter</label>
       <textarea id="prep-letter"></textarea>
       <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button></div>
+      <div id="prep-ai" hidden>
+        <label for="prep-desc">Job description (optional: paste it here for a better AI letter)</label>
+        <textarea id="prep-desc" maxlength="8000"></textarea>
+        <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
+          <button type="button" class="primary" id="prep-ai-btn">Write with AI</button>
+          <span class="who" id="prep-ai-status" role="status"></span>
+        </div>
+      </div>
       <label style="margin-top:16px">Quick answers</label>
       <div id="prep-qa"></div>
       <div class="row">
@@ -735,27 +744,35 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           (text.match(KNOWN_NEW_TOOLS) || []).forEach(function (t) { var k = t.toLowerCase(); if (!seen[k]) { seen[k] = 1; learn.push(t); } });
           var learnText = learn.length ? learn.slice(0, 2).join(' and ') : 'new tools';
           var links = app.links || {};
-          var name = PROFILE.fullName || '';
-          var contact = [app.location, PRIVATE.phone, PRIVATE.email].filter(Boolean).join(' ');
-          var date = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
           var p1 = 'I’m a second-year Mechanical Engineering student at the University of British Columbia applying for the ' + j.title + ' role' + (j.company ? ' with ' + j.company : '') + '. I’m interested in ' + interest + '.';
           var p2 = 'Through coursework and projects, I’ve gained practical experience with ' + (app.experience_with || 'CAD and prototyping') +
             (picks.length ? ', including ' + picks.join(picks[0].indexOf(' and ') > -1 ? ', and ' : ' and ') : '') + '. I’m comfortable with ' + (app.comfortable_with || 'Microsoft Office') + ' and ready to learn ' + learnText + ' quickly.';
           var p3 = (links.Portfolio ? 'My portfolio is at ' + links.Portfolio + '. ' : '') + 'Thank you for your consideration. I’d appreciate the opportunity to discuss how I can contribute and grow with your team starting in ' + (app.available || 'May 2027') + '.';
+          return frameLetter(j, [p1, p2, p3].join('\n\n'));
+        }
+        // Header, "Re:" line, greeting and sign-off around a body (shared by the template and the AI letter).
+        function frameLetter(j, body) {
+          var app = PROFILE.application || {};
+          var name = PROFILE.fullName || '';
+          var contact = [app.location, PRIVATE.phone, PRIVATE.email].filter(Boolean).join(' ');
+          var date = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
           return [
             name + (contact ? '\n' + contact : ''),
             date,
             'Hiring Committee' + (j.company ? '\n' + j.company : ''),
             'Re: ' + j.title,
             'Dear Hiring Committee,',
-            p1, p2, p3,
+            body,
             'Sincerely,\n' + name
           ].join('\n\n');
         }
+        var prepJob = null;
         function openPrep(j) {
           var app = PROFILE.application || {};
           $('prep-title').textContent = 'Prepare application: ' + j.title + (j.company ? ' at ' + j.company : '');
           $('prep-letter').value = buildLetter(j);
+          prepJob = j; $('prep-desc').value = ''; $('prep-ai-status').textContent = '';
+          $('prep-ai').hidden = !(API && pass); $('prep-ai-btn').disabled = false;
           var qa = $('prep-qa'); qa.textContent = '';
           var rows = [];
           Object.keys(app.names || {}).forEach(function (k) { rows.push([k, app.names[k]]); });
@@ -772,6 +789,29 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           $('prep-open').href = j.url;
           var d = $('prep-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
         }
+        $('prep-ai-btn').addEventListener('click', function () {
+          var j = prepJob; if (!j || !API || !pass) return;
+          var btn = $('prep-ai-btn'), st = $('prep-ai-status');
+          var detail = $('prep-desc').value.trim() || [j.description, j.note, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ').trim();
+          btn.disabled = true; st.textContent = 'Writing… (a few seconds)';
+          fetch(API + '/letter', {
+            method: 'POST', cache: 'no-store',
+            headers: { 'Content-Type': 'application/json', 'X-Passcode': pass },
+            body: JSON.stringify({ title: j.title, company: j.company, location: j.location || '', description: detail, profile: PROFILE })
+          }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.ok && res.d.letter) {
+                $('prep-letter').value = frameLetter(j, res.d.letter);
+                st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.left != null ? res.d.left + ' left today.' : '');
+              } else if (res.status === 401) {
+                st.textContent = 'Please log in again.';
+              } else {
+                st.textContent = (res.d && res.d.error) || 'The AI could not write it. The template letter is still above.';
+              }
+            })
+            .catch(function () { st.textContent = 'Could not reach the AI. The template letter is still above.'; })
+            .then(function () { btn.disabled = false; });
+        });
         $('prep-copy-letter').addEventListener('click', function () { copyText($('prep-letter').value, $('prep-copy-letter')); });
         $('prep-close').addEventListener('click', function () { var d = $('prep-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); });
 
