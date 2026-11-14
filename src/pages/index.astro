@@ -126,6 +126,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .rm:hover { color: var(--red); text-decoration: underline; }
       #add-dialog { width: min(520px, calc(100vw - 32px)); }
       #add-dialog .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      #add-dialog #a-source { min-height: 70px; }
+      #a-fill, #prep-ai-btn { white-space: nowrap; flex: 0 0 auto; }
       #add-dialog textarea { width: 100%; min-height: 78px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
       #add-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
@@ -409,6 +411,14 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <form method="dialog" id="add-form">
         <h3>Add a posting for Benny</h3>
         <p class="who" style="margin:0">A job or an event you found. It goes straight into the Shortlist for everyone.</p>
+        <div id="a-auto">
+          <label for="a-source">Paste a link and the form fills itself in</label>
+          <textarea id="a-source" maxlength="60000" placeholder="Paste the job link here. For Indeed or LinkedIn, press Ctrl+A then Ctrl+C on the posting page and paste the text instead."></textarea>
+          <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
+            <button type="button" class="primary" id="a-fill">Fill it in</button>
+            <span class="who" id="a-fill-status" role="status"></span>
+          </div>
+        </div>
         <label for="a-kind">Type</label>
         <select id="a-kind"><option value="job">Job or co-op</option><option value="event">Event to register for</option></select>
         <label for="a-title">Title *</label>
@@ -525,11 +535,11 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         // ---- posts added by hand (shared) ----
         var BC_RE = /\b(BC|B\.C\.|British Columbia|Vancouver|Burnaby|Surrey|Richmond|Victoria|Kelowna|Langley|Delta|Pitt Meadows|Coquitlam|Abbotsford|Nanaimo|Squamish)\b/i;
         function postToJob(x) {
-          var text = [x.title, x.company, x.note].join(' ');
+          var text = [x.title, x.company, x.note, x.desc].join(' ');
           return {
             id: x.id, title: x.title, company: x.company || (x.kind === 'event' ? 'Event' : 'Added by hand'),
             location: x.location || '', url: x.url, posted: new Date(x.ts || Date.now()).toISOString().slice(0, 10),
-            source: 'added', kind: x.kind, eventDate: x.date || '', note: x.note || '', addedBy: x.by || '',
+            source: 'added', kind: x.kind, eventDate: x.date || '', note: x.note || '', description: x.desc || '', addedBy: x.by || '',
             bc: BC_RE.test(x.location || ''), solidworks: /solid\s?works/i.test(text),
             startLabel: x.kind === 'job' ? (x.date || null) : null, fitsMay: null, score: 0,
           };
@@ -990,13 +1000,15 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               rebuildJobs(); renderAll();
             }).catch(function () { flash('Could not remove it right now. Please try again.'); });
         }
+        var addDesc = '';
         function openAdd() {
           if (!pass) { openSetup(openAdd); return; }
-          ['a-title', 'a-url', 'a-company', 'a-loc', 'a-date', 'a-note'].forEach(function (id) { $(id).value = ''; });
+          ['a-title', 'a-url', 'a-company', 'a-loc', 'a-date', 'a-note', 'a-source'].forEach(function (id) { $(id).value = ''; });
+          addDesc = ''; $('a-fill-status').textContent = ''; $('a-fill').disabled = false;
           $('a-kind').value = 'job'; syncKindLabels();
           $('a-err').textContent = '';
           var d = $('add-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
-          $('a-title').focus();
+          $('a-source').focus();
         }
         function closeAdd() { var d = $('add-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
         function syncKindLabels() {
@@ -1008,12 +1020,57 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         $('a-cancel').addEventListener('click', closeAdd);
         $('add-open').addEventListener('click', openAdd);
         if (API) $('add-open').classList.add('show');
+        // ---- "Fill it in": link or pasted text -> title, company, location, start date ----
+        var NO_AUTO = /^https?:\/\/([\w-]+\.)*(indeed|linkedin|glassdoor)\.(com|ca)(\/|$|\?)/i;
+        function cleanUrl(u) {
+          try {
+            var x = new URL(u);
+            Array.from(x.searchParams.keys()).forEach(function (k) { if (/^(utm_|gclid|fbclid|from$|refid$|ref$|source$|src$|trk)/i.test(k)) x.searchParams.delete(k); });
+            x.hash = ''; return x.toString();
+          } catch (e) { return u; }
+        }
+        $('a-fill').addEventListener('click', function () {
+          var input = $('a-source').value.trim(), st = $('a-fill-status'), btn = $('a-fill');
+          if (!input) { st.textContent = 'Paste a link or the posting text first.'; return; }
+          var isLink = /^https?:\/\/\S+$/i.test(input);
+          if (isLink && NO_AUTO.test(input)) {
+            $('a-url').value = cleanUrl(input);
+            st.textContent = 'Indeed, LinkedIn and Glassdoor cannot be read from a link. Open the posting, press Ctrl+A then Ctrl+C, and paste the text here. I kept the link.';
+            return;
+          }
+          btn.disabled = true; st.textContent = 'Reading… (a few seconds)';
+          fetch(API + '/extract', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify({ input: input }) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { closeAdd(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!res.ok) {
+                if (res.d && res.d.url && !$('a-url').value) $('a-url').value = res.d.url;
+                st.textContent = (res.d && res.d.error) || 'Could not read that. Fill the fields in by hand.'; return;
+              }
+              var d = res.d;
+              if (d.title) $('a-title').value = d.title;
+              if (d.company) $('a-company').value = d.company;
+              if (d.location) $('a-loc').value = d.location;
+              if (d.start) $('a-date').value = d.start;
+              if (d.url) $('a-url').value = d.url;
+              else if (isLink) $('a-url').value = cleanUrl(input);
+              $('a-kind').value = 'job'; syncKindLabels();
+              addDesc = d.description || '';
+              var missing = [];
+              if (!$('a-url').value) missing.push('the link');
+              if (!$('a-date').value) missing.push('start date');
+              if (!$('a-loc').value) missing.push('location');
+              st.textContent = 'Filled in. Please check it' + (missing.length ? ' and add ' + missing.join(', ') : '') + ', then click Add to Shortlist.';
+            })
+            .catch(function () { st.textContent = 'Could not reach the server. Fill the fields in by hand.'; })
+            .then(function () { btn.disabled = false; });
+        });
         $('add-form').addEventListener('submit', function (e) {
           e.preventDefault();
           var body = {
             kind: $('a-kind').value, title: $('a-title').value.trim(), url: $('a-url').value.trim(),
             company: $('a-company').value.trim(), location: $('a-loc').value.trim(),
-            date: $('a-date').value.trim(), note: $('a-note').value.trim(), by: who,
+            date: $('a-date').value.trim(), note: $('a-note').value.trim(), desc: addDesc, by: who,
           };
           if (!body.title) { $('a-err').textContent = 'Please add a title.'; return; }
           var btn = $('a-save'); btn.disabled = true; btn.textContent = 'Adding...';
