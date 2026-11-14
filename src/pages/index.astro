@@ -719,25 +719,38 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
           var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; } document.body.removeChild(ta); done(ok);
         }
+        // Follows the structure of Benny's own cover letter: header, "Re:" line, three short paragraphs.
+        var KNOWN_NEW_TOOLS = /\b(Autodesk Inventor|Inventor|AutoCAD|Creo|CATIA|Siemens NX|Ansys|Abaqus|Solid Edge|LabVIEW|Simulink|Revit)\b/gi;
         function buildLetter(j) {
-          var app = PROFILE.application || {}, sent = PROFILE.interest_sentences || {};
+          var app = PROFILE.application || {}, phr = PROFILE.interest_phrases || {};
           var text = [j.title, j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ');
           var why = matchOf(j).why;
-          var interest = sent[why[0]] || sent['default'] || '';
+          var interest = phr[why[0]] || phr['default'] || 'hands-on engineering work';
           var ranked = (PROFILE.project_blurbs || []).map(function (p, i) {
             var n = 0; try { n = (text.match(new RegExp(p.tags, 'gi')) || []).length; } catch (e) { n = 0; }
             return { p: p, n: n, i: i };
           }).sort(function (a, b) { return b.n - a.n || a.i - b.i; });
-          var picks = ranked.slice(0, 2).map(function (r) { return r.p.sentence; });
-          var parts = [];
-          var nm = (app.names && app.names['Preferred first name']) || PROFILE.fullName || '';
-          parts.push('Hi ' + (j.company || 'there') + ' team,');
-          parts.push('I\u2019m a second-year mechanical engineering student at UBC, applying for the ' + j.title + ' role' + (j.location ? ' in ' + j.location : '') + '. ' + interest);
-          if (picks.length) parts.push('Outside class, I ' + picks[0] + '.' + (picks[1] ? ' I also ' + picks[1] + '.' : ''));
+          var picks = ranked.slice(0, 2).map(function (r) { return r.p.phrase; });
+          var seen = {}, learn = [];
+          (text.match(KNOWN_NEW_TOOLS) || []).forEach(function (t) { var k = t.toLowerCase(); if (!seen[k]) { seen[k] = 1; learn.push(t); } });
+          var learnText = learn.length ? learn.slice(0, 2).join(' and ') : 'new tools';
           var links = app.links || {};
-          parts.push('I\u2019m free to start in ' + (app.available || 'May 2027') + '. ' + (links.Portfolio ? 'My portfolio is at ' + links.Portfolio + ', and my' : 'My') + ' resume is attached. Thanks for reading.');
-          parts.push(nm);
-          return parts.join('\n\n');
+          var name = PROFILE.fullName || '';
+          var contact = [app.location, PRIVATE.phone, PRIVATE.email].filter(Boolean).join(' ');
+          var date = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+          var p1 = 'I’m a second-year Mechanical Engineering student at the University of British Columbia applying for the ' + j.title + ' role' + (j.company ? ' with ' + j.company : '') + '. I’m interested in ' + interest + '.';
+          var p2 = 'Through coursework and projects, I’ve gained practical experience with ' + (app.experience_with || 'CAD and prototyping') +
+            (picks.length ? ', including ' + picks.join(picks[0].indexOf(' and ') > -1 ? ', and ' : ' and ') : '') + '. I’m comfortable with ' + (app.comfortable_with || 'Microsoft Office') + ' and ready to learn ' + learnText + ' quickly.';
+          var p3 = (links.Portfolio ? 'My portfolio is at ' + links.Portfolio + '. ' : '') + 'Thank you for your consideration. I’d appreciate the opportunity to discuss how I can contribute and grow with your team starting in ' + (app.available || 'May 2027') + '.';
+          return [
+            name + (contact ? '\n' + contact : ''),
+            date,
+            'Hiring Committee' + (j.company ? '\n' + j.company : ''),
+            'Re: ' + j.title,
+            'Dear Hiring Committee,',
+            p1, p2, p3,
+            'Sincerely,\n' + name
+          ].join('\n\n');
         }
         function openPrep(j) {
           var app = PROFILE.application || {};
