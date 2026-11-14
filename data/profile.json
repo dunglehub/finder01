@@ -1,0 +1,103 @@
+{
+  "name": "Benny",
+  "about": "UBC 2nd-year mechanical engineering (expected May 2029). Interested in sustainable energy storage, thermal management, fluid systems and mechanical design, with hands-on fabrication. Built from his portfolio, resume and LinkedIn. Edit the keyword lists below to change how jobs are ranked.",
+  "skills": {
+    "design_cad": [
+      "SolidWorks (3D modelling, flow simulation)",
+      "Fusion 360",
+      "PrusaSlicer",
+      "technical drawing"
+    ],
+    "electronics": [
+      "KiCad PCB design",
+      "Arduino",
+      "soldering",
+      "basic circuits and sensors"
+    ],
+    "programming": [
+      "Embedded C/C++",
+      "Python",
+      "MATLAB",
+      "Git/GitHub"
+    ],
+    "fabrication": [
+      "3D printing (FDM)",
+      "machining",
+      "manual fabrication",
+      "sheet metal fabrication"
+    ],
+    "data": [
+      "Excel system modelling and data analysis"
+    ]
+  },
+  "projects": [
+    "Two-speed hand-crank generator (SolidWorks, 3D printed, hand-machined shafts, Arduino data logging)",
+    "Leader-follower 4-DOF robotic arm (SolidWorks, custom KiCad PCB, firmware)",
+    "Chompy: sheet-metal underwater retrieval claw for the APSC 101 design competition",
+    "Rainwater harvester system simulation in Excel (team of 5, placed 2nd of 10)"
+  ],
+  "interests": [
+    {
+      "label": "Battery / EV",
+      "weight": 4,
+      "pattern": "batter(y|ies)|energy storage|lithium|cell engineer|electric vehicle|\\bEVs?\\b|power ?pack|powertrain|solar vehicle|thermal management"
+    },
+    {
+      "label": "Renewable energy",
+      "weight": 3,
+      "pattern": "renewable|clean ?energy|solar|wind|hydro|geothermal|hydrogen|fuel cell|grid|decarboni[sz]|sustainab|generator"
+    },
+    {
+      "label": "Thermal / fluids",
+      "weight": 3,
+      "pattern": "thermal|heat transfer|cooling|fluid|flow simulation|\\bCFD\\b|hvac|pump|piping"
+    },
+    {
+      "label": "SolidWorks / CAD",
+      "weight": 3,
+      "pattern": "solid\\s?works|\\bCAD\\b|fusion 360|\\bGD&T\\b|3d model"
+    },
+    {
+      "label": "Mechanical",
+      "weight": 3,
+      "pattern": "mechanical|mechatronic|\\bmech\\.? eng"
+    },
+    {
+      "label": "Hands-on build",
+      "weight": 2,
+      "pattern": "prototyp|product design|3d print|additive|machin|fabricat|sheet metal|assembly|hands-on"
+    },
+    {
+      "label": "Electronics / PCB",
+      "weight": 2,
+      "pattern": "\\bPCB\\b|kicad|arduino|embedded|firmware|circuit|electronics|soldering"
+    },
+    {
+      "label": "Simulation / analysis",
+      "weight": 1,
+      "pattern": "simulat|matlab|FEA\\b|stress analysis|data analysis"
+    },
+    {
+      "label": "Testing / manufacturing",
+      "weight": 1,
+      "pattern": "\\btest(ing)? engineer|validation|manufactur|process engineer|quality"
+    },
+    {
+      "label": "Robotics / controls",
+      "weight": 1,
+      "pattern": "robot|automation|controls"
+    }
+  ],
+  "avoid": [
+    {
+      "label": "Not engineering",
+      "weight": -4,
+      "pattern": "software (engineer|developer)|data scien|machine learning|marketing|sales|accounting|finance|human resources|\\bHR\\b|legal|recruit"
+    }
+  ],
+  "experience": [
+    "Club volleyball coach, Volleydome (Jan 2024 to Aug 2026): leadership and communication",
+    "Community event volunteer (2023)"
+  ],
+  "looking_for": "Internships and co-ops; applying to UBC design teams."
+}
