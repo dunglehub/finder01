@@ -49,7 +49,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         }
       }
       [hidden] { display: none !important; }
-      html, body { margin: 0; }
+      html, body { margin: 0; max-width: 100%; overflow-x: hidden; }
+      .addbtn .long { display: inline; }
       body { color: var(--text); background: var(--bg); font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
       button, input, select, textarea { font-family: inherit; }
       button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
@@ -191,12 +192,26 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .dback { display: none; font: inherit; background: none; border: none; color: var(--blue); cursor: pointer; padding: 0 0 12px; }
 
       @media (max-width: 960px) {
-        .top { padding: 12px 14px; position: static; }
-        .brand h1 { font-size: 1.15rem; }
-        .layout { grid-template-columns: 1fr; }
+        .top { padding: 10px 12px; position: static; gap: 8px; }
+        .brand { gap: 4px 10px; flex: 1 1 auto; min-width: 0; }
+        .brand h1 { font-size: 1.05rem; line-height: 1.2; }
+        .live { font-size: .8rem; }
+        .topright { gap: 4px; flex: 0 0 auto; }
+        .linkbtn { padding: 6px 6px; font-size: .85rem; }
+        .addbtn { padding: 6px 12px; font-size: .85rem; border-radius: 8px; gap: 4px; }
+        .addbtn .long { display: none; }
+        .addbtn .ico { width: 14px; height: 14px; }
+        .chip { padding: 3px 10px 3px 4px; font-size: .82rem; }
+        .chip .avatar { width: 24px; height: 24px; font-size: .75rem; }
+        .layout { grid-template-columns: minmax(0, 1fr); }
+        .side, .main, .listcol, .cols, .app { min-width: 0; max-width: 100%; }
+        .pills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .nav { max-width: 100%; }
         .side { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--line); padding: 14px; }
         .nav { flex-direction: row; overflow-x: auto; }
-        .nav button { white-space: nowrap; width: auto; }
+        .nav { gap: 2px; overflow-x: visible; }
+        .nav button { white-space: nowrap; width: auto; padding: 8px 9px; gap: 5px; font-size: .92rem; }
+        .nav button .ico { display: none; }
         .fbox > summary { display: block; }
         .main { padding: 14px; }
         .cols { grid-template-columns: 1fr; }
@@ -276,7 +291,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         background: var(--blue-soft); border: 1px solid var(--line); }
       .tip .ico { font-size: 1.7rem; color: var(--blue); flex: none; margin-top: 2px; }
       .tip p { margin: 0; }
-      .tip p:first-child { font-weight: 700; color: var(--navy); }
+      .tip p:first-child { font-weight: 400; color: var(--text); }
       .tip p + p { color: var(--muted); font-size: .92rem; }
       /* ---------- dialog ---------- */
       dialog { border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--text);
@@ -297,12 +312,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
     <main class="app" id="app" data-api={config.api || ''}>
       <header class="top">
         <div class="brand">
-          <h1>Co-op Finder: Summer 2027</h1>
+          <h1>Co-op</h1>
           <span class="live locked" id="live"><i></i><b>Live</b></span>
         </div>
         <div class="topright">
-          <button type="button" class="linkbtn" id="clear-top">Clear</button>
-          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span>Add posting</button>
+          <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset</button>
+          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Add<span class="long"> posting</span></span></button>
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
             <div class="menu" id="menu" hidden>
@@ -318,7 +333,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <aside class="side">
           <nav class="nav" id="nav" aria-label="Sections">
             <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt" id="jobs-count">{jobs.length}</span></button>
-            <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers to check directly <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+            <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
             <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
           <div id="sidejobs">
@@ -335,13 +350,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               <summary>Filters</summary>
               <div class="search">
                 <span class="ico" data-i="search"></span>
-                <input type="search" id="q" placeholder="Search title, company, location..." aria-label="Search jobs" />
+                <input type="search" id="q" placeholder="Search" aria-label="Search jobs" />
               </div>
               <div class="fchecks" id="fchecks" role="group" aria-label="Filters, in order of priority (tick one or more to narrow the list)"></div>
-              <button type="button" class="linkbtn" id="clear"><span class="ico" data-i="x"></span>Clear filters</button>
+              <button type="button" class="linkbtn" id="clear" hidden>Reset</button>
             </details>
           </div>
-          <p class="built">Last built {checked} (Pacific). BC first, rest of Canada second.</p>
+          <p class="built">Built {checked}</p>
         </aside>
 
         <div class="main">
@@ -352,10 +367,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
                   <span id="count"></span>
                   <label>Sort by
                     <select id="sort" aria-label="Sort by">
-                      <option value="priority">Priority order</option>
+                      <option value="priority">Priority</option>
                       <option value="best">Best match</option>
-                      <option value="new">Most recent</option>
-                      <option value="company">Company (top ranked first)</option>
+                      <option value="new">Newest</option>
+                      <option value="company">Company</option>
                     </select>
                   </label>
                 </div>
@@ -366,7 +381,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           </section>
 
         <section class="view" data-view="bc" hidden>
-          <h2>Employers to check directly</h2>
+          <h2>Employers</h2>
           <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op". Use the buttons to keep track of the ones you've looked at. These are the BC ones.</p>
           <div class="emptools"><button type="button" class="addbtn" data-emp-add="BC"><span class="ico" data-i="plus"></span>Add employer</button></div>
           <div class="grid">
@@ -405,8 +420,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <div class="tip">
         <span class="ico" data-i="bulb"></span>
         <div>
-          <p>The Jobs list only shows employers that publish a public job feed (an API, RSS or JSON feed). Many sites have no feed, or sit behind a login, so they can't be pulled in. Check those on the Employers tabs, and don't forget UBC's own co-op portal, which needs your login.</p>
-          <p>Always confirm start dates and details on the employer's posting.</p>
+          <p>Jobs come from employers with public job feeds. Many sites have no feed or need a login, so check them under Employers. UBC's co-op portal needs your login too.</p>
+          <p>Confirm dates on the posting.</p>
         </div>
       </div>
         </div>
@@ -687,18 +702,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         }
         function ownText(j) { return [j.title, j.company, j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' '); }
         var CRITERIA = [
-          { id: 'f0', label: 'Hand-picked', test: function (j) { return j.source === 'manual' || j.source === 'added'; } },
-          { id: 'f1', label: 'May 2027 start', test: function (j) { return j.fitsMay === true; } },
-          { id: 'f2', label: 'Vancouver / BC', test: function (j) { return !!j.bc; } },
-          { id: 'f3', label: 'Calgary / Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
-          { id: 'f4', label: 'Mechanical engineering', test: function (j) { return topicTags(j).mech; } },
-          { id: 'f5', label: 'Battery / power pack', test: function (j) { return topicTags(j).battery; } },
-          { id: 'f6', label: 'EV company', test: function (j) { return EV_RE.test(ownText(j)); } },
-          { id: 'f7', label: 'Clean energy / solar', test: function (j) { return CLEAN_RE.test(ownText(j)); } },
+          { id: 'f0', label: 'Picked', test: function (j) { return j.source === 'manual' || j.source === 'added'; } },
+          { id: 'f1', label: 'May 2027', test: function (j) { return j.fitsMay === true; } },
+          { id: 'f2', label: 'BC', test: function (j) { return !!j.bc; } },
+          { id: 'f3', label: 'Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
+          { id: 'f4', label: 'Mechanical', test: function (j) { return topicTags(j).mech; } },
+          { id: 'f5', label: 'Battery', test: function (j) { return topicTags(j).battery; } },
+          { id: 'f6', label: 'EV', test: function (j) { return EV_RE.test(ownText(j)); } },
+          { id: 'f7', label: 'Clean energy', test: function (j) { return CLEAN_RE.test(ownText(j)); } },
           { id: 'f8', label: 'SolidWorks', test: function (j) { return !!j.solidworks; } },
-          { id: 'f9', label: 'Posted in last 30 days', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
-          { id: 'f10', label: 'Well-known company', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
-          { id: 'f11', label: 'Other start dates', test: function (j) { return j.fitsMay === false; } },
+          { id: 'f9', label: 'New (30 days)', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
+          { id: 'f10', label: 'Big name', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
+          { id: 'f11', label: 'Other dates', test: function (j) { return j.fitsMay === false; } },
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
         function byPriority(a, b) {
@@ -1001,17 +1016,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
         function jobTags(j) {
           var mt = matchOf(j), t = el('div', 'tags');
-          if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong match' : 'Good match', mt.tier === 'strong' ? 'match strong' : 'match', 'plus'));
+          if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong' : 'Good', mt.tier === 'strong' ? 'match strong' : 'match', 'plus'));
           if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' · ' + j.eventDate : ''), 'warn', 'cal'));
-          else if (j.fitsMay === true) t.appendChild(tag('Starts ' + j.startLabel, 'info', 'check'));
-          else if (j.fitsMay === false) t.appendChild(tag('Starts ' + j.startLabel + ' (not May 2027)', 'warn'));
+          else if (j.fitsMay === true) t.appendChild(tag(j.startLabel, 'info', 'check'));
+          else if (j.fitsMay === false) t.appendChild(tag(j.startLabel, 'warn'));
           else if (j.source === 'added' && j.startLabel) t.appendChild(tag('Start: ' + j.startLabel, 'warn'));
-          else t.appendChild(tag('Start date not listed', 'warn'));
+          else t.appendChild(tag('No start date', 'warn'));
           t.appendChild(j.bc ? tag('BC') : tag('Outside BC'));
           if (j.solidworks) t.appendChild(tag('SolidWorks'));
           var tt = topicTags(j);
           if (tt.battery) t.appendChild(tag('Battery'));
-          if (tt.mech) t.appendChild(tag('Mechanical engineering'));
+          if (tt.mech) t.appendChild(tag('Mechanical'));
           if (j.source === 'manual') t.appendChild(tag('Hand-picked', 'info'));
           if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
           return t;
@@ -1107,13 +1122,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           var bar = el('div', 'dbar');
           bar.appendChild(actionsRow(j.id, false));
           bar.appendChild(el('span', 'spacer'));
-          if (j.url) { var ob = el('a', 'btn2', 'Open posting'); ob.href = j.url; ob.target = '_blank'; ob.rel = 'noopener noreferrer'; bar.appendChild(ob); }
+          if (j.url) { var ob = el('a', 'btn2', 'Open'); ob.href = j.url; ob.target = '_blank'; ob.rel = 'noopener noreferrer'; bar.appendChild(ob); }
           if (j.source === 'added' && API) {
             var rm = el('button', 'rm', 'Remove'); rm.type = 'button'; rm.style.marginLeft = '0';
             rm.addEventListener('click', function () { removePost(j); }); bar.appendChild(rm);
           }
           if (j.kind !== 'event') {
-            var pb = el('button', 'btn1', 'Prepare application'); pb.type = 'button';
+            var pb = el('button', 'btn1', 'Prepare'); pb.type = 'button';
             pb.addEventListener('click', function () { openPrep(j); }); bar.appendChild(pb);
           }
           box.appendChild(bar);
@@ -1129,7 +1144,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             btns[i].querySelector('.n').textContent = String(counts[t]);
           }
           var done = jobs.length - counts.review;
-          $('progress-text').textContent = done + ' of ' + jobs.length + ' jobs reviewed';
+          $('progress-text').textContent = done + ' of ' + jobs.length + ' reviewed';
           $('progress-bar').style.width = (jobs.length ? Math.round(100 * done / jobs.length) : 0) + '%';
         }
 
@@ -1138,10 +1153,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           live.className = 'live ' + (link === 'online' ? 'online' : link === 'offline' ? 'offline' : link === 'connecting' ? 'connecting' : link === 'local' ? 'local' : 'locked');
           live.querySelector('b').textContent = link === 'online' ? 'Live' : link === 'offline' ? 'Offline' : link === 'connecting' ? 'Connecting…' : link === 'local' ? 'This device only' : 'Logged out';
           var chip = $('chip'); chip.textContent = '';
-          if (who) { chip.appendChild(avatar(who)); chip.appendChild(el('span', null, 'Marking as ' + who)); }
+          if (who) { chip.appendChild(avatar(who)); chip.appendChild(el('span', null, who)); }
           else chip.appendChild(el('span', null, API ? 'Log in' : 'Set your name'));
           if (!(API && who)) $('menu').hidden = true;
-          var msg = flashMsg || (link === 'locked' ? 'Log in to see and share picks.' : link === 'offline' ? 'The shared list is unreachable right now. Marks are kept on this device.' : '');
+          var msg = flashMsg || (link === 'locked' ? 'Log in to share picks.' : link === 'offline' ? 'The shared list is unreachable right now. Marks are kept on this device.' : '');
           var f = $('status'); f.textContent = msg; f.hidden = !msg;
         }
 
@@ -1180,7 +1195,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (!shown.length) list.appendChild(emptyState());
           var inTab = jobs.filter(function (j) { return (stateOf(j.id) || 'review') === tab; }).length;
           var hidden = inTab - shown.length;
-          count.textContent = shown.length + ' shown' + (hidden ? ' · ' + hidden + ' hidden by filters' : '');
+          count.textContent = shown.length + ' shown' + (hidden ? ' · ' + hidden + ' hidden' : '');
           renderDetail();
         }
 
