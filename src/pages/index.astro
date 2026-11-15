@@ -4,6 +4,7 @@ import manualJobs from '../../data/manual-jobs.json';
 import watchlist from '../../data/watchlist.json';
 import config from '../../data/config.json';
 import profile from '../../data/profile.json';
+import companies from '../../data/companies.json';
 import { enrich } from '../../scripts/lib/classify.mjs';
 
 // Manual jobs are enriched the same way as automatic ones, then tagged "hand-picked".
@@ -118,6 +119,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .chk { display: inline-flex; gap: 8px; align-items: center; font-size: .92rem; color: var(--text); cursor: pointer;
         padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); }
       .chk input { accent-color: var(--blue); width: 16px; height: 16px; }
+      .fchecks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .fchecks .chk { padding: 7px 11px; font-size: .88rem; }
+      .fchecks .num { display: inline-block; min-width: 1.3em; text-align: center; font-weight: 700; font-size: .78rem; color: var(--blue);
+        background: var(--blue-soft); border-radius: 999px; padding: 1px 6px; }
       .addbtn { font: inherit; font-weight: 700; font-size: .92rem; display: none; align-items: center; gap: 7px; padding: 11px 16px;
         border-radius: 12px; cursor: pointer; border: none; color: #fff; background: linear-gradient(135deg, #3b82f6, #1d4ed8);
         box-shadow: 0 4px 12px rgba(37,99,235,.3); }
@@ -133,8 +138,19 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
       #add-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
       @media (max-width: 480px) { #add-dialog .two { grid-template-columns: 1fr; } }
+      #emp-dialog { width: min(480px, calc(100vw - 32px)); }
+      #emp-dialog textarea { width: 100%; min-height: 70px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
+      #emp-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+      .emptools { margin: 0 0 14px; }
+      .co .actions .rm + .rm { margin-left: 0; }
+      .hid { margin-top: 18px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px 14px; }
+      .hid summary { cursor: pointer; color: var(--muted); font-size: .92rem; }
+      .hidrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); margin-top: 8px; }
+      .hidrow span { flex: 1; font-weight: 600; }
+      .hidrow button { font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
       #resume-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
-      #resume-dialog textarea { width: 100%; min-height: 64px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+      #resume-dialog textarea { width: 100%; min-height: 128px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
       #resume-dialog .pick { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
       #resume-dialog .pick input[type=file] { width: auto; flex: 1 1 220px; padding: 8px; }
@@ -289,8 +305,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
       <nav class="nav" id="nav" aria-label="Sections">
         <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt" id="jobs-count">{jobs.length}</span></button>
-        <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers to check directly <span class="cnt">{bcList.length}</span></button>
-        <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt">{elseList.length}</span></button>
+        <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers to check directly <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+        <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
       </nav>
 
       <div class="panel">
@@ -300,16 +316,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               <span class="ico" data-i="search"></span>
               <input type="search" id="q" placeholder="Search title, company, location..." aria-label="Search jobs" />
             </div>
-            <select id="region" aria-label="Region">
-              <option value="all">All locations</option>
-              <option value="bc">BC only</option>
-              <option value="other">Outside BC</option>
-            </select>
-            <label class="chk"><input type="checkbox" id="sw" /> SolidWorks mentioned</label>
-            <label class="chk"><input type="checkbox" id="mismatch" /> Show other start dates</label>
             <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span>Add posting</button>
             <button type="button" class="linkbtn" id="clear"><span class="ico" data-i="refresh"></span>Clear filters</button>
           </div>
+          <div class="fchecks" id="fchecks" role="group" aria-label="Filters, in order of priority (tick one or more to narrow the list)"></div>
 
           <div class="pills" id="tabs" role="group" aria-label="Show postings">
             <button type="button" data-tab="review" aria-pressed="true"><span class="ico" data-i="refresh"></span>To review <span class="n"></span></button>
@@ -325,9 +335,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             <span id="count"></span>
             <label>Sort by
               <select id="sort" aria-label="Sort by">
+                <option value="priority">Priority order</option>
                 <option value="best">Best match</option>
                 <option value="new">Most recent</option>
-                <option value="company">Company</option>
+                <option value="company">Company (top ranked first)</option>
               </select>
             </label>
           </div>
@@ -337,6 +348,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <section class="view" data-view="bc" hidden>
           <h2>Employers to check directly</h2>
           <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op". Use the buttons to keep track of the ones you've looked at. These are the BC ones.</p>
+          <div class="emptools"><button type="button" class="addbtn" data-emp-add="BC"><span class="ico" data-i="plus"></span>Add employer</button></div>
           <div class="grid">
             {bcList.map((c) => (
               <div class="co" data-id={`co:${c.name}`}>
@@ -349,11 +361,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               </div>
             ))}
           </div>
+          <details class="hid" id="hid-bc" hidden><summary>Hidden (<span class="n">0</span>)</summary><div class="hidlist"></div></details>
         </section>
 
         <section class="view" data-view="else" hidden>
           <h2>Elsewhere</h2>
           <p class="sub">Employers outside BC. Same idea: open the careers page and search for "intern" or "co-op".</p>
+          <div class="emptools"><button type="button" class="addbtn" data-emp-add="Elsewhere"><span class="ico" data-i="plus"></span>Add employer</button></div>
           <div class="grid">
             {elseList.map((c) => (
               <div class="co" data-id={`co:${c.name}`}>
@@ -365,6 +379,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               </div>
             ))}
           </div>
+          <details class="hid" id="hid-else" hidden><summary>Hidden (<span class="n">0</span>)</summary><div class="hidlist"></div></details>
         </section>
       </div>
 
@@ -446,6 +461,26 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       </div>
     </dialog>
 
+    <dialog id="emp-dialog">
+      <form method="dialog" id="emp-form">
+        <h3>Add employer</h3>
+        <p class="who" style="margin:0">A careers page to check directly. It shows up for everyone.</p>
+        <label for="e-name">Company name</label>
+        <input id="e-name" maxlength="100" autocomplete="off" required />
+        <label for="e-url">Careers link</label>
+        <input id="e-url" type="url" placeholder="https://..." autocomplete="off" required />
+        <label for="e-region">Where is it?</label>
+        <select id="e-region"><option value="BC">BC</option><option value="Elsewhere">Elsewhere</option></select>
+        <label for="e-note">Note (optional)</label>
+        <textarea id="e-note" maxlength="300"></textarea>
+        <div class="err" id="e-err"></div>
+        <div class="row">
+          <button type="button" id="e-cancel">Cancel</button>
+          <button type="submit" class="primary" id="e-save">Add employer</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog id="add-dialog">
       <form method="dialog" id="add-form">
         <h3>Add a posting for Benny</h3>
@@ -481,6 +516,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
     </dialog>
 
     <script id="profile-data" type="application/json" set:html={JSON.stringify(profile)}></script>
+    <script id="co-rank" type="application/json" set:html={JSON.stringify(companies.companies)}></script>
     <script id="emp-data" type="application/json" set:html={JSON.stringify(Object.fromEntries(watchlist.map((c) => [c.name, c.note || ''])))}></script>
     <script id="jobs-data" type="application/json" set:html={JSON.stringify(jobs)}></script>
     <script is:inline>
@@ -571,6 +607,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         var link = API ? 'connecting' : 'local'; // connecting | online | offline | locked | local
         if (API && !pass) { marks = {}; posts = []; link = 'locked'; who = ''; lsDel('cf_marks'); lsDel('cf_posts'); lsDel('cf_name'); }
 
+        // ---- employers: hidden companies and ones added by hand (shared, kept in the Worker) ----
+        var EMPL = { added: [], hidden: [] }, HID = {};
+        function normName(n) { return String(n || '').trim().toLowerCase(); }
+        function isHiddenCo(n) { return !!HID[normName(n)]; }
+        function setEmployers(e) {
+          EMPL = { added: Array.isArray(e && e.added) ? e.added : [], hidden: Array.isArray(e && e.hidden) ? e.hidden : [] };
+          HID = {}; EMPL.hidden.forEach(function (n) { HID[normName(n)] = true; });
+          lsSet('cf_emp', JSON.stringify(EMPL));
+        }
+        try { setEmployers(API && pass ? JSON.parse(lsGet('cf_emp') || '{}') : {}); } catch (e) { setEmployers({}); }
+
         // ---- posts added by hand (shared) ----
         var BC_RE = /\b(BC|B\.C\.|British Columbia|Vancouver|Burnaby|Surrey|Richmond|Victoria|Kelowna|Langley|Delta|Pitt Meadows|Coquitlam|Abbotsford|Nanaimo|Squamish)\b/i;
         function postToJob(x) {
@@ -584,20 +631,85 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           };
         }
         function rebuildJobs() {
-          jobs = baseJobs.concat(posts.map(postToJob));
+          jobs = baseJobs.concat(posts.map(postToJob)).filter(function (j) { return !isHiddenCo(j.company); });
           var c = $('jobs-count'); if (c) c.textContent = jobs.length;
         }
         rebuildJobs();
 
+        // ---- filters and the default sort, in priority order (0 matters most) ----
+        var AB_RE = /\bAB\b|\b(Alberta|Calgary|Edmonton|Red Deer|Lethbridge|Medicine Hat|Fort McMurray)\b/;
+        var EV_RE = /electric vehicle|\bEVs?\b|e-?mobility|powertrain|\bTesla\b|Rivian|\bLucid\b|Polestar|\bBYD\b|Proterra|Lion Electric|Taiga|Nikola/i;
+        var CLEAN_RE = /solar|renewable|clean ?energy|wind (power|turbine|energy)|hydrogen|fuel ?cell|energy storage|geothermal|hydro ?electric|sustainab|decarboni[sz]/i;
+        // Company ranking from data/companies.json: tech first, then fame, then revenue.
+        var CO = [];
+        try { CO = JSON.parse(document.getElementById('co-rank').textContent) || []; } catch (e) { CO = []; }
+        function escRe(t) { return String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        CO = CO.map(function (c) {
+          var al = (c.aliases && c.aliases.length ? c.aliases : [c.name]).map(escRe).join('|');
+          return { name: c.name, tech: c.tech || 0, fame: c.fame || 0, rev: c.rev || 0, re: new RegExp('(^|[^A-Za-z0-9])(' + al + ')($|[^A-Za-z0-9])', 'i') };
+        }).sort(function (a, b) { return b.tech - a.tech || b.fame - a.fame || b.rev - a.rev || a.name.localeCompare(b.name); });
+        var coCache = {};
+        // 0 = top-ranked company, -1 = not on the list
+        function coRank(name) {
+          name = String(name || '');
+          if (coCache[name] !== undefined) return coCache[name];
+          var r = -1;
+          for (var i = 0; i < CO.length; i++) if (CO[i].re.test(name)) { r = i; break; }
+          coCache[name] = r; return r;
+        }
+        function byCompanyRank(a, b) {
+          var ra = coRank(a.company), rb = coRank(b.company);
+          if (ra === rb) return 0;
+          if (ra < 0) return 1;
+          if (rb < 0) return -1;
+          return ra - rb;
+        }
+        function ownText(j) { return [j.title, j.company, j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' '); }
+        var CRITERIA = [
+          { id: 'f0', label: 'Hand-picked', test: function (j) { return j.source === 'manual' || j.source === 'added'; } },
+          { id: 'f1', label: 'May 2027 start', test: function (j) { return j.fitsMay === true; } },
+          { id: 'f2', label: 'Vancouver / BC', test: function (j) { return !!j.bc; } },
+          { id: 'f3', label: 'Calgary / Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
+          { id: 'f4', label: 'Mechanical engineering', test: function (j) { return topicTags(j).mech; } },
+          { id: 'f5', label: 'Battery / power pack', test: function (j) { return topicTags(j).battery; } },
+          { id: 'f6', label: 'EV company', test: function (j) { return EV_RE.test(ownText(j)); } },
+          { id: 'f7', label: 'Clean energy / solar', test: function (j) { return CLEAN_RE.test(ownText(j)); } },
+          { id: 'f8', label: 'SolidWorks', test: function (j) { return !!j.solidworks; } },
+          { id: 'f9', label: 'Posted in last 30 days', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
+          { id: 'f10', label: 'Well-known company', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
+          { id: 'f11', label: 'Other start dates', test: function (j) { return j.fitsMay === false; } },
+        ];
+        function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
+        function byPriority(a, b) {
+          var fa = flags(a), fb = flags(b), i;
+          for (i = 0; i <= 9; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
+          var cr = byCompanyRank(a, b); if (cr) return cr; // 10: well-known companies, best-ranked first
+          if (fa[11] !== fb[11]) return fa[11] ? 1 : -1; // other start dates go last
+          return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b);
+        }
+
         // ---- sorting ----
         function rank(j) { return j.fitsMay === true ? 0 : j.fitsMay === null ? 1 : 2; }
         var SORTS = {
+          priority: function (a, b) { return byPriority(a, b); },
           best: function (a, b) {
             return rank(a) - rank(b) || (fitScore(b) - fitScore(a)) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
           },
           new: function (a, b) { return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b); },
-          company: function (a, b) { return String(a.company).localeCompare(String(b.company)) || SORTS.best(a, b); },
+          company: function (a, b) { return byCompanyRank(a, b) || String(a.company).localeCompare(String(b.company)) || SORTS.best(a, b); },
         };
+
+        (function buildChecks() {
+          var box = document.getElementById('fchecks');
+          CRITERIA.forEach(function (c, i) {
+            var lab = document.createElement('label'); lab.className = 'chk';
+            var inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = c.id;
+            var n = document.createElement('span'); n.className = 'num'; n.textContent = String(i);
+            lab.appendChild(inp); lab.appendChild(n); lab.appendChild(document.createTextNode(c.label));
+            box.appendChild(lab);
+            inp.addEventListener('change', function () { renderJobs(); });
+          });
+        })();
 
         function el(tag, cls, text) {
           var e = document.createElement(tag);
@@ -624,7 +736,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function saveLocal() { lsSet('cf_marks', JSON.stringify(marks)); }
 
         function logout(msg) {
-          pass = ''; who = ''; marks = {}; posts = []; PRIVATE = {};
+          pass = ''; who = ''; marks = {}; posts = []; PRIVATE = {}; setEmployers({});
           lsDel('cf_pass'); lsDel('cf_name'); lsDel('cf_marks'); lsDel('cf_posts');
           link = 'locked'; tab = 'review'; rebuildJobs();
           if (msg) flash(msg);
@@ -650,7 +762,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             return r.json();
           }).then(function (d) {
             marks = d.marks || {}; saveLocal();
-            if (Array.isArray(d.posts)) { posts = d.posts; lsSet('cf_posts', JSON.stringify(posts)); rebuildJobs(); }
+            if (d.employers) setEmployers(d.employers);
+            if (Array.isArray(d.posts)) { posts = d.posts; lsSet('cf_posts', JSON.stringify(posts)); }
+            rebuildJobs();
             link = 'online'; renderAll(); loadPrivate();
           }).catch(function (e) {
             if (e && e.message === '401') logout('Your passcode is not valid any more. Please log in again.');
@@ -978,24 +1092,22 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           var big = el('div', 'big'); big.innerHTML = ICONS.empty; box.appendChild(big);
           box.appendChild(el('strong', null, tab === 'review' ? 'Nothing left to review' : 'Nothing here yet'));
           box.appendChild(el('span', null, tab === 'review'
-            ? 'Try "Show other start dates", clear the filters, or check the Employers tabs.'
+            ? 'Try clearing the filters, or check the Employers tabs.'
             : 'Jobs you mark will show up here for everyone.'));
           return box;
         }
 
         function renderJobs() {
           var q = $('q').value.trim().toLowerCase();
-          var region = $('region').value, sw = $('sw').checked, mm = $('mismatch').checked;
+          var on = CRITERIA.map(function (c) { return $(c.id).checked; });
           var shown = jobs.filter(function (j) {
             var s = stateOf(j.id) || 'review';
             if (s !== tab) return false;
-            if (!mm && j.fitsMay === false) return false;
-            if (sw && !j.solidworks) return false;
-            if (region === 'bc' && !j.bc) return false;
-            if (region === 'other' && j.bc) return false;
+            var f = flags(j);
+            for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
             if (q && (j.title + ' ' + j.company + ' ' + j.location).toLowerCase().indexOf(q) === -1) return false;
             return true;
-          }).sort(SORTS[$('sort').value] || SORTS.best);
+          }).sort(SORTS[$('sort').value] || SORTS.priority);
           list.textContent = '';
           shown.forEach(function (j) { list.appendChild(card(j)); });
           if (!shown.length) list.appendChild(emptyState());
@@ -1004,15 +1116,108 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           count.textContent = shown.length + ' shown' + (hidden ? ' · ' + hidden + ' hidden by filters' : '');
         }
 
-        function renderEmployers() {
-          var cos = document.querySelectorAll('.co[data-id]');
-          for (var i = 0; i < cos.length; i++) {
-            var node = cos[i];
-            var old = node.querySelector('.actions');
-            if (old) node.removeChild(old);
-            node.appendChild(actionsRow(node.getAttribute('data-id'), true));
-          }
+        // ---- employers: hide / show / add / delete (shared with everyone) ----
+        function empAct(body, failMsg) {
+          if (!API || !pass) { openSetup(null); return Promise.resolve({ ok: false, error: 'Please log in first.' }); }
+          return fetch(API + '/employers', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify(body) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { logout('Your passcode was not accepted. Please log in again.'); return { ok: false, error: 'Please log in again.' }; }
+              if (!res.ok || !res.d.employers) { var m = (res.d && res.d.error) || failMsg; flash(m); return { ok: false, error: m }; }
+              setEmployers(res.d.employers); rebuildJobs(); renderAll(); return { ok: true };
+            })
+            .catch(function () { flash(failMsg); return { ok: false, error: failMsg }; });
         }
+        function manageBtn(label, tip, fn) {
+          var b = el('button', 'rm', label); b.type = 'button'; b.title = tip; b.addEventListener('click', fn); return b;
+        }
+        function renderEmployers() {
+          var logged = !!(API && pass), i;
+          var old = document.querySelectorAll('.co[data-added]');
+          for (i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+          EMPL.added.forEach(function (c) {
+            var grid = document.querySelector('.view[data-view="' + (c.region === 'BC' ? 'bc' : 'else') + '"] .grid');
+            if (!grid) return;
+            var node = el('div', 'co'); node.setAttribute('data-id', 'co:' + c.name); node.setAttribute('data-added', c.id);
+            node.appendChild(avatar(c.name));
+            var box = el('div'); var a = el('a', null, c.name); a.href = c.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            box.appendChild(a); if (c.note) box.appendChild(el('p', null, c.note));
+            box.appendChild(el('p', null, 'Added by ' + (c.by || 'someone')));
+            node.appendChild(box); grid.appendChild(node);
+          });
+          var viewOf = {};
+          var cos = document.querySelectorAll('.co[data-id]');
+          for (i = 0; i < cos.length; i++) {
+            var node2 = cos[i], id = node2.getAttribute('data-id'), name = id.slice(3), addedId = node2.getAttribute('data-added');
+            var v = node2.closest('.view'); viewOf[normName(name)] = v ? v.getAttribute('data-view') : 'else';
+            var oldRow = node2.querySelector('.actions'); if (oldRow) node2.removeChild(oldRow);
+            if (!addedId && isHiddenCo(name)) { node2.style.display = 'none'; continue; }
+            node2.style.display = '';
+            var row = actionsRow(id, true);
+            if (logged) {
+              (function (nm, aid) {
+                if (aid) row.appendChild(manageBtn('Delete', 'Delete this employer for everyone', function () {
+                  if (!confirm('Delete ' + nm + ' for everyone?')) return;
+                  empAct({ action: 'delete', id: aid }, 'Could not delete it right now.');
+                }));
+                else row.appendChild(manageBtn('Hide', 'Hide this company and its job postings for everyone', function () {
+                  if (!confirm('Hide ' + nm + ' and its job postings for everyone? You can bring it back from the Hidden list.')) return;
+                  empAct({ action: 'hide', name: nm }, 'Could not hide it right now.');
+                }));
+              })(name, addedId);
+            }
+            node2.appendChild(row);
+          }
+          ['bc', 'else'].forEach(function (vw) {
+            var panel = $('hid-' + vw), list = panel.querySelector('.hidlist'), n = 0;
+            list.textContent = '';
+            EMPL.hidden.forEach(function (nm) {
+              if ((viewOf[normName(nm)] || 'else') !== vw) return;
+              n++;
+              var r = el('div', 'hidrow'); r.appendChild(el('span', null, nm));
+              if (logged) {
+                var sb = el('button', null, 'Show again'); sb.type = 'button';
+                sb.addEventListener('click', function () { empAct({ action: 'show', name: nm }, 'Could not bring it back right now.'); });
+                r.appendChild(sb);
+              }
+              list.appendChild(r);
+            });
+            panel.querySelector('.n').textContent = n; panel.hidden = n === 0;
+            var shownCount = 0, cards = document.querySelectorAll('.view[data-view="' + vw + '"] .co');
+            for (var k = 0; k < cards.length; k++) if (cards[k].style.display !== 'none') shownCount++;
+            $('cnt-' + vw).textContent = shownCount;
+          });
+          var adds = document.querySelectorAll('[data-emp-add]');
+          for (i = 0; i < adds.length; i++) adds[i].classList.toggle('show', logged);
+        }
+
+        function openEmp(region) {
+          if (!pass) { openSetup(function () { openEmp(region); }); return; }
+          ['e-name', 'e-url', 'e-note'].forEach(function (id) { $(id).value = ''; });
+          $('e-region').value = region === 'BC' ? 'BC' : 'Elsewhere'; $('e-err').textContent = ''; $('e-save').disabled = false;
+          var d = $('emp-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          $('e-name').focus();
+        }
+        function closeEmp() { var d = $('emp-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        Array.prototype.forEach.call(document.querySelectorAll('[data-emp-add]'), function (b) {
+          b.addEventListener('click', function () { openEmp(b.getAttribute('data-emp-add')); });
+        });
+        $('e-cancel').addEventListener('click', closeEmp);
+        $('emp-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var name = $('e-name').value.trim(), url = $('e-url').value.trim(), region = $('e-region').value;
+          if (!name) { $('e-err').textContent = 'Please add the company name.'; return; }
+          if (!/^https?:\/\/\S+$/i.test(url)) { $('e-err').textContent = 'The link must start with http:// or https://'; return; }
+          var dup = Array.prototype.some.call(document.querySelectorAll('.co[data-id]'), function (n) { return normName(n.getAttribute('data-id').slice(3)) === normName(name); });
+          if (dup) { $('e-err').textContent = isHiddenCo(name) ? 'That company is in the list but hidden. Use Show again under Hidden.' : 'That company is already in the list.'; return; }
+          var btn = $('e-save'); btn.disabled = true;
+          empAct({ action: 'add', employer: { name: name, url: url, region: region, note: $('e-note').value.trim() } }, 'Could not add it. Please try again.')
+            .then(function (r) {
+              if (r.ok) { closeEmp(); showView(region === 'BC' ? 'bc' : 'else'); }
+              else $('e-err').textContent = r.error || 'Could not add it.';
+            })
+            .then(function () { btn.disabled = false; });
+        });
 
         function renderAll() { renderTabs(); renderStatus(); renderJobs(); renderEmployers(); }
 
@@ -1022,11 +1227,11 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           tab = b.getAttribute('data-tab');
           renderAll();
         });
-        ['q', 'region', 'sw', 'mismatch', 'sort'].forEach(function (id) {
+        ['q', 'sort'].forEach(function (id) {
           $(id).addEventListener(id === 'q' ? 'input' : 'change', renderJobs);
         });
         $('clear').addEventListener('click', function () {
-          $('q').value = ''; $('region').value = 'all'; $('sw').checked = false; $('mismatch').checked = false; $('sort').value = 'best';
+          $('q').value = ''; CRITERIA.forEach(function (c) { $(c.id).checked = false; }); $('sort').value = 'priority';
           renderJobs();
         });
 
