@@ -49,7 +49,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         }
       }
       [hidden] { display: none !important; }
-      html, body { margin: 0; max-width: 100%; overflow-x: hidden; }
+      html, body { margin: 0; max-width: 100%; overflow-x: hidden; overflow-x: clip; }
       .addbtn .long { display: inline; }
       body { color: var(--text); background: var(--bg); font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
       button, input, select, textarea { font-family: inherit; }
@@ -214,13 +214,51 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .nav button .ico { display: none; }
         .fbox > summary { display: block; }
         .main { padding: 14px; }
-        .cols { grid-template-columns: 1fr; }
+        .cols { grid-template-columns: minmax(0, 1fr); }
         #list { max-height: none; overflow: visible; }
         .detail { display: none; position: static; max-height: none; }
         .dback { display: inline-block; }
         .app.show-detail .side, .app.show-detail .listcol { display: none; }
         .app.show-detail .detail { display: flex; }
         .flash { margin: 10px 14px 0; }
+      }
+      @media (max-width: 560px) {
+        .app { overflow-x: clip; }
+        .top { flex-wrap: wrap; padding: 8px 10px; gap: 4px 6px; }
+        .brand { flex: 1 1 auto; gap: 2px 8px; }
+        .brand h1 { font-size: 1rem; }
+        .live { font-size: .72rem; gap: 5px; }
+        .live i { width: 7px; height: 7px; }
+        .topright { gap: 2px; flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+        .linkbtn { padding: 4px 5px; font-size: .78rem; }
+        .addbtn { padding: 4px 9px; font-size: .78rem; border-radius: 7px; gap: 3px; }
+        .addbtn .ico { width: 12px; height: 12px; }
+        .chip { padding: 2px 8px 2px 3px; font-size: .78rem; gap: 5px; }
+        .chip:not(:has(.avatar)) { padding-left: 8px; }
+        .chip .avatar { width: 20px; height: 20px; font-size: .68rem; }
+        .flash { margin: 8px 10px 0; padding: 6px 10px; font-size: .82rem; }
+        .side { padding: 10px; gap: 10px; }
+        .main { padding: 10px 10px 28px; }
+        .nav button { padding: 5px 7px; gap: 4px; font-size: .84rem; }
+        .nav button .cnt { font-size: .76rem; }
+        .pills { gap: 6px; }
+        .pills button { padding: 5px 9px; font-size: .84rem; border-radius: 8px; }
+        .progress { font-size: .74rem; }
+        .listhead { font-size: .8rem; margin: 0 0 8px; }
+        .listhead select { padding: 4px 8px; font-size: .8rem; }
+        #list { padding: 0; gap: 8px; }
+        .card { grid-template-columns: 28px minmax(0, 1fr); gap: 2px 9px; padding: 9px 10px; border-radius: 10px; }
+        .avatar { width: 28px; height: 28px; font-size: .88rem; border-radius: 7px; }
+        .card h3 { font-size: .95rem; }
+        .meta { font-size: .8rem; }
+        .tag { font-size: .7rem; padding: 1px 7px; }
+        .tags { gap: 4px; margin-top: 6px; }
+        .actions { gap: 4px; margin-top: 8px; }
+        .actions button { font-size: .76rem; padding: 4px 8px; border-radius: 7px; }
+        .detail .dbody { padding: 14px 12px 6px; }
+        .detail .dbar { padding: 10px 12px; gap: 6px; }
+        .tip { padding: 10px 12px; gap: 10px; margin-top: 16px; font-size: .88rem; }
+        .tip .ico { font-size: 1.3rem; }
       }
       @media (max-width: 560px) { .detail .drow { grid-template-columns: 1fr; gap: 2px; } .detail h2 { font-size: 1.4rem; } .detail .dbody { padding: 18px 16px 8px; } }
 
