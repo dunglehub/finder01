@@ -1,0 +1,306 @@
+{
+  "_notes": "Company ranking for the Company sort, the Well-known company filter and the priority sort. Order: tech (1 to 4, 4 = most advanced engineering) first, then fame (1 to 3), then revenue (1 to 3, rough size). Ratings are approximate judgement calls, edit freely. aliases are the names matched against a posting's company (whole words, any case).",
+  "companies": [
+    {
+      "name": "SpaceX",
+      "aliases": [
+        "SpaceX",
+        "Space X"
+      ],
+      "tech": 4,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Tesla",
+      "aliases": [
+        "Tesla"
+      ],
+      "tech": 4,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Google",
+      "aliases": [
+        "Google",
+        "Alphabet"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Microsoft",
+      "aliases": [
+        "Microsoft"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Amazon",
+      "aliases": [
+        "Amazon",
+        "AWS"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Apple",
+      "aliases": [
+        "Apple"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Meta",
+      "aliases": [
+        "Meta",
+        "Facebook"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "NVIDIA",
+      "aliases": [
+        "NVIDIA"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "OpenAI",
+      "aliases": [
+        "OpenAI"
+      ],
+      "tech": 3,
+      "fame": 3,
+      "rev": 1
+    },
+    {
+      "name": "Anthropic",
+      "aliases": [
+        "Anthropic"
+      ],
+      "tech": 3,
+      "fame": 2,
+      "rev": 1
+    },
+    {
+      "name": "Rivian",
+      "aliases": [
+        "Rivian"
+      ],
+      "tech": 3,
+      "fame": 2,
+      "rev": 1
+    },
+    {
+      "name": "AMD",
+      "aliases": [
+        "AMD",
+        "Advanced Micro Devices"
+      ],
+      "tech": 3,
+      "fame": 2,
+      "rev": 2
+    },
+    {
+      "name": "Rocket Lab",
+      "aliases": [
+        "Rocket Lab"
+      ],
+      "tech": 3,
+      "fame": 2,
+      "rev": 1
+    },
+    {
+      "name": "Moderna",
+      "aliases": [
+        "Moderna"
+      ],
+      "tech": 3,
+      "fame": 2,
+      "rev": 1
+    },
+    {
+      "name": "GM",
+      "aliases": [
+        "GM",
+        "General Motors"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Ford",
+      "aliases": [
+        "Ford"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Toyota",
+      "aliases": [
+        "Toyota"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Honda",
+      "aliases": [
+        "Honda"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "IBM",
+      "aliases": [
+        "IBM"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "General Electric",
+      "aliases": [
+        "General Electric",
+        "GE Aerospace",
+        "GE Vernova",
+        "GE"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Boeing",
+      "aliases": [
+        "Boeing"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Oracle",
+      "aliases": [
+        "Oracle"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Intel",
+      "aliases": [
+        "Intel"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Siemens",
+      "aliases": [
+        "Siemens"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Bosch",
+      "aliases": [
+        "Bosch",
+        "Robert Bosch"
+      ],
+      "tech": 2,
+      "fame": 3,
+      "rev": 2
+    },
+    {
+      "name": "Lockheed Martin",
+      "aliases": [
+        "Lockheed Martin"
+      ],
+      "tech": 2,
+      "fame": 2,
+      "rev": 2
+    },
+    {
+      "name": "Hitachi",
+      "aliases": [
+        "Hitachi"
+      ],
+      "tech": 2,
+      "fame": 2,
+      "rev": 2
+    },
+    {
+      "name": "ExxonMobil",
+      "aliases": [
+        "ExxonMobil",
+        "Exxon Mobil",
+        "Exxon"
+      ],
+      "tech": 1,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Chevron",
+      "aliases": [
+        "Chevron"
+      ],
+      "tech": 1,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "Shell",
+      "aliases": [
+        "Shell"
+      ],
+      "tech": 1,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "BP",
+      "aliases": [
+        "BP"
+      ],
+      "tech": 1,
+      "fame": 3,
+      "rev": 3
+    },
+    {
+      "name": "TotalEnergies",
+      "aliases": [
+        "TotalEnergies",
+        "Total Energies"
+      ],
+      "tech": 1,
+      "fame": 3,
+      "rev": 3
+    }
+  ]
+}
