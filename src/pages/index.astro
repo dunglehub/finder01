@@ -133,6 +133,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
       #add-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
       @media (max-width: 480px) { #add-dialog .two { grid-template-columns: 1fr; } }
+      #resume-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
+      #resume-dialog textarea { width: 100%; min-height: 64px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
+      #resume-dialog .pick { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+      #resume-dialog .pick input[type=file] { width: auto; flex: 1 1 220px; padding: 8px; }
+      #resume-dialog .hint { color: var(--muted); font-size: .86rem; margin: 2px 0 0; }
+      #r-read { white-space: nowrap; flex: 0 0 auto; }
       .linkbtn { font: inherit; font-size: .9rem; background: none; border: none; color: var(--blue); cursor: pointer;
         padding: 6px 4px; display: inline-flex; align-items: center; gap: 6px; }
       .linkbtn:hover { text-decoration: underline; }
@@ -405,6 +412,37 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <div class="row">
         <button type="button" id="prep-close">Close</button>
         <a class="btnlink" id="prep-open" href="#" target="_blank" rel="noopener noreferrer">Open posting</a>
+      </div>
+    </dialog>
+
+    <dialog id="resume-dialog">
+      <h3>Your resume facts</h3>
+      <p class="who" style="margin:0">Upload your resume (PDF or Word). The AI lists what it says, you check and fix the list, then Save. AI letters use only this list.</p>
+      <div class="pick">
+        <input type="file" id="r-file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Resume file" />
+        <button type="button" class="primary" id="r-read">Read it</button>
+      </div>
+      <p class="hint">PDF or .docx, up to 4 MB. Old .doc files: in Word, use Save As and pick .docx.</p>
+      <div class="who" id="r-status" role="status" style="margin-top:8px"></div>
+      <div id="r-edit" hidden>
+        <label for="r-about">About</label>
+        <textarea id="r-about" maxlength="800"></textarea>
+        <label for="r-education">Education (one per line)</label>
+        <textarea id="r-education"></textarea>
+        <label for="r-skills">Skills (one per line)</label>
+        <textarea id="r-skills"></textarea>
+        <label for="r-experience">Experience (one per line)</label>
+        <textarea id="r-experience"></textarea>
+        <label for="r-projects">Projects (one per line)</label>
+        <textarea id="r-projects"></textarea>
+        <label for="r-awards">Awards (one per line)</label>
+        <textarea id="r-awards"></textarea>
+      </div>
+      <div class="err" id="r-err"></div>
+      <div class="row">
+        <button type="button" id="r-delete" hidden>Delete saved facts</button>
+        <button type="button" id="r-close">Close</button>
+        <button type="button" class="primary" id="r-save" hidden>Save</button>
       </div>
     </dialog>
 
@@ -813,7 +851,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             .then(function (res) {
               if (res.ok && res.d.letter) {
                 $('prep-letter').value = frameLetter(j, res.d.letter);
-                st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.left != null ? res.d.left + ' left today.' : '');
+                st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.usedResume ? 'Used your saved resume facts. ' : 'Tip: add your resume under My resume so letters use your real details. ') + (res.d.left != null ? res.d.left + ' left today.' : '');
               } else if (res.status === 401) {
                 st.textContent = 'Please log in again.';
               } else {
@@ -919,6 +957,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (who) s.appendChild(el('span', null, 'Marking as ' + who + '.'));
           var b;
           if (API && who) {
+            var rb = el('button', 'linkbtn', 'My resume');
+            rb.type = 'button';
+            rb.addEventListener('click', openResume);
+            s.appendChild(rb);
             b = el('button', 'linkbtn', 'Log out');
             b.type = 'button';
             b.addEventListener('click', function () { logout(); });
@@ -1089,6 +1131,134 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             })
             .catch(function () { $('a-err').textContent = 'Could not reach the shared list. Please try again.'; })
             .then(function () { btn.disabled = false; btn.textContent = 'Add to Shortlist'; });
+        });
+
+        // ---- Word (.docx) text, read in the browser so only plain text is sent ----
+        function inflateRaw(bytes) {
+          var ds = new DecompressionStream('deflate-raw');
+          var w = ds.writable.getWriter(); w.write(bytes); w.close();
+          return new Response(ds.readable).arrayBuffer();
+        }
+        function docxText(buf) {
+          var dv = new DataView(buf), u8 = new Uint8Array(buf), n = u8.length, i, eocd = -1;
+          for (i = n - 22; i >= Math.max(0, n - 65557); i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+          if (eocd < 0) return Promise.reject(new Error('notzip'));
+          var count = dv.getUint16(eocd + 10, true), p = dv.getUint32(eocd + 16, true), hit = null;
+          for (i = 0; i < count && p + 46 <= n; i++) {
+            if (dv.getUint32(p, true) !== 0x02014b50) break;
+            var method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+            var nl = dv.getUint16(p + 28, true), el2 = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+            var name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl));
+            if (name === 'word/document.xml') { hit = { method: method, csize: csize, off: off }; break; }
+            p += 46 + nl + el2 + cl;
+          }
+          if (!hit) return Promise.reject(new Error('nodoc'));
+          var ln = dv.getUint16(hit.off + 26, true), le = dv.getUint16(hit.off + 28, true), start = hit.off + 30 + ln + le;
+          var data = u8.subarray(start, start + hit.csize);
+          var raw = hit.method === 0 ? Promise.resolve(data.slice().buffer) : inflateRaw(data);
+          return raw.then(function (ab) {
+            var xml = new TextDecoder().decode(ab);
+            return xml.replace(/<w:tab\b[^>]*\/>/g, '\t').replace(/<w:(br|cr)\b[^>]*\/>/g, '\n').replace(/<\/w:p>/g, '\n')
+              .replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&')
+              .replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+          });
+        }
+
+        // ---- resume facts: upload, check, save ----
+        var FACT_KEYS = ['education', 'skills', 'experience', 'projects', 'awards'];
+        var MAX_RESUME_BYTES = 4 * 1024 * 1024;
+        var resumeFile = '';
+        function toLines(s) { return String(s || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }
+        function fillFacts(f) {
+          f = f || {};
+          $('r-about').value = f.about || '';
+          FACT_KEYS.forEach(function (k) { $('r-' + k).value = (f[k] || []).join('\n'); });
+          $('r-edit').hidden = false; $('r-save').hidden = false;
+        }
+        function readFacts() {
+          var f = { about: $('r-about').value.trim() };
+          FACT_KEYS.forEach(function (k) { f[k] = toLines($('r-' + k).value); });
+          return f;
+        }
+        function bufToBase64(buf) {
+          var u8 = new Uint8Array(buf), s = '';
+          for (var i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+          return btoa(s);
+        }
+        function closeResume() { var d = $('resume-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        function resumeHeaders() { return { 'Content-Type': 'application/json', 'X-Passcode': pass }; }
+        function openResume() {
+          if (!pass) { openSetup(openResume); return; }
+          $('r-file').value = ''; $('r-err').textContent = ''; resumeFile = '';
+          $('r-status').textContent = 'Checking for saved facts…';
+          $('r-edit').hidden = true; $('r-save').hidden = true; $('r-delete').hidden = true; $('r-read').disabled = false; $('r-save').disabled = false;
+          var dlg = $('resume-dialog'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+          fetch(API + '/facts', { cache: 'no-store', headers: { 'X-Passcode': pass } })
+            .then(function (r) { if (r.status === 401) throw new Error('401'); return r.ok ? r.json() : {}; })
+            .then(function (d) {
+              if (d && d.facts) {
+                fillFacts(d.facts); $('r-delete').hidden = false; resumeFile = d.facts.file || '';
+                var when2 = d.facts.ts ? new Date(d.facts.ts).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                $('r-status').textContent = 'Saved' + (d.facts.file ? ' from ' + d.facts.file : '') + (when2 ? ' on ' + when2 : '') + '. Upload a new resume to replace it, or edit the lines and Save.';
+              } else {
+                $('r-status').textContent = 'No resume saved yet. Choose a file and click Read it.';
+              }
+            })
+            .catch(function (e) {
+              if (e && e.message === '401') { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              $('r-status').textContent = 'Could not check for saved facts. You can still upload a resume.';
+            });
+        }
+        $('r-close').addEventListener('click', closeResume);
+        $('r-read').addEventListener('click', function () {
+          var f = $('r-file').files && $('r-file').files[0], st = $('r-status'), btn = $('r-read');
+          $('r-err').textContent = '';
+          if (!f) { st.textContent = 'Choose your resume file first.'; return; }
+          var nm = f.name.toLowerCase(), isPdf = /\.pdf$/.test(nm), isDocx = /\.docx$/.test(nm);
+          if (/\.doc$/.test(nm)) { st.textContent = 'Old .doc files are not supported. In Word, use Save As and pick .docx (or PDF).'; return; }
+          if (!isPdf && !isDocx) { st.textContent = 'Please choose a PDF or a .docx file.'; return; }
+          if (f.size > MAX_RESUME_BYTES) { st.textContent = 'That file is over 4 MB. Please use a smaller one.'; return; }
+          btn.disabled = true; st.textContent = 'Reading… (about 10 to 20 seconds)';
+          f.arrayBuffer().then(function (buf) {
+            if (isPdf) return { kind: 'pdf', filename: f.name, data: bufToBase64(buf) };
+            return docxText(buf).then(function (t) { return { kind: 'text', filename: f.name, text: t }; });
+          }).then(function (payload) {
+            return fetch(API + '/resume', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify(payload) })
+              .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+              .then(function (res) {
+                if (res.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+                if (!res.ok || !res.d.facts) { st.textContent = (res.d && res.d.error) || 'Could not read that file.'; return; }
+                resumeFile = f.name; fillFacts(res.d.facts);
+                st.textContent = 'Read. Check every line against your resume, fix anything wrong or missing, then click Save. Nothing is saved yet.' + (res.d.left != null ? ' ' + res.d.left + ' AI uses left today.' : '');
+              });
+          }).catch(function (e) {
+            st.textContent = e && (e.message === 'notzip' || e.message === 'nodoc')
+              ? 'I could not open that Word file. Try saving it as a PDF instead.'
+              : 'Could not read or send that file. Please try again.';
+          }).then(function () { btn.disabled = false; });
+        });
+        $('r-save').addEventListener('click', function () {
+          var btn = $('r-save'); btn.disabled = true; $('r-err').textContent = '';
+          fetch(API + '/facts', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify({ file: resumeFile, facts: readFacts() }) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!res.ok) { $('r-err').textContent = (res.d && res.d.error) || 'Could not save. Please try again.'; return; }
+              $('r-status').textContent = 'Saved. AI letters will now use only these facts.'; $('r-delete').hidden = false;
+            })
+            .catch(function () { $('r-err').textContent = 'Could not reach the server. Please try again.'; })
+            .then(function () { btn.disabled = false; });
+        });
+        $('r-delete').addEventListener('click', function () {
+          if (!confirm('Delete your saved resume facts? AI letters will go back to the public profile.')) return;
+          fetch(API + '/facts', { method: 'DELETE', cache: 'no-store', headers: { 'X-Passcode': pass } })
+            .then(function (r) {
+              if (r.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              $('r-edit').hidden = true; $('r-save').hidden = true; $('r-delete').hidden = true; resumeFile = '';
+              $('r-status').textContent = 'Deleted. Choose a file and click Read it to start again.';
+            })
+            .catch(function () { $('r-err').textContent = 'Could not delete right now. Please try again.'; });
         });
 
         // ---- top-level tabs ----
