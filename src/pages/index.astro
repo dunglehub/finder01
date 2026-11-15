@@ -1,0 +1,1565 @@
+---
+import autoJobs from '../../data/jobs.json';
+import manualJobs from '../../data/manual-jobs.json';
+import watchlist from '../../data/watchlist.json';
+import config from '../../data/config.json';
+import profile from '../../data/profile.json';
+import companies from '../../data/companies.json';
+import { enrich } from '../../scripts/lib/classify.mjs';
+
+// Manual jobs are enriched the same way as automatic ones, then tagged "hand-picked".
+const manual = manualJobs.map((j) =>
+  enrich({ ...j, source: 'manual', description: `${j.start ? 'Starting ' + j.start + '. ' : ''}${j.note || ''}` }),
+);
+const jobs = [...manual, ...autoJobs];
+
+const checked = new Date().toLocaleString('en-CA', {
+  dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Vancouver',
+});
+
+const bcList = watchlist.filter((c) => c.region === 'BC');
+const elseList = watchlist.filter((c) => c.region !== 'BC');
+
+// Simple coloured letter badge instead of company logos.
+const initial = (name) => (name.match(/[A-Za-z]/) || ['?'])[0].toUpperCase();
+const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Co-op Finder: Summer 2027</title>
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/favicon.svg`} />
+    <meta name="description" content="Intern and co-op roles in battery, EV and clean-energy engineering, starting May 2027." />
+    <style is:global>
+      :root {
+        --navy: #1f2530; --blue: #4f5c93; --blue-soft: #e7eaf5; --green: #2f8a57; --green-soft: #e1f0e6;
+        --amber: #9a5b1e; --amber-soft: #f8e9d3; --grey: #6b6f78; --grey-soft: #e9e6df; --red: #b3372f;
+        --bg: #f2f0eb; --bg2: #f8f7f3; --card: #ffffff; --text: #1f2530; --muted: #6b6f78; --line: #dcd9d1;
+        --shadow: 0 1px 2px rgba(31,37,48,.05);
+        --radius: 12px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --navy: #eceae4; --blue: #93a4dc; --blue-soft: #2a3252; --green: #6cc596; --green-soft: #1f3a2c;
+          --amber: #e2b072; --amber-soft: #3a2f1c; --grey: #a2a5ad; --grey-soft: #2d3038; --red: #ef9a94;
+          --bg: #181a1f; --bg2: #1f2228; --card: #23262d; --text: #eceae4; --muted: #a2a5ad; --line: #343841;
+          --shadow: 0 1px 2px rgba(0,0,0,.4);
+        }
+      }
+      [hidden] { display: none !important; }
+      html, body { margin: 0; }
+      body { color: var(--text); background: var(--bg); font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      button, input, select, textarea { font-family: inherit; }
+      button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+      /* ---------- top bar ---------- */
+      .app { min-height: 100vh; display: flex; flex-direction: column; }
+      .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px;
+        border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 20; }
+      .brand { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
+      .brand h1 { margin: 0; font-size: 1.5rem; font-weight: 600; letter-spacing: -.01em; }
+      .live { display: inline-flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 600; color: var(--green); }
+      .live i { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
+      .live.offline { color: var(--red); } .live.offline i { background: var(--red); }
+      .live.locked, .live.connecting, .live.local { color: var(--muted); } .live.locked i, .live.connecting i, .live.local i { background: var(--grey); }
+      .topright { display: flex; align-items: center; gap: 10px; }
+      .linkbtn { font: inherit; font-size: .92rem; background: none; border: none; color: var(--blue); cursor: pointer;
+        padding: 6px 8px; display: inline-flex; align-items: center; gap: 6px; }
+      .linkbtn:hover { text-decoration: underline; }
+      .addbtn { font: inherit; font-weight: 600; font-size: .92rem; display: none; align-items: center; gap: 7px; padding: 9px 16px;
+        border-radius: 10px; cursor: pointer; border: none; color: #fff; background: var(--blue); }
+      .addbtn.show { display: inline-flex; }
+      .addbtn:hover { filter: brightness(1.08); }
+      .usermenu { position: relative; }
+      .chip { display: inline-flex; align-items: center; gap: 9px; padding: 5px 14px 5px 6px; border-radius: 12px; border: 1px solid var(--line);
+        background: var(--card); font-size: .92rem; color: var(--text); cursor: pointer; }
+      .chip:not(:has(.avatar)) { padding-left: 14px; }
+      .chip .avatar { width: 28px; height: 28px; border-radius: 50%; font-size: .85rem; }
+      .menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.15); min-width: 170px; padding: 6px; z-index: 30; }
+      .menu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 12px; border-radius: 8px;
+        font: inherit; color: var(--text); cursor: pointer; }
+      .menu button:hover { background: var(--grey-soft); }
+      .flash { margin: 10px 24px 0; padding: 8px 12px; border-radius: 10px; background: var(--amber-soft); color: var(--amber); font-size: .9rem; }
+
+      /* ---------- layout ---------- */
+      .layout { flex: 1; display: grid; grid-template-columns: 262px minmax(0, 1fr); align-items: start; }
+      .side { padding: 18px 16px 24px 20px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px;
+        position: sticky; top: 64px; max-height: calc(100vh - 64px); overflow: auto; }
+      .sep { height: 1px; background: var(--line); }
+      .nav { display: flex; flex-direction: column; gap: 4px; }
+      .nav button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 12px; border-radius: 10px;
+        border: none; background: none; font: inherit; color: var(--text); cursor: pointer; }
+      .nav button:hover { background: var(--grey-soft); }
+      .nav button .ico { color: var(--muted); font-size: 1.15rem; flex: none; }
+      .nav button .cnt { margin-left: auto; color: var(--muted); font-size: .85rem; }
+      .nav button[aria-pressed=true] { background: var(--grey-soft); font-weight: 600; }
+      #sidejobs { display: flex; flex-direction: column; gap: 14px; }
+      .pills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .pills button { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px;
+        border: 1px solid var(--line); background: var(--card); font: inherit; font-size: .9rem; color: var(--text); cursor: pointer; }
+      .pills button .ico { display: none; }
+      .pills button .n { color: var(--muted); font-weight: 600; }
+      .pills button:hover { border-color: var(--muted); }
+      .pills button[aria-pressed=true] { border-color: var(--blue); background: var(--blue-soft); font-weight: 600; }
+      .progress { display: flex; align-items: center; gap: 10px; font-size: .8rem; color: var(--muted); flex-wrap: wrap; }
+      .progress .bar { flex: 1 1 100%; height: 6px; border-radius: 999px; background: var(--grey-soft); overflow: hidden; }
+      .progress .bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width .3s; }
+      .fbox > summary { display: none; cursor: pointer; font-weight: 600; padding: 4px 0 10px; }
+      .search { position: relative; }
+      .search .ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.05rem; }
+      .search input { width: 100%; padding: 9px 12px 9px 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; }
+      .fchecks { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+      .chk { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px;
+        background: var(--card); font-size: .88rem; cursor: pointer; }
+      .chk input { accent-color: var(--blue); width: 16px; height: 16px; margin: 0; flex: none; }
+      .fchecks .num { display: inline-block; min-width: 1.4em; text-align: center; font-weight: 700; font-size: .74rem; color: var(--muted);
+        background: var(--grey-soft); border-radius: 999px; padding: 1px 6px; flex: none; }
+      .fbox .linkbtn { margin-top: 8px; padding-left: 2px; }
+      .built { color: var(--muted); font-size: .78rem; margin: 0; }
+      .main { padding: 18px 22px 40px; min-width: 0; }
+      .cols { display: grid; grid-template-columns: minmax(300px, 410px) minmax(0, 1fr); gap: 18px; align-items: start; }
+      .listcol { min-width: 0; }
+      .listhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin: 0 2px 10px; color: var(--muted); font-size: .88rem; }
+      .listhead label { display: inline-flex; align-items: center; gap: 8px; }
+      .listhead select { padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; font-size: .88rem; }
+      #list { display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 140px); overflow: auto; padding: 2px 4px 4px 2px; }
+
+      /* ---------- job cards ---------- */
+      .card { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 2px 12px; background: var(--card); border: 1px solid var(--line);
+        border-radius: 12px; padding: 12px 14px; cursor: pointer; box-shadow: var(--shadow); }
+      .card:hover { border-color: var(--muted); }
+      .card.sel { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+      .card[data-state=skip] { opacity: .72; }
+      .avatar { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-weight: 700; font-size: 1rem; color: #fff; flex: none; }
+      .card .avatar { background: var(--grey-soft) !important; color: var(--text); }
+      .card h3 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.3; }
+      .meta { color: var(--muted); font-size: .88rem; margin-top: 1px; }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+      .tag { font-size: .74rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--grey-soft); color: var(--muted);
+        display: inline-flex; align-items: center; gap: 4px; }
+      .tag.warn { background: var(--amber-soft); color: var(--amber); }
+      .tag.info { background: var(--blue-soft); color: var(--blue); }
+      .tag.match { background: var(--blue-soft); color: var(--blue); }
+      .tag.match.strong { background: var(--blue-soft); color: var(--blue); }
+      .tag .ico { font-size: .9em; }
+      .why { margin: 8px 0 0; font-size: .8rem; color: var(--muted); }
+      .note { margin: 8px 0 0; font-size: .86rem; color: var(--text); opacity: .88;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .who { font-size: .78rem; color: var(--muted); }
+      .actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+      .actions button { font: inherit; font-size: .8rem; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 11px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--text); }
+      .actions button:hover { border-color: var(--muted); }
+      .actions button.on-shortlist { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+      .actions button.on-applied { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); }
+      .actions button.on-skip { background: var(--grey-soft); border-color: var(--grey); color: var(--grey); }
+      .rm { font: inherit; font-size: .8rem; background: none; border: none; color: var(--muted); cursor: pointer; padding: 5px 4px; margin-left: auto; }
+      .rm:hover { color: var(--red); text-decoration: underline; }
+
+      /* ---------- detail panel ---------- */
+      .detail { position: sticky; top: 82px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column;
+        max-height: calc(100vh - 106px); min-width: 0; }
+      .detail .dbody { padding: 22px 26px 8px; overflow: auto; flex: 1; }
+      .detail h2 { font-size: 1.7rem; font-weight: 500; line-height: 1.2; margin: 0 0 6px; letter-spacing: -.01em; }
+      .detail .dsub { color: var(--muted); }
+      .detail hr { border: none; border-top: 1px solid var(--line); margin: 16px 0; }
+      .detail .drow { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; margin-bottom: 8px; }
+      .detail .dlabel { font-weight: 600; }
+      .detail .dval { word-break: break-word; }
+      .exp-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%; background: none; border: none; padding: 0;
+        font: inherit; font-weight: 600; color: var(--text); cursor: pointer; }
+      .exp-toggle .ico { transition: transform .15s; }
+      .exp-toggle[aria-expanded=false] .ico { transform: rotate(180deg); }
+      .exp ul { margin: 10px 0 0; padding-left: 20px; }
+      .exp li { margin-bottom: 4px; }
+      .exp details { margin-top: 10px; }
+      .exp summary { cursor: pointer; color: var(--blue); font-size: .9rem; }
+      .exp .full { margin-top: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; font-size: .88rem; color: var(--muted);
+        background: var(--bg2); border-radius: 8px; padding: 10px 12px; }
+      .detail .dbar { border-top: 1px solid var(--line); padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .detail .dbar .actions { margin: 0; }
+      .detail .dbar .actions button { font-size: .86rem; padding: 7px 13px; }
+      .detail .dbar .spacer { flex: 1; }
+      .btn2 { display: inline-block; text-decoration: none; font-size: .86rem; padding: 7px 13px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
+      .btn2:hover { border-color: var(--muted); }
+      .btn1 { font: inherit; font-weight: 600; font-size: .9rem; padding: 8px 16px; border-radius: 8px; border: none; background: var(--blue); color: #fff; cursor: pointer; }
+      .btn1:hover { filter: brightness(1.08); }
+      .detail .ph { padding: 40px 26px; color: var(--muted); }
+      .dback { display: none; font: inherit; background: none; border: none; color: var(--blue); cursor: pointer; padding: 0 0 12px; }
+
+      @media (max-width: 960px) {
+        .top { padding: 12px 14px; position: static; }
+        .brand h1 { font-size: 1.15rem; }
+        .layout { grid-template-columns: 1fr; }
+        .side { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--line); padding: 14px; }
+        .nav { flex-direction: row; overflow-x: auto; }
+        .nav button { white-space: nowrap; width: auto; }
+        .fbox > summary { display: block; }
+        .main { padding: 14px; }
+        .cols { grid-template-columns: 1fr; }
+        #list { max-height: none; overflow: visible; }
+        .detail { display: none; position: static; max-height: none; }
+        .dback { display: inline-block; }
+        .app.show-detail .side, .app.show-detail .listcol { display: none; }
+        .app.show-detail .detail { display: flex; }
+        .flash { margin: 10px 14px 0; }
+      }
+      @media (max-width: 560px) { .detail .drow { grid-template-columns: 1fr; gap: 2px; } .detail h2 { font-size: 1.4rem; } .detail .dbody { padding: 18px 16px 8px; } }
+
+      /* ---------- kept from before ---------- */
+      * { box-sizing: border-box; }
+      svg { display: block; }
+      .ico { display: inline-flex; vertical-align: middle; }
+      .ico svg { width: 1em; height: 1em; }
+      /* ---------- header ---------- */
+      /* ---------- top navigation ---------- */
+      /* ---------- filters ---------- */
+      #add-dialog { width: min(520px, calc(100vw - 32px)); }
+      #add-dialog .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      #add-dialog #a-source { min-height: 70px; }
+      #a-fill, #prep-ai-btn { white-space: nowrap; flex: 0 0 auto; }
+      #add-dialog textarea { width: 100%; min-height: 78px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
+      #add-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+      @media (max-width: 480px) { #add-dialog .two { grid-template-columns: 1fr; } }
+      #emp-dialog { width: min(480px, calc(100vw - 32px)); }
+      #emp-dialog textarea { width: 100%; min-height: 70px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
+      #emp-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+      .emptools { margin: 0 0 14px; }
+      .co .actions .rm + .rm { margin-left: 0; }
+      .hid { margin-top: 18px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px 14px; }
+      .hid summary { cursor: pointer; color: var(--muted); font-size: .92rem; }
+      .hidrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); margin-top: 8px; }
+      .hidrow span { flex: 1; font-weight: 600; }
+      .hidrow button { font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
+      #resume-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
+      #resume-dialog textarea { width: 100%; min-height: 128px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
+      #resume-dialog .pick { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+      #resume-dialog .pick input[type=file] { width: auto; flex: 1 1 220px; padding: 8px; }
+      #resume-dialog .hint { color: var(--muted); font-size: .86rem; margin: 2px 0 0; }
+      #r-read { white-space: nowrap; flex: 0 0 auto; }
+      /* ---------- job cards ---------- */
+      #prep-dialog { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
+      #prep-dialog textarea { width: 100%; min-height: 300px; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
+      #prep-dialog #prep-desc { min-height: 90px; }
+      #prep-dialog .qa { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
+      #prep-dialog .qa .k { color: var(--muted); }
+      #prep-dialog .qa .v { word-break: break-word; }
+      #prep-dialog .warnbox { background: var(--amber-soft); color: var(--amber); border-radius: 10px; padding: 8px 12px; font-size: .88rem; margin: 8px 0 12px; }
+      #prep-dialog a.btnlink { display: inline-block; text-decoration: none; padding: 9px 18px; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 600; }
+      @media (max-width: 520px) { #prep-dialog .qa { grid-template-columns: 1fr auto; } #prep-dialog .qa .k { grid-column: 1 / -1; } }
+      .empty { padding: 34px 20px; text-align: center; color: var(--muted); background: var(--bg2);
+        border: 1px dashed var(--line); border-radius: var(--radius); }
+      .empty .big { width: 64px; height: 64px; margin: 0 auto 8px; color: var(--blue); opacity: .85; }
+      .empty .big svg { width: 100%; height: 100%; }
+      .empty strong { display: block; color: var(--navy); font-size: 1.05rem; margin-bottom: 2px; }
+      /* ---------- employers ---------- */
+      .view[hidden] { display: none; }
+      .view h2 { font-size: 1.25rem; margin: 4px 0 4px; }
+      .sub { color: var(--muted); margin: 0 0 16px; font-size: .95rem; max-width: 46em; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+      .co { background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+        display: grid; grid-template-columns: 44px 1fr; gap: 4px 12px; }
+      .co .avatar { width: 44px; height: 44px; font-size: 1.2rem; border-radius: 12px; }
+      .co a { font-weight: 700; color: var(--navy); text-decoration: none; }
+      .co a:hover { color: var(--blue); text-decoration: underline; }
+      .co p { margin: 2px 0 0; font-size: .88rem; color: var(--muted); }
+      .co .actions { grid-column: 1 / -1; margin-top: 8px; }
+      /* ---------- tip ---------- */
+      .tip { display: flex; gap: 14px; align-items: flex-start; margin-top: 26px; padding: 16px 18px; border-radius: var(--radius);
+        background: var(--blue-soft); border: 1px solid var(--line); }
+      .tip .ico { font-size: 1.7rem; color: var(--blue); flex: none; margin-top: 2px; }
+      .tip p { margin: 0; }
+      .tip p:first-child { font-weight: 700; color: var(--navy); }
+      .tip p + p { color: var(--muted); font-size: .92rem; }
+      /* ---------- dialog ---------- */
+      dialog { border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--text);
+        padding: 22px; width: min(420px, calc(100vw - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+      dialog::backdrop { background: rgba(15,42,74,.5); }
+      dialog h3 { margin: 0 0 6px; }
+      dialog label { display: block; margin: 12px 0 4px; font-size: .9rem; color: var(--muted); }
+      dialog input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+        background: var(--bg2); color: var(--text); font: inherit; }
+      dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+      dialog button { font: inherit; padding: 9px 18px; border-radius: 10px; cursor: pointer;
+        border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
+      dialog button.primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
+      dialog .err { color: var(--red); font-size: .88rem; min-height: 1.2em; margin-top: 8px; }
+    </style>
+  </head>
+  <body>
+    <main class="app" id="app" data-api={config.api || ''}>
+      <header class="top">
+        <div class="brand">
+          <h1>Co-op Finder: Summer 2027</h1>
+          <span class="live locked" id="live"><i></i><b>Live</b></span>
+        </div>
+        <div class="topright">
+          <button type="button" class="linkbtn" id="clear-top">Clear</button>
+          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span>Add posting</button>
+          <div class="usermenu">
+            <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
+            <div class="menu" id="menu" hidden>
+              <button type="button" id="menu-resume">My resume</button>
+              <button type="button" id="menu-logout">Log out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="flash" id="status" role="status" hidden></div>
+
+      <div class="layout">
+        <aside class="side">
+          <nav class="nav" id="nav" aria-label="Sections">
+            <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt" id="jobs-count">{jobs.length}</span></button>
+            <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers to check directly <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+            <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
+          </nav>
+          <div id="sidejobs">
+            <div class="sep"></div>
+            <div class="pills" id="tabs" role="group" aria-label="Show postings">
+              <button type="button" data-tab="review" aria-pressed="true"><span class="ico" data-i="refresh"></span>To review <span class="n"></span></button>
+              <button type="button" data-tab="shortlist" aria-pressed="false"><span class="ico" data-i="star"></span>Shortlist <span class="n"></span></button>
+              <button type="button" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>Applied <span class="n"></span></button>
+              <button type="button" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Skipped <span class="n"></span></button>
+            </div>
+            <div class="progress" id="progress"><span id="progress-text"></span><span class="bar"><i id="progress-bar"></i></span></div>
+            <div class="sep"></div>
+            <details class="fbox" id="fbox" open>
+              <summary>Filters</summary>
+              <div class="search">
+                <span class="ico" data-i="search"></span>
+                <input type="search" id="q" placeholder="Search title, company, location..." aria-label="Search jobs" />
+              </div>
+              <div class="fchecks" id="fchecks" role="group" aria-label="Filters, in order of priority (tick one or more to narrow the list)"></div>
+              <button type="button" class="linkbtn" id="clear"><span class="ico" data-i="x"></span>Clear filters</button>
+            </details>
+          </div>
+          <p class="built">Last built {checked} (Pacific). BC first, rest of Canada second.</p>
+        </aside>
+
+        <div class="main">
+          <section class="view" data-view="jobs">
+            <div class="cols">
+              <div class="listcol">
+                <div class="listhead">
+                  <span id="count"></span>
+                  <label>Sort by
+                    <select id="sort" aria-label="Sort by">
+                      <option value="priority">Priority order</option>
+                      <option value="best">Best match</option>
+                      <option value="new">Most recent</option>
+                      <option value="company">Company (top ranked first)</option>
+                    </select>
+                  </label>
+                </div>
+                <div id="list"></div>
+              </div>
+              <div class="detail" id="detail" aria-live="polite"></div>
+            </div>
+          </section>
+
+        <section class="view" data-view="bc" hidden>
+          <h2>Employers to check directly</h2>
+          <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op". Use the buttons to keep track of the ones you've looked at. These are the BC ones.</p>
+          <div class="emptools"><button type="button" class="addbtn" data-emp-add="BC"><span class="ico" data-i="plus"></span>Add employer</button></div>
+          <div class="grid">
+            {bcList.map((c) => (
+              <div class="co" data-id={`co:${c.name}`}>
+                <div class="avatar" style={`background:linear-gradient(135deg,hsl(${hue(c.name)} 70% 52%),hsl(${(hue(c.name) + 40) % 360} 65% 38%))`}>{initial(c.name)}</div>
+                <div>
+                  <a href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+                  {c.mode === 'auto' && <span class="tag good" style="margin-left:6px">auto</span>}
+                  <p>{c.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <details class="hid" id="hid-bc" hidden><summary>Hidden (<span class="n">0</span>)</summary><div class="hidlist"></div></details>
+        </section>
+
+        <section class="view" data-view="else" hidden>
+          <h2>Elsewhere</h2>
+          <p class="sub">Employers outside BC. Same idea: open the careers page and search for "intern" or "co-op".</p>
+          <div class="emptools"><button type="button" class="addbtn" data-emp-add="Elsewhere"><span class="ico" data-i="plus"></span>Add employer</button></div>
+          <div class="grid">
+            {elseList.map((c) => (
+              <div class="co" data-id={`co:${c.name}`}>
+                <div class="avatar" style={`background:linear-gradient(135deg,hsl(${hue(c.name)} 70% 52%),hsl(${(hue(c.name) + 40) % 360} 65% 38%))`}>{initial(c.name)}</div>
+                <div>
+                  <a href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+                  <p>{c.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <details class="hid" id="hid-else" hidden><summary>Hidden (<span class="n">0</span>)</summary><div class="hidlist"></div></details>
+        </section>
+
+          <div class="tip">
+        <span class="ico" data-i="bulb"></span>
+        <div>
+          <p>Tip: Don't forget UBC's own co-op job portal, which needs a login and can't be listed here.</p>
+          <p>Always confirm start dates and details on the employer's posting.</p>
+        </div>
+      </div>
+        </div>
+      </div>
+    </main>
+
+    <dialog id="setup">
+      <form method="dialog" id="setup-form">
+        <h3>Log in</h3>
+        <p class="who" style="margin:0" id="s-help">Enter your own passcode. Your name then shows next to what you mark.</p>
+        <label for="s-name" id="s-name-label">Your name or nickname</label>
+        <input id="s-name" maxlength="30" autocomplete="off" />
+        <label for="s-pass" id="s-pass-label">Your passcode</label>
+        <input id="s-pass" type="password" autocomplete="current-password" />
+        <div class="err" id="s-err"></div>
+        <div class="row">
+          <button type="button" id="s-cancel">Cancel</button>
+          <button type="submit" class="primary" id="s-save">Log in</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="prep-dialog">
+      <h3 id="prep-title">Prepare application</h3>
+      <div class="warnbox">Draft only. Read it, fix anything that is not true for you, then paste it into the application.</div>
+      <label for="prep-letter">Cover letter</label>
+      <textarea id="prep-letter"></textarea>
+      <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button></div>
+      <div id="prep-ai" hidden>
+        <label for="prep-desc">Job description (optional: paste it here for a better AI letter)</label>
+        <textarea id="prep-desc" maxlength="8000"></textarea>
+        <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
+          <button type="button" class="primary" id="prep-ai-btn">Write with AI</button>
+          <span class="who" id="prep-ai-status" role="status"></span>
+        </div>
+      </div>
+      <label style="margin-top:16px">Quick answers</label>
+      <div id="prep-qa"></div>
+      <div class="row">
+        <button type="button" id="prep-close">Close</button>
+        <a class="btnlink" id="prep-open" href="#" target="_blank" rel="noopener noreferrer">Open posting</a>
+      </div>
+    </dialog>
+
+    <dialog id="resume-dialog">
+      <h3>Your resume facts</h3>
+      <p class="who" style="margin:0">Upload your resume (PDF or Word). The AI lists what it says, you check and fix the list, then Save. AI letters use only this list.</p>
+      <div class="pick">
+        <input type="file" id="r-file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Resume file" />
+        <button type="button" class="primary" id="r-read">Read it</button>
+      </div>
+      <p class="hint">PDF or .docx, up to 4 MB. Old .doc files: in Word, use Save As and pick .docx.</p>
+      <div class="who" id="r-status" role="status" style="margin-top:8px"></div>
+      <div id="r-edit" hidden>
+        <label for="r-about">About</label>
+        <textarea id="r-about" maxlength="800"></textarea>
+        <label for="r-education">Education (one per line)</label>
+        <textarea id="r-education"></textarea>
+        <label for="r-skills">Skills (one per line)</label>
+        <textarea id="r-skills"></textarea>
+        <label for="r-experience">Experience (one per line)</label>
+        <textarea id="r-experience"></textarea>
+        <label for="r-projects">Projects (one per line)</label>
+        <textarea id="r-projects"></textarea>
+        <label for="r-awards">Awards (one per line)</label>
+        <textarea id="r-awards"></textarea>
+      </div>
+      <div class="err" id="r-err"></div>
+      <div class="row">
+        <button type="button" id="r-delete" hidden>Delete saved facts</button>
+        <button type="button" id="r-close">Close</button>
+        <button type="button" class="primary" id="r-save" hidden>Save</button>
+      </div>
+    </dialog>
+
+    <dialog id="emp-dialog">
+      <form method="dialog" id="emp-form">
+        <h3>Add employer</h3>
+        <p class="who" style="margin:0">A careers page to check directly. It shows up for everyone.</p>
+        <label for="e-name">Company name</label>
+        <input id="e-name" maxlength="100" autocomplete="off" required />
+        <label for="e-url">Careers link</label>
+        <input id="e-url" type="url" placeholder="https://..." autocomplete="off" required />
+        <label for="e-region">Where is it?</label>
+        <select id="e-region"><option value="BC">BC</option><option value="Elsewhere">Elsewhere</option></select>
+        <label for="e-note">Note (optional)</label>
+        <textarea id="e-note" maxlength="300"></textarea>
+        <div class="err" id="e-err"></div>
+        <div class="row">
+          <button type="button" id="e-cancel">Cancel</button>
+          <button type="submit" class="primary" id="e-save">Add employer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="add-dialog">
+      <form method="dialog" id="add-form">
+        <h3>Add a posting for Benny</h3>
+        <p class="who" style="margin:0">A job or an event you found. It goes straight into the Shortlist for everyone.</p>
+        <div id="a-auto">
+          <label for="a-source">Paste a link and the form fills itself in</label>
+          <textarea id="a-source" maxlength="60000" placeholder="Paste the job link here. For Indeed or LinkedIn, press Ctrl+A then Ctrl+C on the posting page and paste the text instead."></textarea>
+          <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
+            <button type="button" class="primary" id="a-fill">Fill it in</button>
+            <span class="who" id="a-fill-status" role="status"></span>
+          </div>
+        </div>
+        <label for="a-kind">Type</label>
+        <select id="a-kind"><option value="job">Job or co-op</option><option value="event">Event to register for</option></select>
+        <label for="a-title">Title *</label>
+        <input id="a-title" maxlength="150" autocomplete="off" required />
+        <label for="a-url">Link *</label>
+        <input id="a-url" type="url" placeholder="https://..." autocomplete="off" required />
+        <div class="two">
+          <div><label for="a-company">Company or organizer</label><input id="a-company" maxlength="100" autocomplete="off" /></div>
+          <div><label for="a-loc">Location</label><input id="a-loc" maxlength="100" autocomplete="off" /></div>
+        </div>
+        <label for="a-date" id="a-date-label">Start date (optional)</label>
+        <input id="a-date" maxlength="40" placeholder="for example May 2027" autocomplete="off" />
+        <label for="a-note">Note for Benny (optional)</label>
+        <textarea id="a-note" maxlength="600"></textarea>
+        <div class="err" id="a-err"></div>
+        <div class="row">
+          <button type="button" id="a-cancel">Cancel</button>
+          <button type="submit" class="primary" id="a-save">Add to Shortlist</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script id="profile-data" type="application/json" set:html={JSON.stringify(profile)}></script>
+    <script id="co-rank" type="application/json" set:html={JSON.stringify(companies.companies)}></script>
+    <script id="emp-data" type="application/json" set:html={JSON.stringify(Object.fromEntries(watchlist.map((c) => [c.name, c.note || ''])))}></script>
+    <script id="jobs-data" type="application/json" set:html={JSON.stringify(jobs)}></script>
+    <script is:inline>
+      (function () {
+        var baseJobs = JSON.parse(document.getElementById('jobs-data').textContent);
+        var jobs = baseJobs.slice();
+        var posts = [];
+        var EMP = {};
+        try { EMP = JSON.parse(document.getElementById('emp-data').textContent) || {}; } catch (e) { EMP = {}; }
+        var BATTERY_RE = /batter(y|ies)|energy storage|cell engineer|lithium|electric vehicle|\bEVs?\b|power ?pack/i;
+        var MECH_RE = /mechanical|mechatronic|\bmech\.? eng/i;
+        // Keyword tags: from the posting's own text, plus (for battery) what the employer does.
+        function topicTags(j) {
+          var own = [j.title, j.note, j.description].join(' ');
+          return {
+            battery: BATTERY_RE.test(own) || BATTERY_RE.test(EMP[j.company] || ''),
+            mech: MECH_RE.test(own),
+          };
+        }
+        // ---- match score: how well a posting fits the profile in data/profile.json ----
+        var PROFILE = { interests: [], avoid: [] };
+        try { PROFILE = JSON.parse(document.getElementById('profile-data').textContent) || PROFILE; } catch (e) { /* no profile */ }
+        var RULES = [];
+        (PROFILE.interests || []).concat(PROFILE.avoid || []).forEach(function (r) {
+          try { RULES.push({ label: r.label, weight: r.weight, re: new RegExp(r.pattern, 'i') }); } catch (e) { /* bad pattern: skip */ }
+        });
+        // A keyword in the title counts in full; one only in the description or employer note counts half.
+        function matchOf(j) {
+          if (j.match) return j.match;
+          var title = j.title || '';
+          var rest = [j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ');
+          var total = 0, why = [];
+          RULES.forEach(function (r) {
+            var inTitle = r.re.test(title), inRest = r.re.test(rest);
+            if (!inTitle && !inRest) return;
+            var pts = inTitle ? r.weight : r.weight / 2;
+            total += pts;
+            if (pts > 0) why.push({ label: r.label, pts: pts });
+          });
+          why.sort(function (a, b) { return b.pts - a.pts; });
+          j.match = {
+            score: total,
+            tier: total >= 6 ? 'strong' : total >= 3 ? 'good' : '',
+            why: why.slice(0, 3).map(function (w) { return w.label; }),
+          };
+          return j.match;
+        }
+        function fitScore(j) { return matchOf(j).score + (j.bc ? 2 : 0); }
+
+        var API = (document.getElementById('app').getAttribute('data-api') || '').replace(/\/$/, '');
+        var $ = function (id) { return document.getElementById(id); };
+        var list = $('list'), count = $('count');
+
+        // ---- static icons (fixed strings, no user content) ----
+        var P = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+        var ICONS = {
+          briefcase: '<svg ' + P + '><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
+          people: '<svg ' + P + '><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.6.1 4.3 1.6 4.8 4.5"/></svg>',
+          pin: '<svg ' + P + '><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+          search: '<svg ' + P + '><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+          refresh: '<svg ' + P + '><path d="M20 11a8 8 0 0 0-14.3-4.3L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.3L20 15.5M20 20v-4.5h-4.5"/></svg>',
+          star: '<svg ' + P + '><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z"/></svg>',
+          check: '<svg ' + P + '><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+          x: '<svg ' + P + '><path d="M6 6l12 12M18 6 6 18"/></svg>',
+          cal: '<svg ' + P + '><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+          bulb: '<svg ' + P + '><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg>',
+          plus: '<svg ' + P + '><path d="M12 5v14M5 12h14"/></svg>',
+          chev: '<svg ' + P + '><path d="m6 15 6-6 6 6"/></svg>',
+          empty: '<svg ' + P + '><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M9 14h6"/></svg>',
+        };
+        function icon(name) { var s = document.createElement('span'); s.className = 'ico'; s.innerHTML = ICONS[name] || ''; return s; }
+        (function paintStatic() {
+          var n = document.querySelectorAll('[data-i]');
+          for (var i = 0; i < n.length; i++) n[i].innerHTML = ICONS[n[i].getAttribute('data-i')] || '';
+        })();
+
+        // ---- tiny safe wrappers around localStorage (it can be blocked) ----
+        function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+        function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+        function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+        var marks = {};
+        try { marks = JSON.parse(lsGet('cf_marks') || '{}') || {}; } catch (e) { marks = {}; }
+        var who = lsGet('cf_name') || '';
+        var pass = lsGet('cf_pass') || '';
+        try { posts = JSON.parse(lsGet('cf_posts') || '[]') || []; } catch (e) { posts = []; }
+        var tab = 'review';
+        var link = API ? 'connecting' : 'local'; // connecting | online | offline | locked | local
+        if (API && !pass) { marks = {}; posts = []; link = 'locked'; who = ''; lsDel('cf_marks'); lsDel('cf_posts'); lsDel('cf_name'); }
+
+        // ---- employers: hidden companies and ones added by hand (shared, kept in the Worker) ----
+        var EMPL = { added: [], hidden: [] }, HID = {};
+        function normName(n) { return String(n || '').trim().toLowerCase(); }
+        function isHiddenCo(n) { return !!HID[normName(n)]; }
+        function setEmployers(e) {
+          EMPL = { added: Array.isArray(e && e.added) ? e.added : [], hidden: Array.isArray(e && e.hidden) ? e.hidden : [] };
+          HID = {}; EMPL.hidden.forEach(function (n) { HID[normName(n)] = true; });
+          lsSet('cf_emp', JSON.stringify(EMPL));
+        }
+        try { setEmployers(API && pass ? JSON.parse(lsGet('cf_emp') || '{}') : {}); } catch (e) { setEmployers({}); }
+
+        // ---- posts added by hand (shared) ----
+        var BC_RE = /\b(BC|B\.C\.|British Columbia|Vancouver|Burnaby|Surrey|Richmond|Victoria|Kelowna|Langley|Delta|Pitt Meadows|Coquitlam|Abbotsford|Nanaimo|Squamish)\b/i;
+        function postToJob(x) {
+          var text = [x.title, x.company, x.note, x.desc].join(' ');
+          return {
+            id: x.id, title: x.title, company: x.company || (x.kind === 'event' ? 'Event' : 'Added by hand'),
+            location: x.location || '', url: x.url, posted: new Date(x.ts || Date.now()).toISOString().slice(0, 10),
+            source: 'added', kind: x.kind, eventDate: x.date || '', note: x.note || '', description: x.desc || '', addedBy: x.by || '',
+            bc: BC_RE.test(x.location || ''), solidworks: /solid\s?works/i.test(text),
+            startLabel: x.kind === 'job' ? (x.date || null) : null, fitsMay: null, score: 0,
+          };
+        }
+        function rebuildJobs() {
+          jobs = baseJobs.concat(posts.map(postToJob)).filter(function (j) { return !isHiddenCo(j.company); });
+          var c = $('jobs-count'); if (c) c.textContent = jobs.length;
+        }
+        rebuildJobs();
+
+        // ---- filters and the default sort, in priority order (0 matters most) ----
+        var AB_RE = /\bAB\b|\b(Alberta|Calgary|Edmonton|Red Deer|Lethbridge|Medicine Hat|Fort McMurray)\b/;
+        var EV_RE = /electric vehicle|\bEVs?\b|e-?mobility|powertrain|\bTesla\b|Rivian|\bLucid\b|Polestar|\bBYD\b|Proterra|Lion Electric|Taiga|Nikola/i;
+        var CLEAN_RE = /solar|renewable|clean ?energy|wind (power|turbine|energy)|hydrogen|fuel ?cell|energy storage|geothermal|hydro ?electric|sustainab|decarboni[sz]/i;
+        // Company ranking from data/companies.json: tech first, then fame, then revenue.
+        var CO = [];
+        try { CO = JSON.parse(document.getElementById('co-rank').textContent) || []; } catch (e) { CO = []; }
+        function escRe(t) { return String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        CO = CO.map(function (c) {
+          var al = (c.aliases && c.aliases.length ? c.aliases : [c.name]).map(escRe).join('|');
+          return { name: c.name, tech: c.tech || 0, fame: c.fame || 0, rev: c.rev || 0, re: new RegExp('(^|[^A-Za-z0-9])(' + al + ')($|[^A-Za-z0-9])', 'i') };
+        }).sort(function (a, b) { return b.tech - a.tech || b.fame - a.fame || b.rev - a.rev || a.name.localeCompare(b.name); });
+        var coCache = {};
+        // 0 = top-ranked company, -1 = not on the list
+        function coRank(name) {
+          name = String(name || '');
+          if (coCache[name] !== undefined) return coCache[name];
+          var r = -1;
+          for (var i = 0; i < CO.length; i++) if (CO[i].re.test(name)) { r = i; break; }
+          coCache[name] = r; return r;
+        }
+        function byCompanyRank(a, b) {
+          var ra = coRank(a.company), rb = coRank(b.company);
+          if (ra === rb) return 0;
+          if (ra < 0) return 1;
+          if (rb < 0) return -1;
+          return ra - rb;
+        }
+        function ownText(j) { return [j.title, j.company, j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' '); }
+        var CRITERIA = [
+          { id: 'f0', label: 'Hand-picked', test: function (j) { return j.source === 'manual' || j.source === 'added'; } },
+          { id: 'f1', label: 'May 2027 start', test: function (j) { return j.fitsMay === true; } },
+          { id: 'f2', label: 'Vancouver / BC', test: function (j) { return !!j.bc; } },
+          { id: 'f3', label: 'Calgary / Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
+          { id: 'f4', label: 'Mechanical engineering', test: function (j) { return topicTags(j).mech; } },
+          { id: 'f5', label: 'Battery / power pack', test: function (j) { return topicTags(j).battery; } },
+          { id: 'f6', label: 'EV company', test: function (j) { return EV_RE.test(ownText(j)); } },
+          { id: 'f7', label: 'Clean energy / solar', test: function (j) { return CLEAN_RE.test(ownText(j)); } },
+          { id: 'f8', label: 'SolidWorks', test: function (j) { return !!j.solidworks; } },
+          { id: 'f9', label: 'Posted in last 30 days', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
+          { id: 'f10', label: 'Well-known company', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
+          { id: 'f11', label: 'Other start dates', test: function (j) { return j.fitsMay === false; } },
+        ];
+        function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
+        function byPriority(a, b) {
+          var fa = flags(a), fb = flags(b), i;
+          for (i = 0; i <= 9; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
+          var cr = byCompanyRank(a, b); if (cr) return cr; // 10: well-known companies, best-ranked first
+          if (fa[11] !== fb[11]) return fa[11] ? 1 : -1; // other start dates go last
+          return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b);
+        }
+
+        // ---- sorting ----
+        function rank(j) { return j.fitsMay === true ? 0 : j.fitsMay === null ? 1 : 2; }
+        var SORTS = {
+          priority: function (a, b) { return byPriority(a, b); },
+          best: function (a, b) {
+            return rank(a) - rank(b) || (fitScore(b) - fitScore(a)) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
+          },
+          new: function (a, b) { return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b); },
+          company: function (a, b) { return byCompanyRank(a, b) || String(a.company).localeCompare(String(b.company)) || SORTS.best(a, b); },
+        };
+
+        (function buildChecks() {
+          var box = document.getElementById('fchecks');
+          CRITERIA.forEach(function (c, i) {
+            var lab = document.createElement('label'); lab.className = 'chk';
+            var inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = c.id;
+            var n = document.createElement('span'); n.className = 'num'; n.textContent = String(i);
+            lab.appendChild(inp); lab.appendChild(n); lab.appendChild(document.createTextNode(c.label));
+            box.appendChild(lab);
+            inp.addEventListener('change', function () { renderJobs(); });
+          });
+        })();
+
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (text != null) e.textContent = text;
+          return e;
+        }
+        function tag(text, kind, ico) {
+          var t = el('span', 'tag' + (kind ? ' ' + kind : ''));
+          if (ico) t.appendChild(icon(ico));
+          t.appendChild(document.createTextNode(text));
+          return t;
+        }
+        function stateOf(id) { return marks[id] ? marks[id].state : null; }
+        function hue(name) { var h = 7; for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360; return h; }
+        function avatar(name) {
+          var a = el('div', 'avatar', (String(name).match(/[A-Za-z]/) || ['?'])[0].toUpperCase());
+          var h = hue(String(name));
+          a.style.background = 'linear-gradient(135deg,hsl(' + h + ' 70% 52%),hsl(' + ((h + 40) % 360) + ' 65% 38%))';
+          return a;
+        }
+
+        // ---- marks: save locally, then to the shared store ----
+        function saveLocal() { lsSet('cf_marks', JSON.stringify(marks)); }
+
+        function logout(msg) {
+          pass = ''; who = ''; marks = {}; posts = []; PRIVATE = {}; setEmployers({});
+          lsDel('cf_pass'); lsDel('cf_name'); lsDel('cf_marks'); lsDel('cf_posts');
+          link = 'locked'; tab = 'review'; rebuildJobs();
+          if (msg) flash(msg);
+          renderAll();
+        }
+
+        // Benny's email and phone live in the Worker (behind the login), never in the public files.
+        var PRIVATE = {};
+        function loadPrivate() {
+          if (!API || !pass || PRIVATE.email || PRIVATE.phone) return;
+          fetch(API + '/private', { cache: 'no-store', headers: { 'X-Passcode': pass } })
+            .then(function (r) { return r.ok ? r.json() : {}; })
+            .then(function (d) { PRIVATE = { email: d.email || '', phone: d.phone || '' }; })
+            .catch(function () { /* optional */ });
+        }
+
+        function syncDown() {
+          if (!API) return Promise.resolve();
+          if (!pass) { link = 'locked'; renderStatus(); return Promise.resolve(); }
+          return fetch(API + '/state', { cache: 'no-store', headers: { 'X-Passcode': pass } }).then(function (r) {
+            if (r.status === 401) throw new Error('401');
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          }).then(function (d) {
+            marks = d.marks || {}; saveLocal();
+            if (d.employers) setEmployers(d.employers);
+            if (Array.isArray(d.posts)) { posts = d.posts; lsSet('cf_posts', JSON.stringify(posts)); }
+            rebuildJobs();
+            link = 'online'; renderAll(); loadPrivate();
+          }).catch(function (e) {
+            if (e && e.message === '401') logout('Your passcode is not valid any more. Please log in again.');
+            else { link = 'offline'; renderStatus(); }
+          });
+        }
+
+        function setMark(id, state) {
+          if (API && (!who || !pass)) { openSetup(function () { setMark(id, state); }); return; }
+          if (!API && !who) who = 'me';
+          if (API && !pass) { openSetup(function () { setMark(id, state); }); return; }
+          var next = stateOf(id) === state ? null : state;
+          if (next) marks[id] = { state: next, by: who, ts: Date.now() };
+          else delete marks[id];
+          saveLocal();
+          renderAll();
+          if (!API) return;
+          fetch(API + '/marks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Passcode': pass },
+            body: JSON.stringify({ id: id, state: next, by: who }),
+          }).then(function (r) {
+            if (r.status === 401) {
+              logout('Your passcode was not accepted. Please log in again.');
+              return;
+            }
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            link = 'online'; renderStatus();
+          }).catch(function () {
+            link = 'offline';
+            flash('Could not reach the shared list. Your mark is saved on this device only for now.');
+          });
+        }
+
+        var flashTimer, flashMsg = '';
+        function flash(msg) {
+          flashMsg = msg;
+          renderStatus();
+          clearTimeout(flashTimer);
+          flashTimer = setTimeout(function () { flashMsg = ''; renderStatus(); }, 8000);
+        }
+
+        // ---- who-are-you dialog ----
+        var afterSetup = null;
+        function openSetup(cb) {
+          afterSetup = cb || null;
+          $('s-name').value = who;
+          $('s-pass').value = '';
+          $('s-name').style.display = API ? 'none' : '';
+          $('s-name-label').style.display = API ? 'none' : '';
+          $('s-pass').style.display = API ? '' : 'none';
+          $('s-pass-label').style.display = API ? '' : 'none';
+          $('s-help').textContent = API
+            ? 'Enter your own passcode. Your name then shows next to what you mark.'
+            : 'Your name shows next to your marks.';
+          $('s-err').textContent = '';
+          var d = $('setup');
+          if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          (API ? $('s-pass') : $('s-name')).focus();
+        }
+        function closeSetup() { var d = $('setup'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        $('s-cancel').addEventListener('click', function () { afterSetup = null; closeSetup(); });
+        $('setup-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var cb;
+          if (!API) {
+            var n = $('s-name').value.trim();
+            if (!n) { $('s-err').textContent = 'Please enter a name.'; return; }
+            who = n; lsSet('cf_name', who); closeSetup(); renderAll();
+            cb = afterSetup; afterSetup = null; if (cb) cb();
+            return;
+          }
+          var p = $('s-pass').value.trim();
+          if (!p) { $('s-err').textContent = 'Please enter your passcode.'; return; }
+          var btn = $('s-save'); btn.disabled = true; btn.textContent = 'Checking...';
+          fetch(API + '/me', { cache: 'no-store', headers: { 'X-Passcode': p } })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status !== 200 || !res.d.name) {
+                $('s-err').textContent = res.status === 401 ? 'That passcode was not recognised.' : (res.d.error || 'Could not log in. Please try again.');
+                return;
+              }
+              who = res.d.name; pass = p; lsSet('cf_name', who); lsSet('cf_pass', pass);
+              closeSetup(); link = 'connecting'; renderAll();
+              cb = afterSetup; afterSetup = null;
+              return syncDown().then(function () { if (cb) cb(); });
+            })
+            .catch(function () { $('s-err').textContent = 'Could not reach the server. Please try again.'; })
+            .then(function () { btn.disabled = false; btn.textContent = 'Log in'; });
+        });
+
+        // ---- rendering ----
+        function when(ts) {
+          try { return new Date(ts).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }); } catch (e) { return ''; }
+        }
+        var LABEL = { shortlist: 'Shortlisted', applied: 'Applied', skip: 'Skipped' };
+
+        function actionsRow(id, isEmployer) {
+          var row = el('div', 'actions');
+          var defs = isEmployer
+            ? [['shortlist', 'Shortlist', 'star'], ['applied', 'Checked', 'check']]
+            : [['shortlist', 'Shortlist', 'star'], ['applied', 'Applied', 'check'], ['skip', 'Skip', 'x']];
+          var cur = stateOf(id);
+          defs.forEach(function (d) {
+            var b = el('button', cur === d[0] ? 'on-' + d[0] : '');
+            b.type = 'button';
+            b.appendChild(icon(d[2]));
+            b.appendChild(document.createTextNode(d[1]));
+            b.setAttribute('aria-pressed', cur === d[0] ? 'true' : 'false');
+            b.addEventListener('click', function () { setMark(id, d[0]); });
+            row.appendChild(b);
+          });
+          if (marks[id]) {
+            var lab = isEmployer && cur === 'applied' ? 'Checked' : LABEL[cur];
+            row.appendChild(el('span', 'who', lab + ' by ' + marks[id].by + (marks[id].ts ? ' · ' + when(marks[id].ts) : '')));
+          }
+          return row;
+        }
+
+        // ---- prepare application: cover letter + quick answers from the profile (no AI service) ----
+        function copyText(text, btn) {
+          function done(ok) { var o = btn.textContent; btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(function () { btn.textContent = o; }, 1400); }
+          if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); return; }
+          var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+          var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; } document.body.removeChild(ta); done(ok);
+        }
+        // Follows the structure of Benny's own cover letter: header, "Re:" line, three short paragraphs.
+        var KNOWN_NEW_TOOLS = /\b(Autodesk Inventor|Inventor|AutoCAD|Creo|CATIA|Siemens NX|Ansys|Abaqus|Solid Edge|LabVIEW|Simulink|Revit)\b/gi;
+        function buildLetter(j) {
+          var app = PROFILE.application || {}, phr = PROFILE.interest_phrases || {};
+          var text = [j.title, j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ');
+          var why = matchOf(j).why;
+          var interest = phr[why[0]] || phr['default'] || 'hands-on engineering work';
+          var ranked = (PROFILE.project_blurbs || []).map(function (p, i) {
+            var n = 0; try { n = (text.match(new RegExp(p.tags, 'gi')) || []).length; } catch (e) { n = 0; }
+            return { p: p, n: n, i: i };
+          }).sort(function (a, b) { return b.n - a.n || a.i - b.i; });
+          var picks = ranked.slice(0, 2).map(function (r) { return r.p.phrase; });
+          var seen = {}, learn = [];
+          (text.match(KNOWN_NEW_TOOLS) || []).forEach(function (t) { var k = t.toLowerCase(); if (!seen[k]) { seen[k] = 1; learn.push(t); } });
+          var learnText = learn.length ? learn.slice(0, 2).join(' and ') : 'new tools';
+          var links = app.links || {};
+          var p1 = 'I’m a second-year Mechanical Engineering student at the University of British Columbia applying for the ' + j.title + ' role' + (j.company ? ' with ' + j.company : '') + '. I’m interested in ' + interest + '.';
+          var p2 = 'Through coursework and projects, I’ve gained practical experience with ' + (app.experience_with || 'CAD and prototyping') +
+            (picks.length ? ', including ' + picks.join(picks[0].indexOf(' and ') > -1 ? ', and ' : ' and ') : '') + '. I’m comfortable with ' + (app.comfortable_with || 'Microsoft Office') + ' and ready to learn ' + learnText + ' quickly.';
+          var p3 = (links.Portfolio ? 'My portfolio is at ' + links.Portfolio + '. ' : '') + 'Thank you for your consideration. I’d appreciate the opportunity to discuss how I can contribute and grow with your team starting in ' + (app.available || 'May 2027') + '.';
+          return frameLetter(j, [p1, p2, p3].join('\n\n'));
+        }
+        // Header, "Re:" line, greeting and sign-off around a body (shared by the template and the AI letter).
+        function frameLetter(j, body) {
+          var app = PROFILE.application || {};
+          var name = PROFILE.fullName || '';
+          var contact = [app.location, PRIVATE.phone, PRIVATE.email].filter(Boolean).join(' ');
+          var date = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+          return [
+            name + (contact ? '\n' + contact : ''),
+            date,
+            'Hiring Committee' + (j.company ? '\n' + j.company : ''),
+            'Re: ' + j.title,
+            'Dear Hiring Committee,',
+            body,
+            'Sincerely,\n' + name
+          ].join('\n\n');
+        }
+        var prepJob = null;
+        function openPrep(j) {
+          var app = PROFILE.application || {};
+          $('prep-title').textContent = 'Prepare application: ' + j.title + (j.company ? ' at ' + j.company : '');
+          $('prep-letter').value = buildLetter(j);
+          prepJob = j; $('prep-desc').value = ''; $('prep-ai-status').textContent = '';
+          $('prep-ai').hidden = !(API && pass); $('prep-ai-btn').disabled = false;
+          var qa = $('prep-qa'); qa.textContent = '';
+          var rows = [];
+          Object.keys(app.names || {}).forEach(function (k) { rows.push([k, app.names[k]]); });
+          rows.push(['Email', PRIVATE.email], ['Phone', PRIVATE.phone]);
+          rows.push(['Work authorization', app.work_authorization], ['Available from', app.available], ['School', app.school]);
+          Object.keys(app.links || {}).forEach(function (k) { rows.push([k, app.links[k]]); });
+          rows.forEach(function (r) {
+            if (!r[1]) return;
+            var row = el('div', 'qa'); row.appendChild(el('span', 'k', r[0])); row.appendChild(el('span', 'v', r[1]));
+            var b = el('button', null, 'Copy'); b.type = 'button';
+            b.addEventListener('click', function () { copyText(r[1], b); });
+            row.appendChild(b); qa.appendChild(row);
+          });
+          $('prep-open').href = j.url;
+          var d = $('prep-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+        }
+        $('prep-ai-btn').addEventListener('click', function () {
+          var j = prepJob; if (!j || !API || !pass) return;
+          var btn = $('prep-ai-btn'), st = $('prep-ai-status');
+          var detail = $('prep-desc').value.trim() || [j.description, j.note, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ').trim();
+          btn.disabled = true; st.textContent = 'Writing… (a few seconds)';
+          fetch(API + '/letter', {
+            method: 'POST', cache: 'no-store',
+            headers: { 'Content-Type': 'application/json', 'X-Passcode': pass },
+            body: JSON.stringify({ title: j.title, company: j.company, location: j.location || '', description: detail, profile: PROFILE })
+          }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.ok && res.d.letter) {
+                $('prep-letter').value = frameLetter(j, res.d.letter);
+                st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.usedResume ? 'Used your saved resume facts. ' : 'Tip: add your resume under My resume so letters use your real details. ') + (res.d.left != null ? res.d.left + ' left today.' : '');
+              } else if (res.status === 401) {
+                st.textContent = 'Please log in again.';
+              } else {
+                st.textContent = (res.d && res.d.error) || 'The AI could not write it. The template letter is still above.';
+              }
+            })
+            .catch(function () { st.textContent = 'Could not reach the AI. The template letter is still above.'; })
+            .then(function () { btn.disabled = false; });
+        });
+        $('prep-copy-letter').addEventListener('click', function () { copyText($('prep-letter').value, $('prep-copy-letter')); });
+        $('prep-close').addEventListener('click', function () { var d = $('prep-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); });
+
+        function jobTags(j) {
+          var mt = matchOf(j), t = el('div', 'tags');
+          if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong match' : 'Good match', mt.tier === 'strong' ? 'match strong' : 'match', 'plus'));
+          if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' · ' + j.eventDate : ''), 'warn', 'cal'));
+          else if (j.fitsMay === true) t.appendChild(tag('Starts ' + j.startLabel, 'info', 'check'));
+          else if (j.fitsMay === false) t.appendChild(tag('Starts ' + j.startLabel + ' (not May 2027)', 'warn'));
+          else if (j.source === 'added' && j.startLabel) t.appendChild(tag('Start: ' + j.startLabel, 'warn'));
+          else t.appendChild(tag('Start date not listed', 'warn'));
+          t.appendChild(j.bc ? tag('BC') : tag('Outside BC'));
+          if (j.solidworks) t.appendChild(tag('SolidWorks'));
+          var tt = topicTags(j);
+          if (tt.battery) t.appendChild(tag('Battery'));
+          if (tt.mech) t.appendChild(tag('Mechanical engineering'));
+          if (j.source === 'manual') t.appendChild(tag('Hand-picked', 'info'));
+          if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
+          return t;
+        }
+
+        function card(j) {
+          var c = el('div', 'card');
+          c.setAttribute('data-state', stateOf(j.id) || 'review');
+          c.setAttribute('data-id', j.id);
+          if (j.id === selId) c.classList.add('sel');
+          c.appendChild(avatar(j.company));
+          var body = el('div');
+          body.appendChild(el('h3', null, j.title));
+          body.appendChild(el('div', 'meta', [j.company, j.location].filter(Boolean).join(' - ')));
+          body.appendChild(jobTags(j));
+          var mt = matchOf(j);
+          if (mt.tier && mt.why.length) body.appendChild(el('p', 'why', 'Why: ' + mt.why.join(' · ')));
+          body.appendChild(actionsRow(j.id, false));
+          c.appendChild(body);
+          c.addEventListener('click', function (e) { if (e.target.closest('button, a')) return; selectJob(j.id); });
+          return c;
+        }
+
+        // ---- detail panel (right side) ----
+        var selId = null, curShown = [];
+        function isNarrow() { return !!(window.matchMedia && window.matchMedia('(max-width: 960px)').matches); }
+        function jobById(id) { for (var i = 0; i < jobs.length; i++) if (jobs[i].id === id) return jobs[i]; return null; }
+        function selectJob(id) {
+          selId = id;
+          var cs = list.querySelectorAll('.card');
+          for (var i = 0; i < cs.length; i++) cs[i].classList.toggle('sel', cs[i].getAttribute('data-id') === id);
+          renderDetail();
+          if (isNarrow()) { $('app').classList.add('show-detail'); window.scrollTo(0, 0); }
+        }
+        function drow(label, value) {
+          var r = el('div', 'drow'); r.appendChild(el('div', 'dlabel', label)); r.appendChild(el('div', 'dval', value)); return r;
+        }
+        function renderDetail() {
+          var box = $('detail'); box.textContent = '';
+          var j = selId ? jobById(selId) : null;
+          if (!j) { box.appendChild(el('div', 'ph', 'Pick a job on the left to see its details.')); return; }
+          var body = el('div', 'dbody');
+          var back = el('button', 'dback', '← Back to the list'); back.type = 'button';
+          back.addEventListener('click', function () { $('app').classList.remove('show-detail'); });
+          body.appendChild(back);
+          body.appendChild(el('h2', null, j.title));
+          body.appendChild(el('div', 'dsub', [j.company, j.location].filter(Boolean).join(' - ')));
+          body.appendChild(el('hr'));
+          var desc = ((j.source === 'manual' || j.source === 'added') && j.note) ? j.note : (j.description || '');
+          var short = desc.length > 420 ? desc.slice(0, 420).replace(/\s+\S*$/, '') + '…' : desc;
+          body.appendChild(drow('Description', short || 'The posting data has no description.'));
+          var mt = matchOf(j);
+          if (mt.tier && mt.why.length) body.appendChild(drow('Why', mt.why.join(' · ')));
+          body.appendChild(el('hr'));
+          var exp = el('div', 'exp');
+          var tg = el('button', 'exp-toggle'); tg.type = 'button'; tg.setAttribute('aria-expanded', 'true');
+          tg.appendChild(el('span', null, 'Expanded info')); tg.appendChild(icon('chev'));
+          var inner = el('div');
+          tg.addEventListener('click', function () {
+            var open = tg.getAttribute('aria-expanded') !== 'true';
+            tg.setAttribute('aria-expanded', open ? 'true' : 'false'); inner.hidden = !open;
+          });
+          exp.appendChild(tg);
+          var ul = el('ul');
+          function li(t) { ul.appendChild(el('li', null, t)); }
+          if (j.kind === 'event') li('Event date: ' + (j.eventDate || 'not listed'));
+          else li('Start: ' + (j.startLabel || 'not listed') + (j.fitsMay === true ? ' (fits May 2027)' : j.fitsMay === false ? ' (not May 2027)' : ''));
+          if (j.posted) li('Posted: ' + j.posted);
+          if (j.location) li('Location: ' + j.location);
+          li('Source: ' + (j.source === 'manual' ? 'hand-picked' : j.source === 'added' ? 'added by ' + (j.addedBy || 'someone') : 'found automatically'));
+          var en = j.company !== 'Event' ? (EMP[j.company] || '') : '';
+          if (en) li('About ' + j.company + ': ' + en);
+          var f = flags(j), hits = [];
+          CRITERIA.forEach(function (c, i) { if (f[i]) hits.push(i + ' ' + c.label); });
+          li('Matches these filters: ' + (hits.length ? hits.join(', ') : 'none of the 12'));
+          inner.appendChild(ul);
+          if (desc.length > short.length) {
+            var dt = el('details'); dt.appendChild(el('summary', null, 'Full description'));
+            dt.appendChild(el('div', 'full', desc)); inner.appendChild(dt);
+          }
+          exp.appendChild(inner);
+          body.appendChild(exp);
+          box.appendChild(body);
+          var bar = el('div', 'dbar');
+          bar.appendChild(actionsRow(j.id, false));
+          bar.appendChild(el('span', 'spacer'));
+          if (j.url) { var ob = el('a', 'btn2', 'Open posting'); ob.href = j.url; ob.target = '_blank'; ob.rel = 'noopener noreferrer'; bar.appendChild(ob); }
+          if (j.source === 'added' && API) {
+            var rm = el('button', 'rm', 'Remove'); rm.type = 'button'; rm.style.marginLeft = '0';
+            rm.addEventListener('click', function () { removePost(j); }); bar.appendChild(rm);
+          }
+          if (j.kind !== 'event') {
+            var pb = el('button', 'btn1', 'Prepare application'); pb.type = 'button';
+            pb.addEventListener('click', function () { openPrep(j); }); bar.appendChild(pb);
+          }
+          box.appendChild(bar);
+        }
+
+        function renderTabs() {
+          var counts = { review: 0, shortlist: 0, applied: 0, skip: 0 };
+          jobs.forEach(function (j) { var s = stateOf(j.id); counts[s || 'review']++; });
+          var btns = $('tabs').querySelectorAll('button');
+          for (var i = 0; i < btns.length; i++) {
+            var t = btns[i].getAttribute('data-tab');
+            btns[i].setAttribute('aria-pressed', t === tab ? 'true' : 'false');
+            btns[i].querySelector('.n').textContent = String(counts[t]);
+          }
+          var done = jobs.length - counts.review;
+          $('progress-text').textContent = done + ' of ' + jobs.length + ' jobs reviewed';
+          $('progress-bar').style.width = (jobs.length ? Math.round(100 * done / jobs.length) : 0) + '%';
+        }
+
+        function renderStatus() {
+          var live = $('live');
+          live.className = 'live ' + (link === 'online' ? 'online' : link === 'offline' ? 'offline' : link === 'connecting' ? 'connecting' : link === 'local' ? 'local' : 'locked');
+          live.querySelector('b').textContent = link === 'online' ? 'Live' : link === 'offline' ? 'Offline' : link === 'connecting' ? 'Connecting…' : link === 'local' ? 'This device only' : 'Logged out';
+          var chip = $('chip'); chip.textContent = '';
+          if (who) { chip.appendChild(avatar(who)); chip.appendChild(el('span', null, 'Marking as ' + who)); }
+          else chip.appendChild(el('span', null, API ? 'Log in' : 'Set your name'));
+          if (!(API && who)) $('menu').hidden = true;
+          var msg = flashMsg || (link === 'locked' ? 'Log in to see and share picks.' : link === 'offline' ? 'The shared list is unreachable right now. Marks are kept on this device.' : '');
+          var f = $('status'); f.textContent = msg; f.hidden = !msg;
+        }
+
+        function emptyState() {
+          var box = el('div', 'empty');
+          var big = el('div', 'big'); big.innerHTML = ICONS.empty; box.appendChild(big);
+          box.appendChild(el('strong', null, tab === 'review' ? 'Nothing left to review' : 'Nothing here yet'));
+          box.appendChild(el('span', null, tab === 'review'
+            ? 'Try clearing the filters, or check the Employers tabs.'
+            : 'Jobs you mark will show up here for everyone.'));
+          return box;
+        }
+
+        function renderJobs() {
+          var q = $('q').value.trim().toLowerCase();
+          var on = CRITERIA.map(function (c) { return $(c.id).checked; });
+          var prevIndex = -1;
+          for (var p = 0; p < curShown.length; p++) if (curShown[p].id === selId) { prevIndex = p; break; }
+          var shown = jobs.filter(function (j) {
+            var s = stateOf(j.id) || 'review';
+            if (s !== tab) return false;
+            var f = flags(j);
+            for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
+            if (q && (j.title + ' ' + j.company + ' ' + j.location).toLowerCase().indexOf(q) === -1) return false;
+            return true;
+          }).sort(SORTS[$('sort').value] || SORTS.priority);
+          curShown = shown;
+          // Keep the selection; if it left the list (for example after Shortlist), move to the next one.
+          var still = shown.some(function (j) { return j.id === selId; });
+          if (!still) {
+            if (isNarrow()) { selId = null; $('app').classList.remove('show-detail'); }
+            else selId = shown.length ? shown[Math.max(0, Math.min(prevIndex < 0 ? 0 : prevIndex, shown.length - 1))].id : null;
+          }
+          list.textContent = '';
+          shown.forEach(function (j) { list.appendChild(card(j)); });
+          if (!shown.length) list.appendChild(emptyState());
+          var inTab = jobs.filter(function (j) { return (stateOf(j.id) || 'review') === tab; }).length;
+          var hidden = inTab - shown.length;
+          count.textContent = shown.length + ' shown' + (hidden ? ' · ' + hidden + ' hidden by filters' : '');
+          renderDetail();
+        }
+
+        // ---- employers: hide / show / add / delete (shared with everyone) ----
+        function empAct(body, failMsg) {
+          if (!API || !pass) { openSetup(null); return Promise.resolve({ ok: false, error: 'Please log in first.' }); }
+          return fetch(API + '/employers', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify(body) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { logout('Your passcode was not accepted. Please log in again.'); return { ok: false, error: 'Please log in again.' }; }
+              if (!res.ok || !res.d.employers) { var m = (res.d && res.d.error) || failMsg; flash(m); return { ok: false, error: m }; }
+              setEmployers(res.d.employers); rebuildJobs(); renderAll(); return { ok: true };
+            })
+            .catch(function () { flash(failMsg); return { ok: false, error: failMsg }; });
+        }
+        function manageBtn(label, tip, fn) {
+          var b = el('button', 'rm', label); b.type = 'button'; b.title = tip; b.addEventListener('click', fn); return b;
+        }
+        function renderEmployers() {
+          var logged = !!(API && pass), i;
+          var old = document.querySelectorAll('.co[data-added]');
+          for (i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+          EMPL.added.forEach(function (c) {
+            var grid = document.querySelector('.view[data-view="' + (c.region === 'BC' ? 'bc' : 'else') + '"] .grid');
+            if (!grid) return;
+            var node = el('div', 'co'); node.setAttribute('data-id', 'co:' + c.name); node.setAttribute('data-added', c.id);
+            node.appendChild(avatar(c.name));
+            var box = el('div'); var a = el('a', null, c.name); a.href = c.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            box.appendChild(a); if (c.note) box.appendChild(el('p', null, c.note));
+            box.appendChild(el('p', null, 'Added by ' + (c.by || 'someone')));
+            node.appendChild(box); grid.appendChild(node);
+          });
+          var viewOf = {};
+          var cos = document.querySelectorAll('.co[data-id]');
+          for (i = 0; i < cos.length; i++) {
+            var node2 = cos[i], id = node2.getAttribute('data-id'), name = id.slice(3), addedId = node2.getAttribute('data-added');
+            var v = node2.closest('.view'); viewOf[normName(name)] = v ? v.getAttribute('data-view') : 'else';
+            var oldRow = node2.querySelector('.actions'); if (oldRow) node2.removeChild(oldRow);
+            if (!addedId && isHiddenCo(name)) { node2.style.display = 'none'; continue; }
+            node2.style.display = '';
+            var row = actionsRow(id, true);
+            if (logged) {
+              (function (nm, aid) {
+                if (aid) row.appendChild(manageBtn('Delete', 'Delete this employer for everyone', function () {
+                  if (!confirm('Delete ' + nm + ' for everyone?')) return;
+                  empAct({ action: 'delete', id: aid }, 'Could not delete it right now.');
+                }));
+                else row.appendChild(manageBtn('Hide', 'Hide this company and its job postings for everyone', function () {
+                  if (!confirm('Hide ' + nm + ' and its job postings for everyone? You can bring it back from the Hidden list.')) return;
+                  empAct({ action: 'hide', name: nm }, 'Could not hide it right now.');
+                }));
+              })(name, addedId);
+            }
+            node2.appendChild(row);
+          }
+          ['bc', 'else'].forEach(function (vw) {
+            var panel = $('hid-' + vw), list = panel.querySelector('.hidlist'), n = 0;
+            list.textContent = '';
+            EMPL.hidden.forEach(function (nm) {
+              if ((viewOf[normName(nm)] || 'else') !== vw) return;
+              n++;
+              var r = el('div', 'hidrow'); r.appendChild(el('span', null, nm));
+              if (logged) {
+                var sb = el('button', null, 'Show again'); sb.type = 'button';
+                sb.addEventListener('click', function () { empAct({ action: 'show', name: nm }, 'Could not bring it back right now.'); });
+                r.appendChild(sb);
+              }
+              list.appendChild(r);
+            });
+            panel.querySelector('.n').textContent = n; panel.hidden = n === 0;
+            var shownCount = 0, cards = document.querySelectorAll('.view[data-view="' + vw + '"] .co');
+            for (var k = 0; k < cards.length; k++) if (cards[k].style.display !== 'none') shownCount++;
+            $('cnt-' + vw).textContent = shownCount;
+          });
+          var adds = document.querySelectorAll('[data-emp-add]');
+          for (i = 0; i < adds.length; i++) adds[i].classList.toggle('show', logged);
+        }
+
+        function openEmp(region) {
+          if (!pass) { openSetup(function () { openEmp(region); }); return; }
+          ['e-name', 'e-url', 'e-note'].forEach(function (id) { $(id).value = ''; });
+          $('e-region').value = region === 'BC' ? 'BC' : 'Elsewhere'; $('e-err').textContent = ''; $('e-save').disabled = false;
+          var d = $('emp-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          $('e-name').focus();
+        }
+        function closeEmp() { var d = $('emp-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        Array.prototype.forEach.call(document.querySelectorAll('[data-emp-add]'), function (b) {
+          b.addEventListener('click', function () { openEmp(b.getAttribute('data-emp-add')); });
+        });
+        $('e-cancel').addEventListener('click', closeEmp);
+        $('emp-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var name = $('e-name').value.trim(), url = $('e-url').value.trim(), region = $('e-region').value;
+          if (!name) { $('e-err').textContent = 'Please add the company name.'; return; }
+          if (!/^https?:\/\/\S+$/i.test(url)) { $('e-err').textContent = 'The link must start with http:// or https://'; return; }
+          var dup = Array.prototype.some.call(document.querySelectorAll('.co[data-id]'), function (n) { return normName(n.getAttribute('data-id').slice(3)) === normName(name); });
+          if (dup) { $('e-err').textContent = isHiddenCo(name) ? 'That company is in the list but hidden. Use Show again under Hidden.' : 'That company is already in the list.'; return; }
+          var btn = $('e-save'); btn.disabled = true;
+          empAct({ action: 'add', employer: { name: name, url: url, region: region, note: $('e-note').value.trim() } }, 'Could not add it. Please try again.')
+            .then(function (r) {
+              if (r.ok) { closeEmp(); showView(region === 'BC' ? 'bc' : 'else'); }
+              else $('e-err').textContent = r.error || 'Could not add it.';
+            })
+            .then(function () { btn.disabled = false; });
+        });
+
+        function renderAll() { renderTabs(); renderStatus(); renderJobs(); renderEmployers(); }
+
+        $('tabs').addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-tab]');
+          if (!b) return;
+          tab = b.getAttribute('data-tab');
+          renderAll();
+        });
+        ['q', 'sort'].forEach(function (id) {
+          $(id).addEventListener(id === 'q' ? 'input' : 'change', renderJobs);
+        });
+        $('clear').addEventListener('click', function () {
+          $('q').value = ''; CRITERIA.forEach(function (c) { $(c.id).checked = false; }); $('sort').value = 'priority';
+          renderJobs();
+        });
+
+        // ---- add / remove postings ----
+        function removePost(j) {
+          if (!confirm('Remove "' + j.title + '" for everyone?')) return;
+          if (!pass) { openSetup(function () { removePost(j); }); return; }
+          fetch(API + '/posts?id=' + encodeURIComponent(j.id), { method: 'DELETE', headers: { 'X-Passcode': pass } })
+            .then(function (r) {
+              if (r.status === 401) { logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              posts = posts.filter(function (x) { return x.id !== j.id; });
+              delete marks[j.id]; saveLocal(); lsSet('cf_posts', JSON.stringify(posts));
+              rebuildJobs(); renderAll();
+            }).catch(function () { flash('Could not remove it right now. Please try again.'); });
+        }
+        var addDesc = '';
+        function openAdd() {
+          if (!pass) { openSetup(openAdd); return; }
+          ['a-title', 'a-url', 'a-company', 'a-loc', 'a-date', 'a-note', 'a-source'].forEach(function (id) { $(id).value = ''; });
+          addDesc = ''; $('a-fill-status').textContent = ''; $('a-fill').disabled = false;
+          $('a-kind').value = 'job'; syncKindLabels();
+          $('a-err').textContent = '';
+          var d = $('add-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          $('a-source').focus();
+        }
+        function closeAdd() { var d = $('add-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        function syncKindLabels() {
+          var ev = $('a-kind').value === 'event';
+          $('a-date-label').textContent = ev ? 'Event date or deadline (optional)' : 'Start date (optional)';
+          $('a-date').placeholder = ev ? 'for example Dec 5, 2026' : 'for example May 2027';
+        }
+        $('a-kind').addEventListener('change', syncKindLabels);
+        $('a-cancel').addEventListener('click', closeAdd);
+        $('add-open').addEventListener('click', openAdd);
+        if (API) $('add-open').classList.add('show');
+        // ---- "Fill it in": link or pasted text -> title, company, location, start date ----
+        var NO_AUTO = /^https?:\/\/([\w-]+\.)*(indeed|linkedin|glassdoor)\.(com|ca)(\/|$|\?)/i;
+        function cleanUrl(u) {
+          try {
+            var x = new URL(u);
+            Array.from(x.searchParams.keys()).forEach(function (k) { if (/^(utm_|gclid|fbclid|from$|refid$|ref$|source$|src$|trk)/i.test(k)) x.searchParams.delete(k); });
+            x.hash = ''; return x.toString();
+          } catch (e) { return u; }
+        }
+        $('a-fill').addEventListener('click', function () {
+          var input = $('a-source').value.trim(), st = $('a-fill-status'), btn = $('a-fill');
+          if (!input) { st.textContent = 'Paste a link or the posting text first.'; return; }
+          var isLink = /^https?:\/\/\S+$/i.test(input);
+          if (isLink && NO_AUTO.test(input)) {
+            $('a-url').value = cleanUrl(input);
+            st.textContent = 'Indeed, LinkedIn and Glassdoor cannot be read from a link. Open the posting, press Ctrl+A then Ctrl+C, and paste the text here. I kept the link.';
+            return;
+          }
+          btn.disabled = true; st.textContent = 'Reading… (a few seconds)';
+          fetch(API + '/extract', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify({ input: input }) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { closeAdd(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!res.ok) {
+                if (res.d && res.d.url && !$('a-url').value) $('a-url').value = res.d.url;
+                st.textContent = (res.d && res.d.error) || 'Could not read that. Fill the fields in by hand.'; return;
+              }
+              var d = res.d;
+              if (d.title) $('a-title').value = d.title;
+              if (d.company) $('a-company').value = d.company;
+              if (d.location) $('a-loc').value = d.location;
+              if (d.start) $('a-date').value = d.start;
+              if (d.url) $('a-url').value = d.url;
+              else if (isLink) $('a-url').value = cleanUrl(input);
+              $('a-kind').value = 'job'; syncKindLabels();
+              addDesc = d.description || '';
+              var missing = [];
+              if (!$('a-url').value) missing.push('the link');
+              if (!$('a-date').value) missing.push('start date');
+              if (!$('a-loc').value) missing.push('location');
+              st.textContent = 'Filled in. Please check it' + (missing.length ? ' and add ' + missing.join(', ') : '') + ', then click Add to Shortlist.';
+            })
+            .catch(function () { st.textContent = 'Could not reach the server. Fill the fields in by hand.'; })
+            .then(function () { btn.disabled = false; });
+        });
+        $('add-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var body = {
+            kind: $('a-kind').value, title: $('a-title').value.trim(), url: $('a-url').value.trim(),
+            company: $('a-company').value.trim(), location: $('a-loc').value.trim(),
+            date: $('a-date').value.trim(), note: $('a-note').value.trim(), desc: addDesc, by: who,
+          };
+          if (!body.title) { $('a-err').textContent = 'Please add a title.'; return; }
+          var btn = $('a-save'); btn.disabled = true; btn.textContent = 'Adding...';
+          fetch(API + '/posts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify(body) })
+            .then(function (r) {
+              return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d }; });
+            })
+            .then(function (res) {
+              if (res.status === 401) { closeAdd(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (res.status !== 200 || !res.d.post) { $('a-err').textContent = res.d.error || 'Could not add it. Please try again.'; return; }
+              posts.unshift(res.d.post); lsSet('cf_posts', JSON.stringify(posts));
+              marks[res.d.post.id] = { state: 'shortlist', by: who, ts: res.d.post.ts }; saveLocal();
+              rebuildJobs(); tab = 'shortlist'; renderAll(); closeAdd();
+              showView('jobs');
+            })
+            .catch(function () { $('a-err').textContent = 'Could not reach the shared list. Please try again.'; })
+            .then(function () { btn.disabled = false; btn.textContent = 'Add to Shortlist'; });
+        });
+
+        // ---- Word (.docx) text, read in the browser so only plain text is sent ----
+        function inflateRaw(bytes) {
+          var ds = new DecompressionStream('deflate-raw');
+          var w = ds.writable.getWriter(); w.write(bytes); w.close();
+          return new Response(ds.readable).arrayBuffer();
+        }
+        function docxText(buf) {
+          var dv = new DataView(buf), u8 = new Uint8Array(buf), n = u8.length, i, eocd = -1;
+          for (i = n - 22; i >= Math.max(0, n - 65557); i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+          if (eocd < 0) return Promise.reject(new Error('notzip'));
+          var count = dv.getUint16(eocd + 10, true), p = dv.getUint32(eocd + 16, true), hit = null;
+          for (i = 0; i < count && p + 46 <= n; i++) {
+            if (dv.getUint32(p, true) !== 0x02014b50) break;
+            var method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+            var nl = dv.getUint16(p + 28, true), el2 = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+            var name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl));
+            if (name === 'word/document.xml') { hit = { method: method, csize: csize, off: off }; break; }
+            p += 46 + nl + el2 + cl;
+          }
+          if (!hit) return Promise.reject(new Error('nodoc'));
+          var ln = dv.getUint16(hit.off + 26, true), le = dv.getUint16(hit.off + 28, true), start = hit.off + 30 + ln + le;
+          var data = u8.subarray(start, start + hit.csize);
+          var raw = hit.method === 0 ? Promise.resolve(data.slice().buffer) : inflateRaw(data);
+          return raw.then(function (ab) {
+            var xml = new TextDecoder().decode(ab);
+            return xml.replace(/<w:tab\b[^>]*\/>/g, '\t').replace(/<w:(br|cr)\b[^>]*\/>/g, '\n').replace(/<\/w:p>/g, '\n')
+              .replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&')
+              .replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+          });
+        }
+
+        // ---- resume facts: upload, check, save ----
+        var FACT_KEYS = ['education', 'skills', 'experience', 'projects', 'awards'];
+        var MAX_RESUME_BYTES = 4 * 1024 * 1024;
+        var resumeFile = '';
+        function toLines(s) { return String(s || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }
+        function fillFacts(f) {
+          f = f || {};
+          $('r-about').value = f.about || '';
+          FACT_KEYS.forEach(function (k) { $('r-' + k).value = (f[k] || []).join('\n'); });
+          $('r-edit').hidden = false; $('r-save').hidden = false;
+        }
+        function readFacts() {
+          var f = { about: $('r-about').value.trim() };
+          FACT_KEYS.forEach(function (k) { f[k] = toLines($('r-' + k).value); });
+          return f;
+        }
+        function bufToBase64(buf) {
+          var u8 = new Uint8Array(buf), s = '';
+          for (var i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+          return btoa(s);
+        }
+        function closeResume() { var d = $('resume-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        function resumeHeaders() { return { 'Content-Type': 'application/json', 'X-Passcode': pass }; }
+        function openResume() {
+          if (!pass) { openSetup(openResume); return; }
+          $('r-file').value = ''; $('r-err').textContent = ''; resumeFile = '';
+          $('r-status').textContent = 'Checking for saved facts…';
+          $('r-edit').hidden = true; $('r-save').hidden = true; $('r-delete').hidden = true; $('r-read').disabled = false; $('r-save').disabled = false;
+          var dlg = $('resume-dialog'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+          fetch(API + '/facts', { cache: 'no-store', headers: { 'X-Passcode': pass } })
+            .then(function (r) { if (r.status === 401) throw new Error('401'); return r.ok ? r.json() : {}; })
+            .then(function (d) {
+              if (d && d.facts) {
+                fillFacts(d.facts); $('r-delete').hidden = false; resumeFile = d.facts.file || '';
+                var when2 = d.facts.ts ? new Date(d.facts.ts).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                $('r-status').textContent = 'Saved' + (d.facts.file ? ' from ' + d.facts.file : '') + (when2 ? ' on ' + when2 : '') + '. Upload a new resume to replace it, or edit the lines and Save.';
+              } else {
+                $('r-status').textContent = 'No resume saved yet. Choose a file and click Read it.';
+              }
+            })
+            .catch(function (e) {
+              if (e && e.message === '401') { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              $('r-status').textContent = 'Could not check for saved facts. You can still upload a resume.';
+            });
+        }
+        $('r-close').addEventListener('click', closeResume);
+        $('r-read').addEventListener('click', function () {
+          var f = $('r-file').files && $('r-file').files[0], st = $('r-status'), btn = $('r-read');
+          $('r-err').textContent = '';
+          if (!f) { st.textContent = 'Choose your resume file first.'; return; }
+          var nm = f.name.toLowerCase(), isPdf = /\.pdf$/.test(nm), isDocx = /\.docx$/.test(nm);
+          if (/\.doc$/.test(nm)) { st.textContent = 'Old .doc files are not supported. In Word, use Save As and pick .docx (or PDF).'; return; }
+          if (!isPdf && !isDocx) { st.textContent = 'Please choose a PDF or a .docx file.'; return; }
+          if (f.size > MAX_RESUME_BYTES) { st.textContent = 'That file is over 4 MB. Please use a smaller one.'; return; }
+          btn.disabled = true; st.textContent = 'Reading… (about 10 to 20 seconds)';
+          f.arrayBuffer().then(function (buf) {
+            if (isPdf) return { kind: 'pdf', filename: f.name, data: bufToBase64(buf) };
+            return docxText(buf).then(function (t) { return { kind: 'text', filename: f.name, text: t }; });
+          }).then(function (payload) {
+            return fetch(API + '/resume', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify(payload) })
+              .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+              .then(function (res) {
+                if (res.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+                if (!res.ok || !res.d.facts) { st.textContent = (res.d && res.d.error) || 'Could not read that file.'; return; }
+                resumeFile = f.name; fillFacts(res.d.facts);
+                st.textContent = 'Read. Check every line against your resume, fix anything wrong or missing, then click Save. Nothing is saved yet.' + (res.d.left != null ? ' ' + res.d.left + ' AI uses left today.' : '');
+              });
+          }).catch(function (e) {
+            st.textContent = e && (e.message === 'notzip' || e.message === 'nodoc')
+              ? 'I could not open that Word file. Try saving it as a PDF instead.'
+              : 'Could not read or send that file. Please try again.';
+          }).then(function () { btn.disabled = false; });
+        });
+        $('r-save').addEventListener('click', function () {
+          var btn = $('r-save'); btn.disabled = true; $('r-err').textContent = '';
+          fetch(API + '/facts', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify({ file: resumeFile, facts: readFacts() }) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!res.ok) { $('r-err').textContent = (res.d && res.d.error) || 'Could not save. Please try again.'; return; }
+              $('r-status').textContent = 'Saved. AI letters will now use only these facts.'; $('r-delete').hidden = false;
+            })
+            .catch(function () { $('r-err').textContent = 'Could not reach the server. Please try again.'; })
+            .then(function () { btn.disabled = false; });
+        });
+        $('r-delete').addEventListener('click', function () {
+          if (!confirm('Delete your saved resume facts? AI letters will go back to the public profile.')) return;
+          fetch(API + '/facts', { method: 'DELETE', cache: 'no-store', headers: { 'X-Passcode': pass } })
+            .then(function (r) {
+              if (r.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+              $('r-edit').hidden = true; $('r-save').hidden = true; $('r-delete').hidden = true; resumeFile = '';
+              $('r-status').textContent = 'Deleted. Choose a file and click Read it to start again.';
+            })
+            .catch(function () { $('r-err').textContent = 'Could not delete right now. Please try again.'; });
+        });
+
+        // ---- top bar: user menu, Clear, filters box ----
+        $('chip').addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (API && who) { var m = $('menu'); m.hidden = !m.hidden; $('chip').setAttribute('aria-expanded', m.hidden ? 'false' : 'true'); }
+          else openSetup(null);
+        });
+        document.addEventListener('click', function (e) { if (!e.target.closest('.usermenu')) { $('menu').hidden = true; $('chip').setAttribute('aria-expanded', 'false'); } });
+        $('menu-resume').addEventListener('click', function () { $('menu').hidden = true; openResume(); });
+        $('menu-logout').addEventListener('click', function () { $('menu').hidden = true; logout(); });
+        $('clear-top').addEventListener('click', function () { $('clear').click(); });
+        $('fbox').open = !isNarrow();
+
+        // ---- top-level tabs ----
+        function showView(v) {
+          if (v !== 'jobs' && v !== 'bc' && v !== 'else') v = 'jobs';
+          var secs = document.querySelectorAll('.view');
+          for (var i = 0; i < secs.length; i++) secs[i].hidden = secs[i].getAttribute('data-view') !== v;
+          $('sidejobs').hidden = v !== 'jobs'; $('app').classList.remove('show-detail');
+          var nb = $('nav').querySelectorAll('button');
+          for (var k = 0; k < nb.length; k++) nb[k].setAttribute('aria-pressed', nb[k].getAttribute('data-view') === v ? 'true' : 'false');
+        }
+        $('nav').addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-view]');
+          if (!b) return;
+          var v = b.getAttribute('data-view');
+          showView(v);
+          try { history.replaceState(null, '', '#' + v); } catch (err) {}
+        });
+        showView((location.hash || '').slice(1));
+
+        renderAll();
+        syncDown();
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) syncDown(); });
+        if (API) setInterval(function () { if (!document.hidden) syncDown(); }, 120000);
+      })();
+    </script>
+  </body>
+</html>
