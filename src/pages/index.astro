@@ -1046,6 +1046,14 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           renderDetail();
           if (isNarrow()) { $('app').classList.add('show-detail'); window.scrollTo(0, 0); }
         }
+        function cleanText(t) {
+          t = String(t || '');
+          for (var k = 0; k < 3; k++) {
+            t = t.replace(/&amp;/gi, '&').replace(/&nbsp;|&#160;|&#xa0;/gi, ' ').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+              .replace(/&quot;|&#34;/gi, '"').replace(/&#0?39;|&rsquo;|&apos;/gi, "'").replace(/&ndash;|&#8211;/gi, '-');
+          }
+          return t.replace(/\u00a0/g, ' ').replace(/\s{2,}/g, ' ').trim();
+        }
         function drow(label, value) {
           var r = el('div', 'drow'); r.appendChild(el('div', 'dlabel', label)); r.appendChild(el('div', 'dval', value)); return r;
         }
@@ -1061,6 +1069,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           body.appendChild(el('div', 'dsub', [j.company, j.location].filter(Boolean).join(' - ')));
           body.appendChild(el('hr'));
           var desc = ((j.source === 'manual' || j.source === 'added') && j.note) ? j.note : (j.description || '');
+          desc = cleanText(desc);
           var short = desc.length > 420 ? desc.slice(0, 420).replace(/\s+\S*$/, '') + '…' : desc;
           body.appendChild(drow('Description', short || 'The posting data has no description.'));
           var mt = matchOf(j);
