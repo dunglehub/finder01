@@ -60,6 +60,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px;
         border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 20; }
       .brand { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
+      .home { font: inherit; color: inherit; background: none; border: none; padding: 4px 6px; margin: -4px -6px; cursor: pointer; letter-spacing: inherit; font-weight: inherit; border-radius: 8px; }
+      .home:hover { background: var(--grey-soft); }
       .brand h1 { margin: 0; font-size: 1.5rem; font-weight: 600; letter-spacing: -.01em; }
       .live { display: inline-flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 600; color: var(--green); }
       .live i { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
@@ -350,7 +352,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
     <main class="app" id="app" data-api={config.api || ''}>
       <header class="top">
         <div class="brand">
-          <h1>Co-op</h1>
+          <h1><button type="button" class="home" id="home" title="Back to the start">Co-op</button></h1>
           <span class="live locked" id="live"><i></i><b>Live</b></span>
         </div>
         <div class="topright">
@@ -1614,6 +1616,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           var v = b.getAttribute('data-view');
           showView(v);
           try { history.replaceState(null, '', '#' + v); } catch (err) {}
+        });
+        $('home').addEventListener('click', function () {
+          tab = 'review'; $('clear').click(); showView('jobs');
+          $('menu').hidden = true;
+          try { history.replaceState(null, '', location.pathname + location.search); } catch (err) {}
+          renderAll(); window.scrollTo(0, 0);
         });
         showView((location.hash || '').slice(1));
 
