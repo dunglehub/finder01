@@ -266,6 +266,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .tip { padding: 10px 12px; gap: 10px; margin-top: 16px; font-size: .88rem; }
         .tip .ico { font-size: 1.3rem; }
       }
+      @media (max-width: 960px) { input, select, textarea, .listhead select, dialog input, dialog textarea, dialog select { font-size: 16px !important; } }
       @media (max-width: 560px) { .detail .drow { grid-template-columns: 1fr; gap: 2px; } .detail h2 { font-size: 1.4rem; } .detail .dbody { padding: 18px 16px 8px; } }
 
       /* ---------- kept from before ---------- */
