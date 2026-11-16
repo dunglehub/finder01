@@ -28,7 +28,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
     <title>Co-op Finder: Summer 2027</title>
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/favicon.svg`} />
     <meta name="description" content="Intern and co-op roles in battery, EV and clean-energy engineering, starting May 2027." />
@@ -50,7 +50,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       }
       [hidden] { display: none !important; }
       html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-      html, body { margin: 0; max-width: 100%; overflow-x: hidden; overflow-x: clip; }
+      html, body { margin: 0; max-width: 100%; overflow-x: hidden; overflow-x: clip; touch-action: pan-y pinch-zoom; }
+      body { position: relative; width: 100%; }
+      .app { width: 100%; max-width: 100%; overflow-x: clip; }
       .addbtn .long { display: inline; }
       body { color: var(--text); background: var(--bg); font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
       button, input, select, textarea { font-family: inherit; }
