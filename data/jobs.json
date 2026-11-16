@@ -103,5 +103,35 @@
     "startLabel": null,
     "fitsMay": null,
     "score": 9
+  },
+  {
+    "id": "wk-zaber-6B2ACC0B13",
+    "title": "Zaberians Wanted (Co-op)",
+    "location": "Vancouver, British Columbia, Canada",
+    "url": "https://apply.workable.com/j/6B2ACC0B13",
+    "posted": "2026-10-27",
+    "description": "If you’re a student looking for a co-op placement and don’t see a suitable posting at the moment, but would like to gain experience at an employee-owned company that builds precision motion control products in Vancouver, please share your resume and tell us what kind of work interests you. We typically check these submissions when planning co-op hiring for upcoming terms. Our teams design, build, and support products used by engineers and researchers around the world. Co-op students work alongside our teams on real projects, and we’re always interested in hearing from curious, hardworking students who enjoy solving problems and take pride in their work. Please include a copy of your transcript and let us know which term you’re available. If a posted co-op role fits what you’re looking for, please apply to it directly instead.",
+    "company": "Zaber Technologies",
+    "source": "auto",
+    "bc": true,
+    "solidworks": false,
+    "startLabel": null,
+    "fitsMay": null,
+    "score": 0
+  },
+  {
+    "id": "wk-zaber-FFCE5DA027",
+    "title": "UX/UI Designer (Co-op)",
+    "location": "Vancouver, British Columbia, Canada",
+    "url": "https://apply.workable.com/j/FFCE5DA027",
+    "posted": "2026-11-06",
+    "description": "Zaber is seeking a detail-oriented and proactive UX/UI Co-op to migrate our design system from Adobe XD to Figma. You’ll also have the opportunity to design a feature for our customer-facing software and see it through with a real product team. You’ll join our responsive and supportive software team, which builds the applications our customers use to control robotics and motion control devices. You’ll work closely with our UX/UI designer, who will mentor you and guide your work, and alongside the developers who turn designs into shipped software. It’s a caring and collaborative team where the culture is to speak freely, and where design is part of the conversation from the start. You’ll also get to see how software, electronics, and firmware come together in a real product. Zaber makes cutting-edge, precision robotics for industry-leading customers across a range of sectors, including photonics, biotechnology, and industrial automation. Through your work on our design system and software, you’ll help make specialized, complex tasks easier for the scientists and engineers who use our products every day. UX/UI Designer Responsibilities Migrate our Style Guide from Adobe XD to Figma, rebuilding it as a well-organized Figma library with components, variants, styles, and variables. Audit the existing Style Guide along the way and flag inconsistencies, gaps, or outdated patterns. Once the migration is complete, design a small feature (or a few, depending on the complexity) for our customer-facing software, from early sketches to high-fidelity prototypes. Work with developers to hand off production-ready specs and assets, and get a hands-on look at how design work becomes shipped software. UX/UI Designer Skills Figma, including components, variants, auto layout, and styles/variables. Adobe XD (at least some knowledge). An understanding of design systems and why consistency matters. A strong eye for detail and the patience for careful, systematic work. Comfort working independently, asking questions, and taking feedback. Enrolled in a University degree program. UX/UI Designer Details The starting wage for this role is $24 - $28/hour, depending on experience. Type: Full-time, co-op, onsite, 1 term. Team: Software. Start: Jan 4, 2027. Closing Date: Nov 22nd. To learn more about our company culture and benefits, visit our careers page: https://www.zaber.com/careers",
+    "company": "Zaber Technologies",
+    "source": "auto",
+    "bc": true,
+    "solidworks": false,
+    "startLabel": null,
+    "fitsMay": null,
+    "score": 2
   }
 ]
