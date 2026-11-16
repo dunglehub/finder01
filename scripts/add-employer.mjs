@@ -1,6 +1,6 @@
 // Adds one employer to data/watchlist.json. Used by the "Add employer" GitHub workflow.
 //
-// Give it a careers link. If the link is a Greenhouse or Lever job board and the board
+// Give it a careers link. If the link is a Greenhouse, Lever or Workable job board and the board
 // really answers, the employer is added with an automatic feed. Otherwise it is added as a
 // link-only employer (shown in the employer list with the star and check buttons).
 import { readFile, writeFile, appendFile } from 'node:fs/promises';
@@ -25,6 +25,10 @@ export function detectBoard(link) {
     const board = host === 'api.lever.co' ? parts[2] : parts[0];
     if (/^[A-Za-z0-9_-]+$/.test(board || '')) return { type: 'lever', board, system: 'Lever' };
   }
+  if (host === 'apply.workable.com') {
+    const board = parts[0] === 'api' ? parts[4] : parts[0];
+    if (/^[A-Za-z0-9_-]+$/.test(board || '') && board !== 'j') return { type: 'workable', board, system: 'Workable' };
+  }
   return null;
 }
 
@@ -46,12 +50,14 @@ export function guessSystem(link) {
 export async function verifyBoard(b, fetchFn = fetch) {
   const url = b.type === 'greenhouse'
     ? `https://boards-api.greenhouse.io/v1/boards/${b.board}/jobs`
-    : `https://api.lever.co/v0/postings/${b.board}?mode=json`;
+    : b.type === 'workable'
+      ? `https://apply.workable.com/api/v1/widget/accounts/${b.board}`
+      : `https://api.lever.co/v0/postings/${b.board}?mode=json`;
   try {
     const res = await fetchFn(url, { headers: UA });
     if (!res.ok) return { ok: false, why: `the job board answered HTTP ${res.status}` };
     const data = await res.json();
-    const count = b.type === 'greenhouse' ? (data.jobs || []).length : (Array.isArray(data) ? data.length : -1);
+    const count = b.type === 'greenhouse' || b.type === 'workable' ? (Array.isArray(data.jobs) ? data.jobs.length : -1) : (Array.isArray(data) ? data.length : -1);
     if (count < 0) return { ok: false, why: 'the job board gave an unexpected answer' };
     return { ok: true, count };
   } catch (e) {
@@ -105,7 +111,7 @@ export async function addEmployer({ name, url, region, type, note }, text, fetch
       why = `Looked like a ${board.system} board, but ${check.why}, so it was added as link-only.`;
     }
   } else {
-    why = 'Not a Greenhouse or Lever link, so it was added as link-only.';
+    why = 'Not a Greenhouse, Lever or Workable link, so it was added as link-only.';
   }
   return { text: insertEntry(text, entry), entry, result, why };
 }

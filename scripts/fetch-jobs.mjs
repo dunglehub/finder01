@@ -1,4 +1,4 @@
-// Pulls jobs from public job-board APIs (Greenhouse, Lever) and writes data/jobs.json.
+// Pulls jobs from public job-board APIs (Greenhouse, Lever, Workable) and writes data/jobs.json.
 // Only official public job-board endpoints are used (no scraping).
 import { readFile, writeFile } from 'node:fs/promises';
 import { isEarlyCareer, stripHtml, enrich } from './lib/classify.mjs';
@@ -38,6 +38,19 @@ const fetchers = {
         description: `${j.descriptionPlain || ''} ${extra} ${j.additionalPlain || ''}`.replace(/\s+/g, ' ').trim(),
       };
     });
+  },
+
+  // Workable's public widget feed (apply.workable.com/<account>)
+  async workable(account) {
+    const data = await getJson(`https://apply.workable.com/api/v1/widget/accounts/${account}?details=true`);
+    return (data.jobs || []).map((j) => ({
+      id: `wk-${account}-${j.shortcode}`,
+      title: j.title,
+      location: [j.city, j.state, j.country].filter(Boolean).join(', '),
+      url: j.url || j.shortlink,
+      posted: j.published_on || (j.created_at ? String(j.created_at).slice(0, 10) : null),
+      description: stripHtml(j.description || ''),
+    }));
   },
 };
 
