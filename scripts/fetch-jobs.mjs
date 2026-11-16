@@ -1,4 +1,4 @@
-// Pulls jobs from public job-board APIs (Greenhouse, Lever, Workable) and writes data/jobs.json.
+// Pulls jobs from public job-board APIs (Greenhouse, Lever, Workable, Workday, SmartRecruiters) and writes data/jobs.json.
 // Only official public job-board endpoints are used (no scraping).
 import { readFile, writeFile } from 'node:fs/promises';
 import { isEarlyCareer, stripHtml, enrich } from './lib/classify.mjs';
@@ -51,6 +51,60 @@ const fetchers = {
       posted: j.published_on || (j.created_at ? String(j.created_at).slice(0, 10) : null),
       description: stripHtml(j.description || ''),
     }));
+  },
+  // SmartRecruiters public postings API. board = company identifier (jobs.smartrecruiters.com/<id>)
+  async smartrecruiters(id) {
+    const seen = new Map();
+    for (const q of ['co-op', 'coop', 'intern', 'student']) {
+      const data = await getJson(`https://api.smartrecruiters.com/v1/companies/${id}/postings?limit=100&q=${encodeURIComponent(q)}`);
+      for (const j of data.content || []) {
+        if (seen.has(j.id)) continue;
+        seen.set(j.id, {
+          id: `sr-${id}-${j.id}`,
+          title: j.name,
+          location: [j.location?.city, j.location?.region, j.location?.country?.toUpperCase()].filter(Boolean).join(', '),
+          url: `https://jobs.smartrecruiters.com/${id}/${j.id}`,
+          posted: j.releasedDate ? String(j.releasedDate).slice(0, 10) : null,
+          description: '',
+        });
+      }
+    }
+    return [...seen.values()];
+  },
+
+  // Workday career sites. board = "<tenant>.<wdN>/<site>", e.g. "qualcomm.wd12/External"
+  async workday(board) {
+    const [host, site] = board.split('/');
+    const tenant = host.split('.')[0];
+    const base = `https://${host}.myworkdayjobs.com`;
+    const seen = new Map();
+    for (const q of ['co-op', 'coop', 'intern', 'student']) {
+      const res = await fetch(`${base}/wday/cxs/${tenant}/${site}/jobs`, {
+        method: 'POST',
+        headers: { ...UA, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ appliedFacets: {}, limit: 20, offset: 0, searchText: q }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      for (const j of data.jobPostings || []) {
+        if (!j.externalPath || seen.has(j.externalPath)) continue;
+        const m = /Posted (Today|Yesterday|(\d+) Days? Ago)/i.exec(j.postedOn || '');
+        let posted = null;
+        if (m) {
+          const back = /today/i.test(m[1]) ? 0 : /yesterday/i.test(m[1]) ? 1 : Number(m[2]);
+          posted = new Date(Date.now() - back * 864e5).toISOString().slice(0, 10);
+        }
+        seen.set(j.externalPath, {
+          id: `wd-${tenant}-${j.externalPath.split('_').pop()}`,
+          title: j.title,
+          location: j.locationsText || '',
+          url: `${base}/en-US/${site}${j.externalPath}`,
+          posted,
+          description: '',
+        });
+      }
+    }
+    return [...seen.values()];
   },
 };
 

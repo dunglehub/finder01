@@ -1,6 +1,6 @@
 // Adds one employer to data/watchlist.json. Used by the "Add employer" GitHub workflow.
 //
-// Give it a careers link. If the link is a Greenhouse, Lever or Workable job board and the board
+// Give it a careers link. If the link is a Greenhouse, Lever, Workable, Workday or SmartRecruiters job board and the board
 // really answers, the employer is added with an automatic feed. Otherwise it is added as a
 // link-only employer (shown in the employer list with the star and check buttons).
 import { readFile, writeFile, appendFile } from 'node:fs/promises';
@@ -29,6 +29,17 @@ export function detectBoard(link) {
     const board = parts[0] === 'api' ? parts[4] : parts[0];
     if (/^[A-Za-z0-9_-]+$/.test(board || '') && board !== 'j') return { type: 'workable', board, system: 'Workable' };
   }
+  if (host === 'jobs.smartrecruiters.com' || host === 'careers.smartrecruiters.com') {
+    const board = parts[0];
+    if (/^[A-Za-z0-9_-]+$/.test(board || '')) return { type: 'smartrecruiters', board, system: 'SmartRecruiters' };
+  }
+  if (host.endsWith('.myworkdayjobs.com')) {
+    const labels = host.split('.');
+    const site = parts.find((p) => !/^[a-z]{2}-[A-Z]{2}$/.test(p));
+    if (labels.length >= 4 && /^wd\d+$/.test(labels[1]) && /^[A-Za-z0-9_-]+$/.test(site || '')) {
+      return { type: 'workday', board: `${labels[0]}.${labels[1]}/${site}`, system: 'Workday' };
+    }
+  }
   return null;
 }
 
@@ -48,16 +59,32 @@ export function guessSystem(link) {
 
 // ---- check that the board really answers (same endpoints the fetch script uses) ----
 export async function verifyBoard(b, fetchFn = fetch) {
-  const url = b.type === 'greenhouse'
-    ? `https://boards-api.greenhouse.io/v1/boards/${b.board}/jobs`
-    : b.type === 'workable'
-      ? `https://apply.workable.com/api/v1/widget/accounts/${b.board}`
-      : `https://api.lever.co/v0/postings/${b.board}?mode=json`;
   try {
+    if (b.type === 'workday') {
+      const [host, site] = b.board.split('/');
+      const res = await fetchFn(`https://${host}.myworkdayjobs.com/wday/cxs/${host.split('.')[0]}/${site}/jobs`, {
+        method: 'POST',
+        headers: { ...UA, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ appliedFacets: {}, limit: 1, offset: 0, searchText: '' }),
+      });
+      if (!res.ok) return { ok: false, why: `the job board answered HTTP ${res.status}` };
+      const data = await res.json();
+      if (typeof data.total !== 'number') return { ok: false, why: 'the job board gave an unexpected answer' };
+      return { ok: true, count: data.total };
+    }
+    const url = b.type === 'greenhouse'
+      ? `https://boards-api.greenhouse.io/v1/boards/${b.board}/jobs`
+      : b.type === 'workable'
+        ? `https://apply.workable.com/api/v1/widget/accounts/${b.board}`
+        : b.type === 'smartrecruiters'
+          ? `https://api.smartrecruiters.com/v1/companies/${b.board}/postings?limit=1`
+          : `https://api.lever.co/v0/postings/${b.board}?mode=json`;
     const res = await fetchFn(url, { headers: UA });
     if (!res.ok) return { ok: false, why: `the job board answered HTTP ${res.status}` };
     const data = await res.json();
-    const count = b.type === 'greenhouse' || b.type === 'workable' ? (Array.isArray(data.jobs) ? data.jobs.length : -1) : (Array.isArray(data) ? data.length : -1);
+    const count = b.type === 'smartrecruiters' ? (Array.isArray(data.content) ? data.totalFound : -1)
+      : b.type === 'greenhouse' || b.type === 'workable' ? (Array.isArray(data.jobs) ? data.jobs.length : -1)
+      : (Array.isArray(data) ? data.length : -1);
     if (count < 0) return { ok: false, why: 'the job board gave an unexpected answer' };
     return { ok: true, count };
   } catch (e) {
@@ -111,7 +138,7 @@ export async function addEmployer({ name, url, region, type, note }, text, fetch
       why = `Looked like a ${board.system} board, but ${check.why}, so it was added as link-only.`;
     }
   } else {
-    why = 'Not a Greenhouse, Lever or Workable link, so it was added as link-only.';
+    why = 'Not a Greenhouse, Lever, Workable, Workday or SmartRecruiters link, so it was added as link-only.';
   }
   return { text: insertEntry(text, entry), entry, result, why };
 }
