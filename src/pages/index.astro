@@ -232,7 +232,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .brand h1 { font-size: 1rem; }
         .live { font-size: .72rem; gap: 5px; }
         .live i { width: 7px; height: 7px; }
-        .topright { gap: 2px; flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+        .brand { flex: 1 1 100%; }
+        .topright { gap: 4px; flex: 1 1 100%; justify-content: space-between; max-width: 100%; min-width: 0; }
         .linkbtn { padding: 4px 5px; font-size: .78rem; }
         .addbtn { padding: 4px 9px; font-size: .78rem; border-radius: 7px; gap: 3px; }
         .addbtn .ico { width: 12px; height: 12px; }
@@ -360,7 +361,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         </div>
         <div class="topright">
           <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset filters</button>
-          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Add<span class="long"> posting</span></span></button>
+          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Posting</span></button>
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
             <div class="menu" id="menu" hidden>
@@ -589,7 +590,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <div class="err" id="a-err"></div>
         <div class="row">
           <button type="button" id="a-cancel">Cancel</button>
-          <button type="submit" class="primary" id="a-save">Add to Shortlist</button>
+          <button type="submit" class="primary" id="a-save">+ Shortlist</button>
         </div>
       </form>
     </dialog>
@@ -1434,7 +1435,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               if (!$('a-url').value) missing.push('the link');
               if (!$('a-date').value) missing.push('start date');
               if (!$('a-loc').value) missing.push('location');
-              st.textContent = 'Filled in. Please check it' + (missing.length ? ' and add ' + missing.join(', ') : '') + ', then click Add to Shortlist.';
+              st.textContent = 'Filled in. Please check it' + (missing.length ? ' and add ' + missing.join(', ') : '') + ', then click + Shortlist.';
             })
             .catch(function () { st.textContent = 'Could not reach the server. Fill the fields in by hand.'; })
             .then(function () { btn.disabled = false; });
@@ -1461,7 +1462,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               showView('jobs');
             })
             .catch(function () { $('a-err').textContent = 'Could not reach the shared list. Please try again.'; })
-            .then(function () { btn.disabled = false; btn.textContent = 'Add to Shortlist'; });
+            .then(function () { btn.disabled = false; btn.textContent = '+ Shortlist'; });
         });
 
         // ---- Word (.docx) text, read in the browser so only plain text is sent ----
