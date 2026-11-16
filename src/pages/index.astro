@@ -359,7 +359,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <span class="live locked" id="live"><i></i><b>Live</b></span>
         </div>
         <div class="topright">
-          <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset</button>
+          <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset filters</button>
           <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Add<span class="long"> posting</span></span></button>
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
@@ -396,7 +396,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
                 <input type="search" id="q" placeholder="Search" aria-label="Search jobs" />
               </div>
               <div class="fchecks" id="fchecks" role="group" aria-label="Filters, in order of priority (tick one or more to narrow the list)"></div>
-              <button type="button" class="linkbtn" id="clear" hidden>Reset</button>
+              <button type="button" class="linkbtn" id="clear" hidden>Reset filters</button>
             </details>
           </div>
           <p class="built">Built {checked}</p>
@@ -426,7 +426,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <section class="view" data-view="bc" hidden>
           <h2>Employers</h2>
           <p class="sub">These sites can't be pulled automatically, so each link goes straight to their careers page. Search for "intern" or "co-op". Use the buttons to keep track of the ones you've looked at. These are the BC ones.</p>
-          <div class="emptools"><button type="button" class="addbtn" data-emp-add="BC"><span class="ico" data-i="plus"></span>Add employer</button></div>
+          <div class="emptools"><button type="button" class="addbtn" data-emp-add="BC"><span class="ico" data-i="plus"></span>Employer</button></div>
           <div class="grid">
             {bcList.map((c) => (
               <div class="co" data-id={`co:${c.name}`}>
@@ -445,7 +445,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <section class="view" data-view="else" hidden>
           <h2>Elsewhere</h2>
           <p class="sub">Employers outside BC. Same idea: open the careers page and search for "intern" or "co-op".</p>
-          <div class="emptools"><button type="button" class="addbtn" data-emp-add="Elsewhere"><span class="ico" data-i="plus"></span>Add employer</button></div>
+          <div class="emptools"><button type="button" class="addbtn" data-emp-add="Elsewhere"><span class="ico" data-i="plus"></span>Employer</button></div>
           <div class="grid">
             {elseList.map((c) => (
               <div class="co" data-id={`co:${c.name}`}>
