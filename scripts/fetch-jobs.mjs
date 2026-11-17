@@ -138,6 +138,78 @@ for (const company of feeds) {
   }
 }
 
+// ---- JSearch (Google for Jobs: Indeed, LinkedIn, Glassdoor ...) ----
+// Needs the JSEARCH_API_KEY secret. Settings live in data/jsearch.json. To save the small free quota it only
+// refreshes every "everyDays" days (or when the workflow is started by hand); other runs keep the earlier results.
+async function jsearchRun(cfg, key) {
+  const hosts = [
+    { url: 'https://api.openwebninja.com/jsearch/search', headers: { 'x-api-key': key } },
+    { url: 'https://jsearch.p.rapidapi.com/search', headers: { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'jsearch.p.rapidapi.com' } },
+  ];
+  let host = 0;
+  const seen = new Map();
+  for (const country of cfg.countries) {
+    for (const query of cfg.queries) {
+      const qs = new URLSearchParams({ query, country, employment_types: 'INTERN', date_posted: cfg.datePosted || 'month', num_pages: String(cfg.pages || 1) });
+      let res = await fetch(`${hosts[host].url}?${qs}`, { headers: { ...UA, ...hosts[host].headers } });
+      if ((res.status === 401 || res.status === 403) && host === 0) {
+        host = 1;
+        res = await fetch(`${hosts[host].url}?${qs}`, { headers: { ...UA, ...hosts[host].headers } });
+      }
+      if (!res.ok) throw new Error(`JSearch HTTP ${res.status}`);
+      const data = await res.json();
+      for (const j of data.data || []) {
+        if (seen.has(j.job_id)) continue;
+        const types = (j.job_employment_types || [j.job_employment_type]).join(' ');
+        if (!isEarlyCareer(j.job_title) && !/INTERN/i.test(types)) continue;
+        seen.set(j.job_id, enrich({
+          id: `js-${j.job_id}`.slice(0, 120),
+          title: String(j.job_title || '').trim(),
+          location: [j.job_city, j.job_state, j.job_country].filter(Boolean).join(', ') + (j.job_is_remote ? ' (remote)' : ''),
+          url: j.job_apply_link || j.job_google_link,
+          posted: j.job_posted_at_datetime_utc ? String(j.job_posted_at_datetime_utc).slice(0, 10) : null,
+          company: j.employer_name || 'Unknown',
+          source: 'auto',
+          via: j.job_publisher || 'JSearch',
+          description: String(j.job_description || '').replace(/\s+/g, ' ').slice(0, 4000),
+        }));
+      }
+    }
+  }
+  return [...seen.values()];
+}
+
+{
+  let previous = [];
+  try { previous = JSON.parse(await readFile(new URL('../data/jobs.json', import.meta.url), 'utf8')); } catch {}
+  const old = previous.filter((j) => String(j.id).startsWith('js-'));
+  let cfg = null;
+  try { cfg = JSON.parse(await readFile(new URL('../data/jsearch.json', import.meta.url), 'utf8')); } catch {}
+  const key = process.env.JSEARCH_API_KEY;
+  if (cfg && key) {
+    const now = new Date();
+    const day = Math.floor(now.getTime() / 864e5);
+    const due = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' || old.length === 0 ||
+      (now.getUTCHours() === 17 && day % (cfg.everyDays || 3) === 0);
+    if (due) {
+      try {
+        const found = await jsearchRun(cfg, key);
+        out.push(...found);
+        console.log(`JSearch: ${found.length} early-career jobs`);
+      } catch (err) {
+        console.warn(`! JSearch failed (${err.message})`);
+        out.push(...old);
+      }
+    } else {
+      out.push(...old);
+      console.log(`JSearch: not due, kept ${old.length} earlier jobs`);
+    }
+  } else {
+    out.push(...old);
+    if (cfg) console.log('JSearch: no JSEARCH_API_KEY secret, skipped');
+  }
+}
+
 // If every feed failed, keep the previous file instead of wiping the site.
 if (feeds.length && problems.length === feeds.length) {
   console.error('All feeds failed; leaving data/jobs.json unchanged.');
