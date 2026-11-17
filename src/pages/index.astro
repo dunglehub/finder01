@@ -40,6 +40,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         --bg: #f2f0eb; --bg2: #f8f7f3; --card: #ffffff; --text: #1f2530; --muted: #6b6f78; --line: #dcd9d1;
         --shadow: 0 1px 2px rgba(31,37,48,.05);
         --radius: 12px;
+        --t-red-bg: #fde4e1; --t-red: #a6261c; --t-orange-bg: #ffe6cc; --t-orange: #a8480a; --t-yellow-bg: #fbf0b4; --t-yellow: #7a5c00;
+        --t-green-bg: #dcf2d2; --t-green: #2f6b1a; --t-teal-bg: #d2f0ec; --t-teal: #146a62; --t-blue-bg: #dde8fb; --t-blue: #274c9a;
+        --t-indigo-bg: #e3e0f8; --t-indigo: #3d359c; --t-purple-bg: #efdcf6; --t-purple: #7a2a9a; --t-slate-bg: #dfe3ea; --t-slate: #2f3a4d;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -47,6 +50,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           --amber: #e2b072; --amber-soft: #3a2f1c; --grey: #a2a5ad; --grey-soft: #2d3038; --red: #ef9a94;
           --bg: #181a1f; --bg2: #1f2228; --card: #23262d; --text: #eceae4; --muted: #a2a5ad; --line: #343841;
           --shadow: 0 1px 2px rgba(0,0,0,.4);
+          --t-red-bg: #4a2220; --t-red: #f5a9a2; --t-orange-bg: #4a2d14; --t-orange: #f6b97a; --t-yellow-bg: #453d12; --t-yellow: #ecd56a;
+          --t-green-bg: #23401b; --t-green: #a6dc8f; --t-teal-bg: #14403c; --t-teal: #7fd6cc; --t-blue-bg: #1f2f55; --t-blue: #9bb8f0;
+          --t-indigo-bg: #2c2a58; --t-indigo: #b3aaf0; --t-purple-bg: #3d2250; --t-purple: #d6a4ea; --t-slate-bg: #313744; --t-slate: #d5dbe8;
         }
       }
       [hidden] { display: none !important; }
@@ -81,10 +87,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .addbtn.show { display: inline-flex; }
       .addbtn:hover { filter: brightness(1.08); }
       .usermenu { position: relative; }
-      .chip { display: inline-flex; align-items: center; gap: 9px; padding: 5px 14px 5px 6px; border-radius: 12px; border: 1px solid var(--line);
+      .chip { display: inline-flex; align-items: center; gap: 9px; padding: 3px 10px 3px 4px; border-radius: 12px; border: 1px solid var(--line);
         background: var(--card); font-size: .92rem; color: var(--text); cursor: pointer; }
-      .chip:not(:has(.avatar)) { padding-left: 14px; }
-      .chip .avatar { width: 28px; height: 28px; border-radius: 50%; font-size: .85rem; }
+      .chip:not(:has(.avatar)) { padding-left: 10px; }
+      .chip .avatar { width: 24px; height: 24px; border-radius: 50%; font-size: .78rem; }
       .menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--card); border: 1px solid var(--line); border-radius: 10px;
         box-shadow: 0 10px 30px rgba(0,0,0,.15); min-width: 170px; padding: 6px; z-index: 30; }
       .menu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 12px; border-radius: 8px;
@@ -106,8 +112,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .nav button[aria-pressed=true] { background: var(--grey-soft); font-weight: 600; }
       #sidejobs { display: flex; flex-direction: column; gap: 14px; }
       .pills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .pills button { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px;
-        border: 1px solid var(--line); background: var(--card); font: inherit; font-size: .9rem; color: var(--text); cursor: pointer; }
+      .pills button { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 9px;
+        border: 1px solid var(--line); background: var(--card); font: inherit; font-size: .88rem; color: var(--text); cursor: pointer; }
       .pills button .ico { display: none; }
       .pills button .n { color: var(--muted); font-weight: 600; }
       .pills button:hover { border-color: var(--muted); }
@@ -118,10 +124,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .fbox > summary { display: none; cursor: pointer; font-weight: 600; padding: 4px 0 10px; }
       .search { position: relative; }
       .search .ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.05rem; }
-      .search input { width: 100%; padding: 9px 12px 9px 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; }
-      .fchecks { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-      .chk { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px;
-        background: var(--card); font-size: .88rem; cursor: pointer; }
+      .search input { width: 100%; padding: 6px 12px 6px 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; }
+      .fchecks { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+      .chk { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 9px;
+        background: var(--card); font-size: .86rem; cursor: pointer; }
       .chk input { accent-color: var(--blue); width: 16px; height: 16px; margin: 0; flex: none; }
       .fchecks .num { display: inline-block; min-width: 1.4em; text-align: center; font-weight: 700; font-size: .74rem; color: var(--muted);
         background: var(--grey-soft); border-radius: 999px; padding: 1px 6px; flex: none; }
@@ -137,7 +143,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
       /* ---------- job cards ---------- */
       .card { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 2px 12px; background: var(--card); border: 1px solid var(--line);
-        border-radius: 12px; padding: 12px 14px; cursor: pointer; box-shadow: var(--shadow); }
+        border-radius: 12px; padding: 9px 12px; cursor: pointer; box-shadow: var(--shadow); }
       .card:hover { border-color: var(--muted); }
       .card.sel { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
       .card[data-state=skip] { opacity: .72; }
@@ -151,12 +157,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .card h3 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.3; }
       .meta { color: var(--muted); font-size: .88rem; margin-top: 1px; }
       .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-      .tag { font-size: .74rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--grey-soft); color: var(--muted);
+      .tag { font-size: .74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--grey-soft); color: var(--muted);
         display: inline-flex; align-items: center; gap: 4px; }
-      .tag.warn { background: var(--amber-soft); color: var(--amber); }
-      .tag.info { background: var(--blue-soft); color: var(--blue); }
-      .tag.match { background: var(--blue-soft); color: var(--blue); }
-      .tag.match.strong { background: var(--blue-soft); color: var(--blue); }
+      .tag.warn { background: transparent; color: var(--muted); border: 1px dashed var(--muted); padding-top: 1px; padding-bottom: 1px; }
+      .tag.info { background: var(--t-slate-bg); color: var(--t-slate); }
+      .tag.t-red { background: var(--t-red-bg); color: var(--t-red); }
+      .tag.t-orange { background: var(--t-orange-bg); color: var(--t-orange); }
+      .tag.t-yellow { background: var(--t-yellow-bg); color: var(--t-yellow); }
+      .tag.t-green { background: var(--t-green-bg); color: var(--t-green); }
+      .tag.t-teal { background: var(--t-teal-bg); color: var(--t-teal); }
+      .tag.t-blue { background: var(--t-blue-bg); color: var(--t-blue); }
+      .tag.t-indigo { background: var(--t-indigo-bg); color: var(--t-indigo); }
+      .tag.t-purple { background: var(--t-purple-bg); color: var(--t-purple); }
       .tag .ico { font-size: .9em; }
       .why { margin: 8px 0 0; font-size: .8rem; color: var(--muted); }
       .note { margin: 8px 0 0; font-size: .86rem; color: var(--text); opacity: .88;
@@ -728,6 +740,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         rebuildJobs();
 
         // ---- filters and the default sort, in priority order (0 matters most) ----
+        var CANADA_RE = /\bCanada\b|\b(British Columbia|Alberta|Saskatchewan|Manitoba|Ontario|Quebec|Qu\u00e9bec|New Brunswick|Nova Scotia|Newfoundland|Prince Edward Island|Yukon|Nunavut)\b|\b(BC|B\.C\.|AB|SK|MB|ON|QC|NB|NS|NL|PE|PEI)$/;
+        function inCanada(j) {
+          if (j.bc) return true;
+          var loc = String(j.location || '').replace(/\s*\(remote\)\s*$/i, '').trim(), parts = loc.split(',');
+          if (CANADA_RE.test(loc)) return true;
+          return parts.length >= 3 && parts[parts.length - 1].trim() === 'CA'; // "City, Province, CA" from the job search feed
+        }
         var AB_RE = /\bAB\b|\b(Alberta|Calgary|Edmonton|Red Deer|Lethbridge|Medicine Hat|Fort McMurray)\b/;
         var EV_RE = /electric vehicle|\bEVs?\b|e-?mobility|powertrain|\bTesla\b|Rivian|\bLucid\b|Polestar|\bBYD\b|Proterra|Lion Electric|Taiga|Nikola/i;
         var CLEAN_RE = /solar|renewable|clean ?energy|wind (power|turbine|energy)|hydrogen|fuel ?cell|energy storage|geothermal|hydro ?electric|sustainab|decarboni[sz]/i;
@@ -761,20 +780,20 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           { id: 'f1', label: 'May 2027 +', test: function (j) { return j.fitsMay !== false; } },
           { id: 'f2', label: 'BC', test: function (j) { return !!j.bc; } },
           { id: 'f3', label: 'Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
+          { id: 'f10', label: 'Canada', test: function (j) { return inCanada(j); } },
           { id: 'f4', label: 'Mechanical', test: function (j) { return topicTags(j).mech; } },
           { id: 'f5', label: 'Battery', test: function (j) { return topicTags(j).battery; } },
           { id: 'f6', label: 'EV', test: function (j) { return EV_RE.test(ownText(j)); } },
           { id: 'f7', label: 'Clean energy', test: function (j) { return CLEAN_RE.test(ownText(j)); } },
           { id: 'f8', label: 'SolidWorks', test: function (j) { return !!j.solidworks; } },
-          { id: 'f9', label: 'New (30 days)', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
-          { id: 'f10', label: 'Big name', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
+          { id: 'f9', label: 'Last 30 days', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
           { id: 'f11', label: 'All dates', test: function () { return true; } },
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
         function byPriority(a, b) {
           var fa = flags(a), fb = flags(b), i;
-          for (i = 0; i <= 9; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
-          var cr = byCompanyRank(a, b); if (cr) return cr; // 10: well-known companies, best-ranked first
+          for (i = 0; i <= 10; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
+          var cr = byCompanyRank(a, b); if (cr) return cr; // then well-known companies, best-ranked first
           if ((a.fitsMay === false) !== (b.fitsMay === false)) return a.fitsMay === false ? 1 : -1; // earlier start dates go last
           return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b);
         }
@@ -1122,19 +1141,22 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         $('prep-copy-letter').addEventListener('click', function () { copyText($('prep-letter').value, $('prep-copy-letter')); });
         $('prep-close').addEventListener('click', function () { var d = $('prep-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); });
 
+        // Tag colours follow the filter order: red, orange, yellow, green, teal, blue, indigo, purple.
         function jobTags(j) {
           var mt = matchOf(j), t = el('div', 'tags');
-          if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong' : 'Good', mt.tier === 'strong' ? 'match strong' : 'match', 'plus'));
-          if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' · ' + j.eventDate : ''), 'warn', 'cal'));
-          else if (j.fitsMay === true) t.appendChild(tag(j.startLabel, 'info', 'check'));
+          if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong' : 'Good', mt.tier === 'strong' ? 't-red' : 't-orange', 'plus'));
+          if (j.bc) t.appendChild(tag('BC', 't-yellow'));
+          else if (inCanada(j)) t.appendChild(tag('Canada', 't-green'));
+          else t.appendChild(tag('Outside BC'));
+          if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' \u00b7 ' + j.eventDate : ''), 'warn', 'cal'));
+          else if (j.fitsMay === true) t.appendChild(tag(j.startLabel, 't-teal', 'check'));
           else if (j.fitsMay === false) t.appendChild(tag(j.startLabel, 'warn'));
           else if (j.source === 'added' && j.startLabel) t.appendChild(tag('Start: ' + j.startLabel, 'warn'));
           else t.appendChild(tag('No start date', 'warn'));
-          t.appendChild(j.bc ? tag('BC') : tag('Outside BC'));
-          if (j.solidworks) t.appendChild(tag('SolidWorks'));
           var tt = topicTags(j);
-          if (tt.battery) t.appendChild(tag('Battery'));
-          if (tt.mech) t.appendChild(tag('Mechanical'));
+          if (tt.mech) t.appendChild(tag('Mechanical', 't-blue'));
+          if (tt.battery) t.appendChild(tag('Battery', 't-indigo'));
+          if (j.solidworks) t.appendChild(tag('SolidWorks', 't-purple'));
           if (j.source === 'manual') t.appendChild(tag('Hand-picked', 'info'));
           if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
           return t;
