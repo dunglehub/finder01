@@ -328,6 +328,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #prep-dialog textarea { width: 100%; min-height: 300px; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
       #prep-dialog #prep-desc { min-height: 90px; }
+      #prep-dialog .hint { color: var(--muted); font-size: .86rem; margin: 4px 0 0; }
       #prep-dialog .qa { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
       #prep-dialog .qa .k { color: var(--muted); }
       #prep-dialog .qa .v { word-break: break-word; }
@@ -518,8 +519,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <textarea id="prep-letter"></textarea>
       <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button></div>
       <div id="prep-ai" hidden>
-        <label for="prep-desc">Job description (optional: paste it here for a better AI letter)</label>
-        <textarea id="prep-desc" maxlength="8000"></textarea>
+        <label for="prep-desc">My own points to include (optional)</label>
+        <textarea id="prep-desc" maxlength="1500" placeholder="Anything you want said in the letter, in your own words. For example: I built a small wind turbine last summer, and I can start in May."></textarea>
+        <div class="hint">The AI reads the job posting page by itself and works your points into the letter.</div>
         <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
           <button type="button" class="primary" id="prep-ai-btn">Write with AI</button>
           <span class="who" id="prep-ai-status" role="status"></span>
@@ -1118,17 +1120,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         $('prep-ai-btn').addEventListener('click', function () {
           var j = prepJob; if (!j || !API || !pass) return;
           var btn = $('prep-ai-btn'), st = $('prep-ai-status');
-          var detail = $('prep-desc').value.trim() || [j.description, j.note, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ').trim();
-          btn.disabled = true; st.textContent = 'Writing… (a few seconds)';
+          var points = $('prep-desc').value.trim();
+          var detail = [j.description, j.note, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' ').trim();
+          btn.disabled = true; st.textContent = 'Reading the posting and writing… (a few seconds)';
           fetch(API + '/letter', {
             method: 'POST', cache: 'no-store',
             headers: { 'Content-Type': 'application/json', 'X-Passcode': pass },
-            body: JSON.stringify({ title: j.title, company: j.company, location: j.location || '', description: detail, profile: PROFILE })
+            body: JSON.stringify({ title: j.title, company: j.company, location: j.location || '', url: j.url || '', description: detail, points: points, profile: PROFILE })
           }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
             .then(function (res) {
               if (res.ok && res.d.letter) {
                 $('prep-letter').value = frameLetter(j, res.d.letter);
-                st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.usedResume ? 'Used your saved resume facts. ' : 'Tip: add your resume under My resume so letters use your real details. ') + (res.d.left != null ? res.d.left + ' left today.' : '');
+                st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.postingRead === 'page' ? 'Read the posting page. ' : res.d.postingRead === 'stored' ? 'Used the short description we have (the page could not be read). ' : 'No description found for this job. ') + (res.d.usedPoints ? 'Worked in your points. ' : '') + (res.d.usedResume ? 'Used your saved resume facts. ' : 'Tip: add your resume under My resume so letters use your real details. ') + (res.d.left != null ? res.d.left + ' left today.' : '');
               } else if (res.status === 401) {
                 st.textContent = 'Please log in again.';
               } else {
