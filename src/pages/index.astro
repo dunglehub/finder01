@@ -407,8 +407,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <div id="sidejobs">
             <div class="sep"></div>
             <div class="pills" id="tabs" role="group" aria-label="Show postings">
-              <button type="button" data-tab="review" aria-pressed="true"><span class="ico" data-i="refresh"></span>Review <span class="n"></span></button>
-              <button type="button" data-tab="shortlist" aria-pressed="false"><span class="ico" data-i="star"></span>Shortlist <span class="n"></span></button>
+              <button type="button" data-tab="review" aria-pressed="false"><span class="ico" data-i="refresh"></span>Review <span class="n"></span></button>
+              <button type="button" data-tab="shortlist" aria-pressed="true"><span class="ico" data-i="star"></span>Shortlist <span class="n"></span></button>
               <button type="button" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>Applied <span class="n"></span></button>
               <button type="button" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Skipped <span class="n"></span></button>
             </div>
@@ -424,7 +424,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               <button type="button" class="linkbtn" id="clear" hidden>Reset filters</button>
             </details>
           </div>
-          <p class="built">Updated <span id="b-upd" data-iso={status.updated}>{updatedText}</span>{polledText && <><br />Indeed and others polled <span id="b-pol" data-iso={status.polled}>{polledText}</span></>}</p>
+          <p class="built">Public feeds updated <span id="b-upd" data-iso={status.updated}>{updatedText}</span>{polledText && <><br />Indeed feed updated <span id="b-pol" data-iso={status.polled}>{polledText}</span></>}</p>
         </aside>
 
         <div class="main">
@@ -708,7 +708,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         var who = lsGet('cf_name') || '';
         var pass = lsGet('cf_pass') || '';
         try { posts = JSON.parse(lsGet('cf_posts') || '[]') || []; } catch (e) { posts = []; }
-        var tab = 'review';
+        var tab = 'shortlist';
         var link = API ? 'connecting' : 'local'; // connecting | online | offline | locked | local
         if (API && !pass) { marks = {}; posts = []; link = 'locked'; who = ''; lsDel('cf_marks'); lsDel('cf_posts'); lsDel('cf_name'); }
 
@@ -903,7 +903,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function logout(msg) {
           pass = ''; who = ''; marks = {}; posts = []; PRIVATE = {}; setEmployers({});
           lsDel('cf_pass'); lsDel('cf_name'); lsDel('cf_marks'); lsDel('cf_posts');
-          link = 'locked'; tab = 'review'; rebuildJobs();
+          link = 'locked'; tab = 'shortlist'; rebuildJobs();
           if (msg) flash(msg);
           renderAll();
         }
@@ -1714,7 +1714,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           try { history.replaceState(null, '', '#' + v); } catch (err) {}
         });
         $('home').addEventListener('click', function () {
-          tab = 'review'; $('clear').click(); showView('jobs');
+          tab = 'shortlist'; $('clear').click(); showView('jobs');
           $('menu').hidden = true;
           try { history.replaceState(null, '', location.pathname + location.search); } catch (err) {}
           renderAll(); window.scrollTo(0, 0);
