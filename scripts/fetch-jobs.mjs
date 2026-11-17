@@ -179,6 +179,7 @@ async function jsearchRun(cfg, key) {
   return [...seen.values()];
 }
 
+let polledNow = false;
 {
   let previous = [];
   try { previous = JSON.parse(await readFile(new URL('../data/jobs.json', import.meta.url), 'utf8')); } catch {}
@@ -195,6 +196,7 @@ async function jsearchRun(cfg, key) {
       try {
         const found = await jsearchRun(cfg, key);
         out.push(...found);
+        polledNow = true;
         console.log(`JSearch: ${found.length} early-career jobs`);
       } catch (err) {
         console.warn(`! JSearch failed (${err.message})`);
@@ -230,5 +232,21 @@ if (problems.length) {
 
 // Stable order so the file only changes when jobs actually change.
 out.sort((a, b) => a.id.localeCompare(b.id));
-await writeFile(new URL('../data/jobs.json', import.meta.url), JSON.stringify(out, null, 2) + '\n');
+const jobsText = JSON.stringify(out, null, 2) + '\n';
+let oldText = '';
+try { oldText = await readFile(new URL('../data/jobs.json', import.meta.url), 'utf8'); } catch {}
+await writeFile(new URL('../data/jobs.json', import.meta.url), jobsText);
+
+// data/status.json: when the job list last changed, and when JSearch (Indeed and others) was last polled.
+{
+  let st = { updated: null, polled: null };
+  try { st = { ...st, ...JSON.parse(await readFile(new URL('../data/status.json', import.meta.url), 'utf8')) }; } catch {}
+  const nowIso = new Date().toISOString();
+  const next = { ...st };
+  if (jobsText !== oldText || !st.updated) next.updated = nowIso;
+  if (polledNow) next.polled = nowIso;
+  if (JSON.stringify(next) !== JSON.stringify(st)) {
+    await writeFile(new URL('../data/status.json', import.meta.url), JSON.stringify(next, null, 2) + '\n');
+  }
+}
 console.log(`Wrote ${out.length} jobs.${problems.length ? ' Problems: ' + problems.join('; ') : ''}`);
