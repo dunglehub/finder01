@@ -206,11 +206,11 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         background: var(--bg2); border-radius: 8px; padding: 10px 12px; }
       .detail .dbar { border-top: 1px solid var(--line); padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
       .detail .dbar .actions { margin: 0; }
-      .detail .dbar .actions button { font-size: .86rem; padding: 7px 13px; }
+      .detail .dbar .actions button { font-size: .84rem; padding: 4px 10px; }
       .detail .dbar .spacer { flex: 1; }
-      .btn2 { display: inline-block; text-decoration: none; font-size: .86rem; padding: 7px 13px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
+      .btn2 { display: inline-block; text-decoration: none; font-size: .84rem; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
       .btn2:hover { border-color: var(--muted); }
-      .btn1 { font: inherit; font-weight: 600; font-size: .9rem; padding: 8px 16px; border-radius: 8px; border: none; background: var(--blue); color: #fff; cursor: pointer; }
+      .btn1 { font: inherit; font-weight: 600; font-size: .88rem; padding: 5px 12px; border-radius: 8px; border: none; background: var(--blue); color: #fff; cursor: pointer; }
       .btn1:hover { filter: brightness(1.08); }
       .detail .ph { padding: 40px 26px; color: var(--muted); }
       .dback { display: none; font: inherit; background: none; border: none; color: var(--blue); cursor: pointer; padding: 0 0 12px; }
@@ -315,7 +315,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .hid summary { cursor: pointer; color: var(--muted); font-size: .92rem; }
       .hidrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); margin-top: 8px; }
       .hidrow span { flex: 1; font-weight: 600; }
-      .hidrow button { font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
+      .hidrow button { font: inherit; font-size: .86rem; padding: 4px 9px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
       #resume-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
       #resume-dialog textarea { width: 100%; min-height: 128px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
@@ -333,7 +333,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #prep-dialog .qa .k { color: var(--muted); }
       #prep-dialog .qa .v { word-break: break-word; }
       #prep-dialog .warnbox { background: var(--amber-soft); color: var(--amber); border-radius: 10px; padding: 8px 12px; font-size: .88rem; margin: 8px 0 12px; }
-      #prep-dialog a.btnlink { display: inline-block; text-decoration: none; padding: 9px 18px; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 600; }
+      #prep-dialog a.btnlink { display: inline-block; text-decoration: none; padding: 5px 12px; border-radius: 8px; background: var(--blue); color: #fff; font-weight: 600; }
       @media (max-width: 520px) { #prep-dialog .qa { grid-template-columns: 1fr auto; } #prep-dialog .qa .k { grid-column: 1 / -1; } }
       .empty { padding: 34px 20px; text-align: center; color: var(--muted); background: var(--bg2);
         border: 1px dashed var(--line); border-radius: var(--radius); }
@@ -370,7 +370,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       dialog input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; }
       dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
-      dialog button { font: inherit; padding: 9px 18px; border-radius: 10px; cursor: pointer;
+      dialog button { font: inherit; font-size: .9rem; padding: 5px 12px; border-radius: 8px; cursor: pointer;
         border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
       dialog button.primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
       dialog .err { color: var(--red); font-size: .88rem; min-height: 1.2em; margin-top: 8px; }
@@ -517,13 +517,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <div class="warnbox">Draft only. Read it, fix anything that is not true for you, then paste it into the application.</div>
       <label for="prep-letter">Cover letter</label>
       <textarea id="prep-letter"></textarea>
-      <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button></div>
+      <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button><button type="button" id="prep-pdf-letter" style="margin-left:8px">PDF</button></div>
       <div id="prep-ai" hidden>
         <label for="prep-desc">My own points to include (optional)</label>
         <textarea id="prep-desc" maxlength="1500" placeholder="Anything you want said in the letter, in your own words. For example: I built a small wind turbine last summer, and I can start in May."></textarea>
         <div class="hint">The AI reads the job posting page by itself and works your points into the letter.</div>
         <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
-          <button type="button" class="primary" id="prep-ai-btn">Write with AI</button>
+          <button type="button" class="primary" id="prep-ai-btn">AI write</button>
           <span class="who" id="prep-ai-status" role="status"></span>
         </div>
       </div>
@@ -1079,7 +1079,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           return frameLetter(j, [p1, p2, p3].join('\n\n'));
         }
         // Header, "Re:" line, greeting and sign-off around a body (shared by the template and the AI letter).
-        function frameLetter(j, body) {
+        function frameLetter(j, body, opt) {
+          opt = opt || {};
           var app = PROFILE.application || {};
           var name = PROFILE.fullName || '';
           var contact = [app.location, PRIVATE.phone, PRIVATE.email].filter(Boolean).join(' ');
@@ -1089,9 +1090,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             date,
             'Hiring Committee' + (j.company ? '\n' + j.company : ''),
             'Re: ' + j.title,
-            'Dear Hiring Committee,',
+            opt.greeting || 'Dear Hiring Committee,',
             body,
-            'Sincerely,\n' + name
+            (opt.closing || 'Sincerely,') + '\n' + name
           ].join('\n\n');
         }
         var prepJob = null;
@@ -1130,7 +1131,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
             .then(function (res) {
               if (res.ok && res.d.letter) {
-                $('prep-letter').value = frameLetter(j, res.d.letter);
+                $('prep-letter').value = frameLetter(j, res.d.letter, { greeting: res.d.greeting, closing: res.d.closing });
                 st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.postingRead === 'page' ? 'Read the posting page. ' : res.d.postingRead === 'stored' ? 'Used the short description we have (the page could not be read). ' : 'No description found for this job. ') + (res.d.usedPoints ? 'Worked in your points. ' : '') + (res.d.usedResume ? 'Used your saved resume facts. ' : 'Tip: add your resume under My resume so letters use your real details. ') + (res.d.left != null ? res.d.left + ' left today.' : '');
               } else if (res.status === 401) {
                 st.textContent = 'Please log in again.';
@@ -1140,6 +1141,51 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             })
             .catch(function () { st.textContent = 'Could not reach the AI. The template letter is still above.'; })
             .then(function () { btn.disabled = false; });
+        });
+        // Plain-text PDF made in the browser (no library): Letter size, Helvetica 11 pt, 1 inch margins.
+        function letterPdf(text) {
+          var map = { '\u2018': "'", '\u2019': "'", '\u201c': '"', '\u201d': '"', '\u2013': '-', '\u2014': '-', '\u2026': '...', '\u00a0': ' ' };
+          text = String(text).replace(/\r/g, '').replace(/[\u2018\u2019\u201c\u201d\u2013\u2014\u2026\u00a0]/g, function (c) { return map[c]; }).replace(/[^\x09\x0a\x20-\x7e\xa0-\xff]/g, '?');
+          var cv = document.createElement('canvas').getContext('2d'); cv.font = '11px Helvetica, Arial, sans-serif';
+          var maxW = 468, lines = [];
+          text.split('\n').forEach(function (para) {
+            if (!para.trim()) { lines.push(''); return; }
+            var words = para.split(' '), cur = '';
+            words.forEach(function (w) {
+              var tryLine = cur ? cur + ' ' + w : w;
+              if (cur && cv.measureText(tryLine).width > maxW) { lines.push(cur); cur = w; } else cur = tryLine;
+            });
+            lines.push(cur);
+          });
+          var perPage = 46, pages = [];
+          for (var i = 0; i < lines.length; i += perPage) pages.push(lines.slice(i, i + perPage));
+          if (!pages.length) pages.push(['']);
+          var esc = function (s) { return s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)'); };
+          var objs = [], n = pages.length;
+          objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+          var kids = []; for (var k = 0; k < n; k++) kids.push((4 + k * 2) + ' 0 R');
+          objs[2] = '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + n + ' >>';
+          objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+          pages.forEach(function (pl, idx) {
+            var body = 'BT /F1 11 Tf 14 TL 72 720 Td\n' + pl.map(function (l) { return '(' + esc(l) + ') Tj T*'; }).join('\n') + '\nET';
+            objs[4 + idx * 2] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents ' + (5 + idx * 2) + ' 0 R >>';
+            objs[5 + idx * 2] = '<< /Length ' + body.length + ' >>\nstream\n' + body + '\nendstream';
+          });
+          var out = '%PDF-1.4\n', offs = [];
+          for (var o = 1; o < objs.length; o++) { offs[o] = out.length; out += o + ' 0 obj\n' + objs[o] + '\nendobj\n'; }
+          var xref = out.length;
+          out += 'xref\n0 ' + objs.length + '\n0000000000 65535 f \n';
+          for (var q = 1; q < objs.length; q++) out += ('0000000000' + offs[q]).slice(-10) + ' 00000 n \n';
+          out += 'trailer\n<< /Size ' + objs.length + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF';
+          var bytes = new Uint8Array(out.length); for (var b = 0; b < out.length; b++) bytes[b] = out.charCodeAt(b) & 255;
+          return new Blob([bytes], { type: 'application/pdf' });
+        }
+        $('prep-pdf-letter').addEventListener('click', function () {
+          var blob = letterPdf($('prep-letter').value), a = document.createElement('a');
+          var nm = 'Cover letter' + (prepJob && prepJob.company ? ' - ' + prepJob.company : '');
+          a.href = URL.createObjectURL(blob); a.download = nm.replace(/[^\w .-]+/g, '').trim() + '.pdf';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
         });
         $('prep-copy-letter').addEventListener('click', function () { copyText($('prep-letter').value, $('prep-copy-letter')); });
         $('prep-close').addEventListener('click', function () { var d = $('prep-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); });
