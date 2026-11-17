@@ -143,6 +143,11 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .card[data-state=skip] { opacity: .72; }
       .avatar { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-weight: 700; font-size: 1rem; color: #fff; flex: none; }
       .card .avatar { background: var(--grey-soft) !important; color: var(--text); }
+      .lead { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .stars { display: flex; flex-direction: column; align-items: center; gap: 0; }
+      .star { font: inherit; font-size: 1.15rem; line-height: 1; background: none; border: none; padding: 1px 3px; cursor: pointer; color: #cdc7bb; }
+      .star.on { color: #e3a008; }
+      .star:hover { transform: scale(1.18); }
       .card h3 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.3; }
       .meta { color: var(--muted); font-size: .88rem; margin-top: 1px; }
       .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -257,6 +262,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         #list { padding: 0; gap: 8px; }
         .card { grid-template-columns: 28px minmax(0, 1fr); gap: 2px 9px; padding: 9px 10px; border-radius: 10px; }
         .avatar { width: 28px; height: 28px; font-size: .88rem; border-radius: 7px; }
+        .star { font-size: 1.05rem; padding: 1px 2px; }
         .card h3 { font-size: .95rem; }
         .meta { font-size: .8rem; }
         .tag { font-size: .7rem; padding: 1px 7px; }
@@ -416,7 +422,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
                   <span id="count"></span>
                   <label>Sort by
                     <select id="sort" aria-label="Sort by">
-                      <option value="priority">Priority</option>
+                      <option value="priority">Most stars</option>
                       <option value="best">Best match</option>
                       <option value="new">Newest</option>
                       <option value="company">Company</option>
@@ -776,7 +782,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         // ---- sorting ----
         function rank(j) { return j.fitsMay === false ? 2 : 0; }
         var SORTS = {
-          priority: function (a, b) { return byPriority(a, b); },
+          priority: function (a, b) { return (ratingOf(b.id) - ratingOf(a.id)) || byPriority(a, b); },
           best: function (a, b) {
             return rank(a) - rank(b) || (fitScore(b) - fitScore(a)) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
           },
@@ -814,6 +820,54 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           return t;
         }
         function stateOf(id) { return marks[id] ? marks[id].state : null; }
+
+        // ---- star ratings: stored in the same shared marks as "rate:<job id>:<stars>" ----
+        function ratingOf(id) {
+          for (var n = 5; n >= 1; n--) if (marks['rate:' + id + ':' + n]) return n;
+          return 0;
+        }
+        function setRating(id, n) {
+          if (API && (!who || !pass)) { openSetup(function () { setRating(id, n); }); return; }
+          if (!API && !who) who = 'me';
+          var cur = ratingOf(id), next = cur === n ? 0 : n;
+          if (cur) delete marks['rate:' + id + ':' + cur];
+          if (next) marks['rate:' + id + ':' + next] = { state: 'shortlist', by: who, ts: Date.now() };
+          saveLocal();
+          renderAll();
+          if (!API) return;
+          var send = function (key, state) {
+            return fetch(API + '/marks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Passcode': pass },
+              body: JSON.stringify({ id: key, state: state, by: who }),
+            }).then(function (r) {
+              if (r.status === 401) { logout('Your passcode was not accepted. Please log in again.'); throw new Error('401'); }
+              if (!r.ok) throw new Error('HTTP ' + r.status);
+            });
+          };
+          var chain = cur ? send('rate:' + id + ':' + cur, null) : Promise.resolve();
+          chain.then(function () { return next ? send('rate:' + id + ':' + next, 'shortlist') : null; })
+            .then(function () { link = 'online'; renderStatus(); })
+            .catch(function (e) {
+              if (e && e.message === '401') return;
+              link = 'offline';
+              flash('Could not reach the shared list. Your stars are saved on this device only for now.');
+            });
+        }
+        function starsEl(j) {
+          var box = el('div', 'stars'), r = ratingOf(j.id);
+          box.setAttribute('role', 'group');
+          box.setAttribute('aria-label', 'Rating: ' + r + ' of 5 stars');
+          for (var n = 1; n <= 5; n++) (function (n) {
+            var b = el('button', 'star' + (n <= r ? ' on' : ''), '\u2605');
+            b.type = 'button';
+            b.title = n === r ? 'Clear rating' : n + (n === 1 ? ' star' : ' stars');
+            b.setAttribute('aria-label', n + (n === 1 ? ' star' : ' stars'));
+            b.addEventListener('click', function (e) { e.stopPropagation(); setRating(j.id, n); });
+            box.appendChild(b);
+          })(n);
+          return box;
+        }
         function hue(name) { var h = 7; for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360; return h; }
         function avatar(name) {
           var a = el('div', 'avatar', (String(name).match(/[A-Za-z]/) || ['?'])[0].toUpperCase());
@@ -1091,7 +1145,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           c.setAttribute('data-state', stateOf(j.id) || 'review');
           c.setAttribute('data-id', j.id);
           if (j.id === selId) c.classList.add('sel');
-          c.appendChild(avatar(j.company));
+          var lead = el('div', 'lead');
+          lead.appendChild(avatar(j.company));
+          lead.appendChild(starsEl(j));
+          c.appendChild(lead);
           var body = el('div');
           body.appendChild(el('h3', null, j.title));
           body.appendChild(el('div', 'meta', [j.company, j.location].filter(Boolean).join(' - ')));
