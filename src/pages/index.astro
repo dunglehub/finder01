@@ -5,6 +5,7 @@ import watchlist from '../../data/watchlist.json';
 import config from '../../data/config.json';
 import profile from '../../data/profile.json';
 import companies from '../../data/companies.json';
+import status from '../../data/status.json';
 import { enrich } from '../../scripts/lib/classify.mjs';
 
 // Manual jobs are enriched the same way as automatic ones, then tagged "hand-picked".
@@ -13,9 +14,9 @@ const manual = manualJobs.map((j) =>
 );
 const jobs = [...manual, ...autoJobs];
 
-const checked = new Date().toLocaleString('en-CA', {
-  dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Vancouver',
-});
+const fmt = (iso) => iso ? new Date(iso).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' }) : '';
+const updatedText = fmt(status.updated);
+const polledText = fmt(status.polled);
 
 const bcList = watchlist.filter((c) => c.region === 'BC');
 const elseList = watchlist.filter((c) => c.region !== 'BC');
@@ -74,8 +75,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .linkbtn { font: inherit; font-size: .92rem; background: none; border: none; color: var(--blue); cursor: pointer;
         padding: 6px 8px; display: inline-flex; align-items: center; gap: 6px; }
       .linkbtn:hover { text-decoration: underline; }
-      .addbtn { font: inherit; font-weight: 600; font-size: .92rem; display: none; align-items: center; gap: 7px; padding: 9px 16px;
-        border-radius: 10px; cursor: pointer; border: none; color: #fff; background: var(--blue); }
+      #clear-top, #clear { font-weight: 700; }
+      .addbtn { font: inherit; font-weight: 600; font-size: .92rem; display: none; align-items: center; gap: 6px; padding: 5px 11px;
+        border-radius: 9px; cursor: pointer; border: none; color: #fff; background: var(--blue); }
       .addbtn.show { display: inline-flex; }
       .addbtn:hover { filter: brightness(1.08); }
       .usermenu { position: relative; }
@@ -203,7 +205,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .live { font-size: .8rem; }
         .topright { gap: 4px; flex: 0 0 auto; }
         .linkbtn { padding: 6px 6px; font-size: .85rem; }
-        .addbtn { padding: 6px 12px; font-size: .85rem; border-radius: 8px; gap: 4px; }
+        .addbtn { padding: 4px 9px; font-size: .85rem; border-radius: 8px; gap: 4px; }
         .addbtn .long { display: none; }
         .addbtn .ico { width: 14px; height: 14px; }
         .chip { padding: 3px 10px 3px 4px; font-size: .82rem; }
@@ -237,7 +239,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .brand { flex: 1 1 100%; }
         .topright { gap: 4px; flex: 1 1 100%; justify-content: space-between; max-width: 100%; min-width: 0; }
         .linkbtn { padding: 4px 5px; font-size: .78rem; }
-        .addbtn { padding: 4px 9px; font-size: .78rem; border-radius: 7px; gap: 3px; }
+        .addbtn { padding: 3px 7px; font-size: .78rem; border-radius: 7px; gap: 3px; }
         .addbtn .ico { width: 12px; height: 12px; }
         .chip { padding: 2px 8px 2px 3px; font-size: .78rem; gap: 5px; }
         .chip:not(:has(.avatar)) { padding-left: 8px; }
@@ -364,7 +366,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         </div>
         <div class="topright">
           <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset filters</button>
-          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Posting</span></button>
+          <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Post</span></button>
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
             <div class="menu" id="menu" hidden>
@@ -386,7 +388,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <div id="sidejobs">
             <div class="sep"></div>
             <div class="pills" id="tabs" role="group" aria-label="Show postings">
-              <button type="button" data-tab="review" aria-pressed="true"><span class="ico" data-i="refresh"></span>To review <span class="n"></span></button>
+              <button type="button" data-tab="review" aria-pressed="true"><span class="ico" data-i="refresh"></span>Review <span class="n"></span></button>
               <button type="button" data-tab="shortlist" aria-pressed="false"><span class="ico" data-i="star"></span>Shortlist <span class="n"></span></button>
               <button type="button" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>Applied <span class="n"></span></button>
               <button type="button" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Skipped <span class="n"></span></button>
@@ -403,7 +405,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               <button type="button" class="linkbtn" id="clear" hidden>Reset filters</button>
             </details>
           </div>
-          <p class="built">Built {checked}</p>
+          <p class="built">Updated <span id="b-upd" data-iso={status.updated}>{updatedText}</span>{polledText && <><br />Indeed and others polled <span id="b-pol" data-iso={status.polled}>{polledText}</span></>}</p>
         </aside>
 
         <div class="main">
@@ -760,14 +762,14 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           { id: 'f8', label: 'SolidWorks', test: function (j) { return !!j.solidworks; } },
           { id: 'f9', label: 'New (30 days)', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
           { id: 'f10', label: 'Big name', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
-          { id: 'f11', label: 'Before May 2027', test: function (j) { return j.fitsMay === false; } },
+          { id: 'f11', label: 'All dates', test: function () { return true; } },
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
         function byPriority(a, b) {
           var fa = flags(a), fb = flags(b), i;
           for (i = 0; i <= 9; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
           var cr = byCompanyRank(a, b); if (cr) return cr; // 10: well-known companies, best-ranked first
-          if (fa[11] !== fb[11]) return fa[11] ? 1 : -1; // other start dates go last
+          if ((a.fitsMay === false) !== (b.fitsMay === false)) return a.fitsMay === false ? 1 : -1; // earlier start dates go last
           return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b);
         }
 
@@ -790,7 +792,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             var n = document.createElement('span'); n.className = 'num'; n.textContent = String(i);
             lab.appendChild(inp); lab.appendChild(n); lab.appendChild(document.createTextNode(c.label));
             box.appendChild(lab);
-            inp.addEventListener('change', function () { renderJobs(); });
+            inp.addEventListener('change', function () {
+              // "May 2027 +" and "All dates" cancel each other out.
+              if (inp.checked && c.id === 'f11') $('f1').checked = false;
+              if (inp.checked && c.id === 'f1') $('f11').checked = false;
+              renderJobs();
+            });
           });
         })();
 
@@ -1156,7 +1163,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           var en = j.company !== 'Event' ? (EMP[j.company] || '') : '';
           if (en) li('About ' + j.company + ': ' + en);
           var f = flags(j), hits = [];
-          CRITERIA.forEach(function (c, i) { if (f[i]) hits.push(i + ' ' + c.label); });
+          CRITERIA.forEach(function (c, i) { if (f[i] && c.id !== 'f11') hits.push(i + ' ' + c.label); });
           li('Matches these filters: ' + (hits.length ? hits.join(', ') : 'none of the 12'));
           inner.appendChild(ul);
           if (desc.length > short.length) {
@@ -1629,6 +1636,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           $('menu').hidden = true;
           try { history.replaceState(null, '', location.pathname + location.search); } catch (err) {}
           renderAll(); window.scrollTo(0, 0);
+        });
+        ['b-upd', 'b-pol'].forEach(function (id) {
+          var e = document.getElementById(id), d = e && new Date(e.getAttribute('data-iso'));
+          if (d && !isNaN(d)) e.textContent = d.toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
         });
         showView((location.hash || '').slice(1));
 
