@@ -49,12 +49,14 @@ export function detectStart(text = '') {
   return firstDate(plain);
 }
 
-// true = fits May 2027, false = clearly a different term, null = not stated.
+// true = Benny can start (May 2027 or later), false = clearly starts before May 2027,
+// null = no start date stated (treated as a possible fit).
 export function fitsMay2027(start) {
   if (!start) return null;
-  if (start.year !== 2027) return false;
-  if (start.season) return start.season === 'summer';
-  return start.month >= 4 && start.month <= 6;
+  if (start.year > 2027) return true;
+  if (start.year < 2027) return false;
+  if (start.season) return start.season === 'summer' || start.season === 'fall' || start.season === 'autumn';
+  return start.month >= 5;
 }
 
 const KEYWORDS = [
