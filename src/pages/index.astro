@@ -364,6 +364,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       /* ---------- dialog ---------- */
       dialog { border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--text);
         padding: 22px; width: min(420px, calc(100vw - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+      dialog .xclose { position: sticky; top: -8px; z-index: 5; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; padding: 0; margin: -10px 0 6px -10px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 1.1rem; line-height: 1; cursor: pointer; }
+      dialog .xclose:hover { color: var(--text); border-color: var(--muted); }
+      #r-toast { position: sticky; bottom: 8px; display: none; margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: #1f7a4d; color: #fff; font-weight: 600; text-align: center; }
       dialog::backdrop { background: rgba(15,42,74,.5); }
       dialog h3 { margin: 0 0 6px; }
       dialog label { display: block; margin: 12px 0 4px; font-size: .9rem; color: var(--muted); }
@@ -559,6 +562,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <textarea id="r-awards"></textarea>
       </div>
       <div class="err" id="r-err"></div>
+      <div id="r-toast" role="status"></div>
       <div class="row">
         <button type="button" id="r-delete" hidden>Delete saved facts</button>
         <button type="button" id="r-close">Close</button>
@@ -1708,15 +1712,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           }).then(function () { btn.disabled = false; });
         });
         $('r-save').addEventListener('click', function () {
-          var btn = $('r-save'); btn.disabled = true; $('r-err').textContent = '';
+          var btn = $('r-save'); btn.disabled = true; $('r-err').textContent = ''; $('r-toast').style.display = 'none'; btn.textContent = 'Saving\u2026';
           fetch(API + '/facts', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify({ file: resumeFile, facts: readFacts() }) })
             .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
             .then(function (res) {
               if (res.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
-              if (!res.ok) { $('r-err').textContent = (res.d && res.d.error) || 'Could not save. Please try again.'; return; }
+              if (!res.ok) { $('r-err').textContent = (res.d && res.d.error) || 'Could not save. Please try again.'; btn.textContent = 'Save'; return; }
               $('r-status').textContent = 'Saved. AI letters will now use only these facts.'; $('r-delete').hidden = false;
+              var tt = $('r-toast'); tt.textContent = '\u2713 Saved. AI letters will now use your resume facts.'; tt.style.display = 'block';
+              btn.textContent = 'Saved \u2713'; clearTimeout(window.__rsT);
+              window.__rsT = setTimeout(function () { tt.style.display = 'none'; btn.textContent = 'Save'; }, 3500);
             })
-            .catch(function () { $('r-err').textContent = 'Could not reach the server. Please try again.'; })
+            .catch(function () { $('r-err').textContent = 'Could not reach the server. Please try again.'; btn.textContent = 'Save'; })
             .then(function () { btn.disabled = false; });
         });
         $('r-delete').addEventListener('click', function () {
@@ -1742,6 +1749,14 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         $('menu-logout').addEventListener('click', function () { $('menu').hidden = true; logout(); });
         $('clear-top').addEventListener('click', function () { $('clear').click(); });
         $('fbox').open = !isNarrow();
+
+        // ---- close (X) button, top left of every pop-up window ----
+        Array.prototype.forEach.call(document.querySelectorAll('dialog'), function (d) {
+          var x = document.createElement('button');
+          x.type = 'button'; x.className = 'xclose'; x.setAttribute('aria-label', 'Close'); x.title = 'Close'; x.textContent = '\u00d7';
+          x.addEventListener('click', function () { if (d.close) d.close(); else d.removeAttribute('open'); });
+          d.insertBefore(x, d.firstChild);
+        });
 
         // ---- top-level tabs ----
         function showView(v) {
