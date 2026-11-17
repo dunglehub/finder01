@@ -1,0 +1,14 @@
+{
+  "queries": [
+    "mechanical engineering co-op",
+    "battery engineering intern",
+    "renewable energy student",
+    "SolidWorks intern",
+    "clean energy co-op",
+    "EV mechanical engineering intern"
+  ],
+  "countries": ["ca", "us"],
+  "datePosted": "month",
+  "pages": 1,
+  "everyDays": 3
+}
