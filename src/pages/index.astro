@@ -750,7 +750,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function ownText(j) { return [j.title, j.company, j.note, j.description, j.company !== 'Event' ? (EMP[j.company] || '') : ''].join(' '); }
         var CRITERIA = [
           { id: 'f0', label: 'Picked', test: function (j) { return j.source === 'manual' || j.source === 'added'; } },
-          { id: 'f1', label: 'May 2027', test: function (j) { return j.fitsMay === true; } },
+          { id: 'f1', label: 'May 2027 +', test: function (j) { return j.fitsMay !== false; } },
           { id: 'f2', label: 'BC', test: function (j) { return !!j.bc; } },
           { id: 'f3', label: 'Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
           { id: 'f4', label: 'Mechanical', test: function (j) { return topicTags(j).mech; } },
@@ -760,7 +760,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           { id: 'f8', label: 'SolidWorks', test: function (j) { return !!j.solidworks; } },
           { id: 'f9', label: 'New (30 days)', test: function (j) { var t = Date.parse(j.posted); return !isNaN(t) && Date.now() - t <= 30 * 86400000; } },
           { id: 'f10', label: 'Big name', test: function (j) { return j.company !== 'Event' && coRank(j.company) >= 0; } },
-          { id: 'f11', label: 'Other dates', test: function (j) { return j.fitsMay === false; } },
+          { id: 'f11', label: 'Before May 2027', test: function (j) { return j.fitsMay === false; } },
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
         function byPriority(a, b) {
@@ -772,7 +772,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         }
 
         // ---- sorting ----
-        function rank(j) { return j.fitsMay === true ? 0 : j.fitsMay === null ? 1 : 2; }
+        function rank(j) { return j.fitsMay === false ? 2 : 0; }
         var SORTS = {
           priority: function (a, b) { return byPriority(a, b); },
           best: function (a, b) {
@@ -1149,7 +1149,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           var ul = el('ul');
           function li(t) { ul.appendChild(el('li', null, t)); }
           if (j.kind === 'event') li('Event date: ' + (j.eventDate || 'not listed'));
-          else li('Start: ' + (j.startLabel || 'not listed') + (j.fitsMay === true ? ' (fits May 2027)' : j.fitsMay === false ? ' (not May 2027)' : ''));
+          else li('Start: ' + (j.startLabel || 'not listed') + (j.fitsMay === true ? ' (May 2027 or later: fits)' : j.fitsMay === false ? ' (before May 2027)' : ' (assumed to fit)'));
           if (j.posted) li('Posted: ' + j.posted);
           if (j.location) li('Location: ' + j.location);
           li('Source: ' + (j.source === 'manual' ? 'hand-picked' : j.source === 'added' ? 'added by ' + (j.addedBy || 'someone') : 'found automatically'));
