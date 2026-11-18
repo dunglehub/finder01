@@ -15,8 +15,8 @@ const manual = manualJobs.map((j) =>
 const jobs = [...manual, ...autoJobs];
 
 const fmt = (iso) => iso ? new Date(iso).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Edmonton' }) : '';
-const updatedText = fmt(status.updated);
-const polledText = fmt(status.polled);
+const latestIso = [status.updated, status.polled].filter(Boolean).sort().pop() || '';
+const updatedText = fmt(latestIso);
 
 const bcList = watchlist.filter((c) => c.region === 'BC');
 const elseList = watchlist.filter((c) => c.region !== 'BC');
@@ -201,7 +201,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .exp ul { margin: 10px 0 0; padding-left: 20px; }
       .exp li { margin-bottom: 4px; }
       .exp details { margin-top: 10px; }
-      .exp summary { cursor: pointer; color: var(--blue); font-size: .9rem; }
+      .exp summary { cursor: pointer; color: var(--blue); font-size: .9rem; width: fit-content; }
       .exp .full { margin-top: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; font-size: .88rem; color: var(--muted);
         background: var(--bg2); border-radius: 8px; padding: 10px 12px; }
       .detail .dbar { border-top: 1px solid var(--line); padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -427,7 +427,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               <button type="button" class="linkbtn" id="clear" hidden>Reset filters</button>
             </details>
           </div>
-          <p class="built">Public feeds updated <span id="b-upd" data-iso={status.updated}>{updatedText}</span>{polledText && <><br />Indeed feed updated <span id="b-pol" data-iso={status.polled}>{polledText}</span></>}</p>
+          <p class="built">Last updated <span id="b-upd" data-iso={latestIso}>{updatedText}</span></p>
         </aside>
 
         <div class="main">
@@ -1780,7 +1780,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           try { history.replaceState(null, '', location.pathname + location.search); } catch (err) {}
           renderAll(); window.scrollTo(0, 0);
         });
-        ['b-upd', 'b-pol'].forEach(function (id) {
+        ['b-upd'].forEach(function (id) {
           var e = document.getElementById(id), d = e && new Date(e.getAttribute('data-iso'));
           if (d && !isNaN(d)) e.textContent = d.toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
         });
