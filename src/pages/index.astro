@@ -317,6 +317,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .hidrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); margin-top: 8px; }
       .hidrow span { flex: 1; font-weight: 600; }
       .hidrow button { font: inherit; font-size: .86rem; padding: 4px 9px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
+      #fb-dialog { width: min(520px, calc(100vw - 32px)); }
+      #fb-dialog textarea { min-height: 140px; }
+      #fb-kind { width: 100%; font: inherit; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
       #resume-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
       #resume-dialog textarea { width: 100%; min-height: 128px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; resize: vertical; }
@@ -370,7 +373,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #r-toast { position: sticky; bottom: 8px; display: none; margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: #1f7a4d; color: #fff; font-weight: 600; text-align: center; }
       /* Phones: keep pop-ups below the browser's address bar (iOS hides the top of a full-height box) */
       @media (max-width: 700px) {
-        dialog, #prep-dialog, #resume-dialog { margin: 16px auto; max-height: calc(100vh - 170px); max-height: calc(100dvh - 32px); }
+        dialog, #prep-dialog, #resume-dialog, #fb-dialog { margin: 16px auto; max-height: calc(100vh - 170px); max-height: calc(100dvh - 32px); }
       }
       dialog::backdrop { background: rgba(15,42,74,.5); }
       dialog h3 { margin: 0 0 6px; }
@@ -399,6 +402,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
             <div class="menu" id="menu" hidden>
+              <button type="button" id="menu-feedback">Send feedback</button>
               <button type="button" id="menu-logout">Log out</button>
             </div>
           </div>
@@ -533,6 +537,25 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <div class="row">
         <button type="button" id="prep-close">Close</button>
         <a class="btnlink" id="prep-open" href="#" target="_blank" rel="noopener noreferrer">Open posting</a>
+      </div>
+    </dialog>
+
+    <dialog id="fb-dialog">
+      <h3>Send feedback</h3>
+      <p class="who" style="margin:0">A feature request, a comment or something to fix. It goes straight to Dung by email.</p>
+      <label for="fb-kind">Type</label>
+      <select id="fb-kind">
+        <option>Feature request</option>
+        <option>Comment</option>
+        <option>Something to fix</option>
+      </select>
+      <label for="fb-msg">Your message</label>
+      <textarea id="fb-msg" maxlength="2000" placeholder="What would make this better?"></textarea>
+      <div class="err" id="fb-err"></div>
+      <div class="who" id="fb-status" role="status"></div>
+      <div class="row">
+        <button type="button" id="fb-close">Close</button>
+        <button type="button" class="primary" id="fb-send">Send</button>
       </div>
     </dialog>
 
@@ -1765,6 +1788,30 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         });
         document.addEventListener('click', function (e) { if (!e.target.closest('.usermenu')) { $('menu').hidden = true; $('chip').setAttribute('aria-expanded', 'false'); } });
         $('resume-up').addEventListener('click', openResume);
+        function closeFb() { var d = $('fb-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        function openFeedback() {
+          if (!pass) { openSetup(openFeedback); return; }
+          $('fb-err').textContent = ''; $('fb-status').textContent = ''; $('fb-send').disabled = false;
+          var d = $('fb-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          $('fb-msg').focus();
+        }
+        $('menu-feedback').addEventListener('click', function () { $('menu').hidden = true; openFeedback(); });
+        $('fb-close').addEventListener('click', closeFb);
+        $('fb-send').addEventListener('click', function () {
+          var msg = $('fb-msg').value.trim(), btn = $('fb-send');
+          $('fb-err').textContent = ''; $('fb-status').textContent = '';
+          if (msg.length < 3) { $('fb-err').textContent = 'Please type your message first.'; return; }
+          btn.disabled = true; $('fb-status').textContent = 'Sending\u2026';
+          fetch(API + '/feedback', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify({ kind: $('fb-kind').value, message: msg }) })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+            .then(function (res) {
+              if (res.status === 401) { closeFb(); logout('Your passcode was not accepted. Please log in again.'); return; }
+              if (!res.ok) { $('fb-status').textContent = ''; $('fb-err').textContent = (res.d && res.d.error) || 'Could not send. Please try again.'; btn.disabled = false; return; }
+              $('fb-msg').value = ''; $('fb-status').textContent = '\u2713 Sent. Thank you!';
+              setTimeout(closeFb, 1500);
+            })
+            .catch(function () { $('fb-status').textContent = ''; $('fb-err').textContent = 'Could not reach the server. Please try again.'; btn.disabled = false; });
+        });
         $('menu-logout').addEventListener('click', function () { $('menu').hidden = true; logout(); });
         $('clear-top').addEventListener('click', function () { $('clear').click(); });
         $('fbox').open = !isNarrow();
