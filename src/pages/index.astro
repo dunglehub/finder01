@@ -1731,7 +1731,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               var tt = $('r-toast'); tt.textContent = '\u2713 Saved. AI letters will now use your resume facts.'; tt.style.display = 'block';
               btn.textContent = 'Saved \u2713'; clearTimeout(window.__rsT);
               window.__rsT = setTimeout(function () { tt.style.display = 'none'; btn.textContent = 'Save'; }, 3500);
-              if (pendingPdf && /^(benny|dung)$/i.test(who || '')) {
+              if (pendingPdf && /^(benny|dung|han)$/i.test(who || '')) {
                 var data = pendingPdf; pendingPdf = '';
                 tt.textContent = '\u2713 Saved. Updating the Resume download\u2026';
                 return fetch(API + '/resumepdf', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify({ data: data }) })
