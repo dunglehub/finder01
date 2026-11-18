@@ -85,6 +85,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .addbtn { font: inherit; font-weight: 600; font-size: .92rem; display: none; align-items: center; gap: 6px; padding: 5px 11px;
         border-radius: 9px; cursor: pointer; border: none; color: #fff; background: var(--blue); }
       .addbtn.show { display: inline-flex; }
+      a.addbtn { text-decoration: none; background: transparent; color: inherit; border: 1px solid currentColor; }
       .addbtn:hover { filter: brightness(1.08); }
       .usermenu { position: relative; }
       .chip { display: inline-flex; align-items: center; gap: 9px; padding: 3px 10px 3px 4px; border-radius: 12px; border: 1px solid var(--line);
@@ -392,6 +393,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         </div>
         <div class="topright">
           <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset filters</button>
+          <a class="addbtn" id="resume-dl" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/Resume_Minh_Le.pdf`} download="Resume_Minh_Le.pdf" title="Download Benny's resume (PDF)"><span class="lbl">Resume</span><span class="ico" data-i="down"></span></a>
           <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Post</span></button>
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
@@ -688,6 +690,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           x: '<svg ' + P + '><path d="M6 6l12 12M18 6 6 18"/></svg>',
           cal: '<svg ' + P + '><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
           bulb: '<svg ' + P + '><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg>',
+          down: '<svg ' + P + '><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg>',
           plus: '<svg ' + P + '><path d="M12 5v14M5 12h14"/></svg>',
           chev: '<svg ' + P + '><path d="m6 15 6-6 6 6"/></svg>',
           empty: '<svg ' + P + '><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M9 14h6"/></svg>',
@@ -1345,6 +1348,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (who) { chip.appendChild(avatar(who)); chip.appendChild(el('span', null, who)); }
           else chip.appendChild(el('span', null, API ? 'Log in' : 'Set your name'));
           if (!(API && who)) $('menu').hidden = true;
+          $('resume-dl').classList.toggle('show', !!who);
           var msg = flashMsg || (link === 'locked' ? 'Log in to share picks.' : link === 'offline' ? 'The shared list is unreachable right now. Marks are kept on this device.' : '');
           var f = $('status'); f.textContent = msg; f.hidden = !msg;
         }
