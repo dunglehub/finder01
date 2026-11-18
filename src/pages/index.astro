@@ -88,7 +88,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .addbtn.outline { text-decoration: none; background: transparent; color: inherit; border: 1px solid currentColor; }
       .addbtn:hover { filter: brightness(1.08); }
       .usermenu { position: relative; }
-      .chip { display: inline-flex; align-items: center; gap: 9px; padding: 3px 10px 3px 4px; border-radius: 12px; border: 1px solid var(--line);
+      .chip { font-weight: 700; display: inline-flex; align-items: center; gap: 9px; padding: 3px 10px 3px 4px; border-radius: 12px; border: 1px solid var(--line);
         background: var(--card); font-size: .92rem; color: var(--text); cursor: pointer; }
       .chip:not(:has(.avatar)) { padding-left: 10px; }
       .chip .avatar { width: 24px; height: 24px; border-radius: 50%; font-size: .78rem; }
