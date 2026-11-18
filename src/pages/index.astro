@@ -85,7 +85,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .addbtn { font: inherit; font-weight: 600; font-size: .92rem; display: none; align-items: center; gap: 6px; padding: 5px 11px;
         border-radius: 9px; cursor: pointer; border: none; color: #fff; background: var(--blue); }
       .addbtn.show { display: inline-flex; }
-      a.addbtn { text-decoration: none; background: transparent; color: inherit; border: 1px solid currentColor; }
+      .addbtn.outline { text-decoration: none; background: transparent; color: inherit; border: 1px solid currentColor; }
       .addbtn:hover { filter: brightness(1.08); }
       .usermenu { position: relative; }
       .chip { display: inline-flex; align-items: center; gap: 9px; padding: 3px 10px 3px 4px; border-radius: 12px; border: 1px solid var(--line);
@@ -393,12 +393,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         </div>
         <div class="topright">
           <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset filters</button>
-          <a class="addbtn" id="resume-dl" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/Resume_Minh_Le.pdf`} download="Resume_Minh_Le.pdf" title="Download Benny's resume (PDF)"><span class="lbl">Resume</span><span class="ico" data-i="down"></span></a>
+          <a class="addbtn outline" id="resume-dl" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/Resume_Minh_Le.pdf`} download="Resume_Minh_Le.pdf" title="Download Benny's resume (PDF)"><span class="lbl">Resume</span><span class="ico" data-i="down"></span></a>
+          <button type="button" class="addbtn outline" id="resume-up" title="Upload a new resume"><span class="lbl">Resume</span><span class="ico" data-i="up"></span></button>
           <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Post</span></button>
           <div class="usermenu">
             <button type="button" class="chip" id="chip" aria-haspopup="true" aria-expanded="false"></button>
             <div class="menu" id="menu" hidden>
-              <button type="button" id="menu-resume">My resume</button>
               <button type="button" id="menu-logout">Log out</button>
             </div>
           </div>
@@ -690,6 +690,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           x: '<svg ' + P + '><path d="M6 6l12 12M18 6 6 18"/></svg>',
           cal: '<svg ' + P + '><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
           bulb: '<svg ' + P + '><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg>',
+          up: '<svg ' + P + '><path d="M12 20V8M6 13l6-6 6 6M5 4h14"/></svg>',
           down: '<svg ' + P + '><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg>',
           plus: '<svg ' + P + '><path d="M12 5v14M5 12h14"/></svg>',
           chev: '<svg ' + P + '><path d="m6 15 6-6 6 6"/></svg>',
@@ -1348,7 +1349,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (who) { chip.appendChild(avatar(who)); chip.appendChild(el('span', null, who)); }
           else chip.appendChild(el('span', null, API ? 'Log in' : 'Set your name'));
           if (!(API && who)) $('menu').hidden = true;
-          $('resume-dl').classList.toggle('show', !!who);
+          $('resume-dl').classList.toggle('show', !!who); $('resume-up').classList.toggle('show', !!who);
           var msg = flashMsg || (link === 'locked' ? 'Log in to share picks.' : link === 'offline' ? 'The shared list is unreachable right now. Marks are kept on this device.' : '');
           var f = $('status'); f.textContent = msg; f.hidden = !msg;
         }
@@ -1649,7 +1650,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         // ---- resume facts: upload, check, save ----
         var FACT_KEYS = ['education', 'skills', 'experience', 'projects', 'awards'];
         var MAX_RESUME_BYTES = 4 * 1024 * 1024;
-        var resumeFile = '';
+        var resumeFile = '', pendingPdf = '', lastB64 = '';
         function toLines(s) { return String(s || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }
         function fillFacts(f) {
           f = f || {};
@@ -1671,7 +1672,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function resumeHeaders() { return { 'Content-Type': 'application/json', 'X-Passcode': pass }; }
         function openResume() {
           if (!pass) { openSetup(openResume); return; }
-          $('r-file').value = ''; $('r-err').textContent = ''; resumeFile = '';
+          $('r-file').value = ''; $('r-err').textContent = ''; resumeFile = ''; pendingPdf = '';
           $('r-status').textContent = 'Checking for saved facts…';
           $('r-edit').hidden = true; $('r-save').hidden = true; $('r-delete').hidden = true; $('r-read').disabled = false; $('r-save').disabled = false;
           var dlg = $('resume-dialog'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
@@ -1702,7 +1703,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (f.size > MAX_RESUME_BYTES) { st.textContent = 'That file is over 4 MB. Please use a smaller one.'; return; }
           btn.disabled = true; st.textContent = 'Reading… (about 10 to 20 seconds)';
           f.arrayBuffer().then(function (buf) {
-            if (isPdf) return { kind: 'pdf', filename: f.name, data: bufToBase64(buf) };
+            if (isPdf) { var b64 = lastB64 = bufToBase64(buf); pendingPdf = ''; return { kind: 'pdf', filename: f.name, data: b64 }; }
             return docxText(buf).then(function (t) { return { kind: 'text', filename: f.name, text: t }; });
           }).then(function (payload) {
             return fetch(API + '/resume', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify(payload) })
@@ -1710,7 +1711,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               .then(function (res) {
                 if (res.status === 401) { closeResume(); logout('Your passcode was not accepted. Please log in again.'); return; }
                 if (!res.ok || !res.d.facts) { st.textContent = (res.d && res.d.error) || 'Could not read that file.'; return; }
-                resumeFile = f.name; fillFacts(res.d.facts);
+                resumeFile = f.name; fillFacts(res.d.facts); pendingPdf = isPdf ? lastB64 : '';
                 st.textContent = 'Read. Check every line against your resume, fix anything wrong or missing, then click Save. Nothing is saved yet.' + (res.d.left != null ? ' ' + res.d.left + ' AI uses left today.' : '');
               });
           }).catch(function (e) {
@@ -1730,6 +1731,16 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               var tt = $('r-toast'); tt.textContent = '\u2713 Saved. AI letters will now use your resume facts.'; tt.style.display = 'block';
               btn.textContent = 'Saved \u2713'; clearTimeout(window.__rsT);
               window.__rsT = setTimeout(function () { tt.style.display = 'none'; btn.textContent = 'Save'; }, 3500);
+              if (pendingPdf && /^(benny|dung)$/i.test(who || '')) {
+                var data = pendingPdf; pendingPdf = '';
+                tt.textContent = '\u2713 Saved. Updating the Resume download\u2026';
+                return fetch(API + '/resumepdf', { method: 'POST', cache: 'no-store', headers: resumeHeaders(), body: JSON.stringify({ data: data }) })
+                  .then(function (r2) { return r2.json().catch(function () { return {}; }).then(function (d2) { return { ok: r2.ok, d: d2 }; }); })
+                  .then(function (r2) {
+                    tt.textContent = r2.ok ? '\u2713 Saved. The Resume download will update in about a minute.' : '\u2713 Saved, but the Resume download was not updated: ' + ((r2.d && r2.d.error) || 'try again later.');
+                    clearTimeout(window.__rsT); window.__rsT = setTimeout(function () { tt.style.display = 'none'; }, r2.ok ? 6000 : 10000);
+                  }).catch(function () { tt.textContent = '\u2713 Saved, but the Resume download was not updated (no connection).'; });
+              }
             })
             .catch(function () { $('r-err').textContent = 'Could not reach the server. Please try again.'; btn.textContent = 'Save'; })
             .then(function () { btn.disabled = false; });
@@ -1753,7 +1764,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           else openSetup(null);
         });
         document.addEventListener('click', function (e) { if (!e.target.closest('.usermenu')) { $('menu').hidden = true; $('chip').setAttribute('aria-expanded', 'false'); } });
-        $('menu-resume').addEventListener('click', function () { $('menu').hidden = true; openResume(); });
+        $('resume-up').addEventListener('click', openResume);
         $('menu-logout').addEventListener('click', function () { $('menu').hidden = true; logout(); });
         $('clear-top').addEventListener('click', function () { $('clear').click(); });
         $('fbox').open = !isNarrow();
