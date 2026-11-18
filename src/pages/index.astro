@@ -318,7 +318,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .hidrow span { flex: 1; font-weight: 600; }
       .hidrow button { font: inherit; font-size: .86rem; padding: 4px 9px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
       #fb-dialog { width: min(520px, calc(100vw - 32px)); }
-      #fb-dialog textarea { min-height: 140px; }
+      #fb-dialog textarea { min-height: 140px; width: 100%; box-sizing: border-box; display: block; }
+      #fb-dialog .err { min-height: 0; margin-top: 4px; }
+      #fb-dialog .row { margin-top: 10px; }
       #fb-kind { width: 100%; font: inherit; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
       #resume-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
       #resume-dialog textarea { width: 100%; min-height: 128px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
