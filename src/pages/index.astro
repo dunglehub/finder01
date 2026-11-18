@@ -757,6 +757,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (CANADA_RE.test(loc)) return true;
           return parts.length >= 3 && parts[parts.length - 1].trim() === 'CA'; // "City, Province, CA" from the job search feed
         }
+        var US_RE = /\bUSA?\b|United States|,\s*(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)$/;
+        function inUS(j) { return !inCanada(j) && US_RE.test(String(j.location || '').replace(/\s*\(remote\)\s*$/i, '').trim()); }
         var AB_RE = /\bAB\b|\b(Alberta|Calgary|Edmonton|Red Deer|Lethbridge|Medicine Hat|Fort McMurray)\b/;
         var EV_RE = /electric vehicle|\bEVs?\b|e-?mobility|powertrain|\bTesla\b|Rivian|\bLucid\b|Polestar|\bBYD\b|Proterra|Lion Electric|Taiga|Nikola/i;
         var CLEAN_RE = /solar|renewable|clean ?energy|wind (power|turbine|energy)|hydrogen|fuel ?cell|energy storage|geothermal|hydro ?electric|sustainab|decarboni[sz]/i;
@@ -790,7 +792,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           { id: 'f1', label: 'May 2027 +', test: function (j) { return j.fitsMay !== false; } },
           { id: 'f2', label: 'BC', test: function (j) { return !!j.bc; } },
           { id: 'f3', label: 'Alberta', test: function (j) { return AB_RE.test(j.location || ''); } },
-          { id: 'f10', label: 'Canada', test: function (j) { return inCanada(j); } },
+          { id: 'f10', label: 'US', test: function (j) { return inUS(j); } },
           { id: 'f4', label: 'Mechanical', test: function (j) { return topicTags(j).mech; } },
           { id: 'f5', label: 'Battery', test: function (j) { return topicTags(j).battery; } },
           { id: 'f6', label: 'EV', test: function (j) { return EV_RE.test(ownText(j)); } },
@@ -800,6 +802,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           { id: 'f11', label: 'All dates', test: function () { return true; } },
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
+        // US jobs stay hidden until the US box is ticked.
+        function usHidden(j) { return !$('f10').checked && flags(j)[4]; }
         function byPriority(a, b) {
           var fa = flags(a), fb = flags(b), i;
           for (i = 0; i <= 10; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
@@ -831,7 +835,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
               // "May 2027 +" and "All dates" cancel each other out.
               if (inp.checked && c.id === 'f11') $('f1').checked = false;
               if (inp.checked && c.id === 'f1') $('f11').checked = false;
-              renderJobs();
+              renderJobs(); renderTabs();
             });
           });
         })();
@@ -1204,6 +1208,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (mt.tier) t.appendChild(tag(mt.tier === 'strong' ? 'Strong' : 'Good', mt.tier === 'strong' ? 't-red' : 't-orange', 'plus'));
           if (j.bc) t.appendChild(tag('BC', 't-yellow'));
           else if (inCanada(j)) t.appendChild(tag('Canada', 't-green'));
+          else if (inUS(j)) t.appendChild(tag('US'));
           else t.appendChild(tag('Outside BC'));
           if (j.source === 'added' && j.kind === 'event') t.appendChild(tag('Event' + (j.eventDate ? ' \u00b7 ' + j.eventDate : ''), 'warn', 'cal'));
           else if (j.fitsMay === true) t.appendChild(tag(j.startLabel, 't-teal', 'check'));
@@ -1326,16 +1331,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
         function renderTabs() {
           var counts = { review: 0, shortlist: 0, applied: 0, skip: 0 };
-          jobs.forEach(function (j) { var s = stateOf(j.id); counts[s || 'review']++; });
+          var vis = jobs.filter(function (j) { return !usHidden(j); });
+          vis.forEach(function (j) { var s = stateOf(j.id); counts[s || 'review']++; });
+          var jc = $('jobs-count'); if (jc) jc.textContent = vis.length;
           var btns = $('tabs').querySelectorAll('button');
           for (var i = 0; i < btns.length; i++) {
             var t = btns[i].getAttribute('data-tab');
             btns[i].setAttribute('aria-pressed', t === tab ? 'true' : 'false');
             btns[i].querySelector('.n').textContent = String(counts[t]);
           }
-          var done = jobs.length - counts.review;
-          $('progress-text').textContent = done + ' of ' + jobs.length + ' reviewed';
-          $('progress-bar').style.width = (jobs.length ? Math.round(100 * done / jobs.length) : 0) + '%';
+          var done = vis.length - counts.review;
+          $('progress-text').textContent = done + ' of ' + vis.length + ' reviewed';
+          $('progress-bar').style.width = (vis.length ? Math.round(100 * done / vis.length) : 0) + '%';
         }
 
         function renderStatus() {
@@ -1369,6 +1376,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             var s = stateOf(j.id) || 'review';
             if (s !== tab) return false;
             var f = flags(j);
+            if (usHidden(j)) return false;
             for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
             if (q && (j.title + ' ' + j.company + ' ' + j.location).toLowerCase().indexOf(q) === -1) return false;
             return true;
@@ -1383,7 +1391,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           list.textContent = '';
           shown.forEach(function (j) { list.appendChild(card(j)); });
           if (!shown.length) list.appendChild(emptyState());
-          var inTab = jobs.filter(function (j) { return (stateOf(j.id) || 'review') === tab; }).length;
+          var inTab = jobs.filter(function (j) { return !usHidden(j) && (stateOf(j.id) || 'review') === tab; }).length;
           var hidden = inTab - shown.length;
           count.textContent = shown.length + ' shown' + (hidden ? ' · ' + hidden + ' hidden' : '');
           renderDetail();
