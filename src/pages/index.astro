@@ -369,7 +369,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #r-toast { position: sticky; bottom: 8px; display: none; margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: #1f7a4d; color: #fff; font-weight: 600; text-align: center; }
       /* Phones: keep pop-ups below the browser's address bar (iOS hides the top of a full-height box) */
       @media (max-width: 700px) {
-        dialog, #prep-dialog, #resume-dialog { margin: 64px auto 16px; max-height: calc(100vh - 150px); max-height: calc(100dvh - 90px); }
+        dialog, #prep-dialog, #resume-dialog { margin: 32px auto 12px; max-height: calc(100vh - 170px); max-height: calc(100dvh - 48px); }
       }
       dialog::backdrop { background: rgba(15,42,74,.5); }
       dialog h3 { margin: 0 0 6px; }
