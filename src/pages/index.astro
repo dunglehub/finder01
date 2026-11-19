@@ -561,6 +561,18 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .chip { padding: 3px 12px 3px 3px; font-size: .85rem; }
         .detail h2 { font-size: 1.6rem; }
       }
+      /* nav = 4 pill buttons like Rev/Sho/App/Ski */
+      .nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; text-align: left; }
+      .nav button, .nav button + button { flex-direction: row; justify-content: space-between; align-items: center; gap: 4px; background: #f4f4f4; border: 0; border-radius: 999px; padding: 9px 6px; font-size: .86rem; font-weight: 400; color: #393c41; }
+      .nav button:hover { background: #e8e8e8; color: #393c41; }
+      .nav button .cnt { order: 0; margin: 0; font-size: inherit; font-weight: 600; color: var(--muted); line-height: inherit; }
+      .nav button[aria-pressed=true], .nav button[aria-pressed=true]:hover { background: #171a20; color: #fff; font-weight: 600; }
+      .nav button[aria-pressed=true] .cnt { color: #d0d1d2; }
+      /* resume pop-up: never wider than the box */
+      #resume-dialog { overflow-x: hidden; }
+      #resume-dialog .pick input[type=file] { flex: 1 1 100%; width: 100%; min-width: 0; max-width: 100%; }
+      #resume-dialog * { max-width: 100%; }
+      #resume-dialog .pick > * { min-width: 0; }
       /* ===== END THEME v2 ===== */
     </style>
   </head>
@@ -590,10 +602,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <div class="layout">
         <aside class="side">
           <nav class="nav" id="nav" aria-label="Sections">
-            <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Found <span class="cnt" id="jobs-count">{jobs.length}</span></button>
-            <button type="button" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Gov <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
-            <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Empl <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
-            <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Else <span class="cnt" id="cnt-else">{elseList.length}</span></button>
+            <button type="button" title="Found" aria-label="Found" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Fou <span class="cnt" id="jobs-count">{jobs.length}</span></button>
+            <button type="button" title="Gov" aria-label="Gov" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Gov <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
+            <button type="button" title="Employers" aria-label="Employers" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Emp <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+            <button type="button" title="Elsewhere" aria-label="Elsewhere" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Els <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
           <div id="sidejobs">
             <div class="sep"></div>
