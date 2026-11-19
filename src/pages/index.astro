@@ -628,6 +628,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .search input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
       .sclear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; border-radius: 50%; background: #e2e3e5; color: #171a20; font-size: 1.2rem; line-height: 1; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
       .sclear[hidden] { display: none; }
+      /* non-active action buttons: light grey like the other chips */
+      .addbtn:not(.outline), .btn1 { background: #f4f4f4; color: #171a20; border: 0; }
+      .addbtn:not(.outline):hover, .btn1:hover { background: #e8e8e8; color: #171a20; filter: none; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
