@@ -19,7 +19,8 @@ const latestIso = [status.updated, status.polled].filter(Boolean).sort().pop() |
 const updatedText = fmt(latestIso);
 
 const bcList = watchlist.filter((c) => c.region === 'BC');
-const elseList = watchlist.filter((c) => c.region !== 'BC');
+const pubList = watchlist.filter((c) => c.region === 'Public');
+const elseList = watchlist.filter((c) => c.region !== 'BC' && c.region !== 'Public');
 
 // Simple coloured letter badge instead of company logos.
 const initial = (name) => (name.match(/[A-Za-z]/) || ['?'])[0].toUpperCase();
@@ -334,6 +335,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #prep-dialog textarea { width: 100%; min-height: 300px; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
       #prep-dialog #prep-desc { min-height: 90px; }
+      #prep-dialog .dd { background: var(--bg2); border: 1px solid var(--line); border-radius: 22px 22px 6px 22px; padding: 0 16px; }
+      #prep-dialog .dd > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+      #prep-dialog .dd > summary::-webkit-details-marker { display: none; }
+      #prep-dialog .ddt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      #prep-dialog .ddp { color: var(--muted); font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #prep-dialog .dd[open] .ddp { display: none; }
+      #prep-dialog .chev { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin: -4px 4px 0 0; transition: transform .15s; flex: 0 0 auto; }
+      #prep-dialog .dd[open] .chev { transform: rotate(-135deg); margin-top: 4px; }
+      #prep-dialog .dd textarea { border: 0; background: transparent; padding: 4px 0 12px; min-height: 120px; overflow: hidden; resize: none; outline: none; }
+      #prep-dialog .dd .qa:first-child { border-top: 0; }
+      #prep-dialog #prep-qa { padding-bottom: 6px; }
       #prep-dialog .hint { color: var(--muted); font-size: .86rem; margin: 4px 0 0; }
       #prep-dialog .qa { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); font-size: .92rem; }
       #prep-dialog .qa .k { color: var(--muted); }
@@ -416,6 +428,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <aside class="side">
           <nav class="nav" id="nav" aria-label="Sections">
             <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt" id="jobs-count">{jobs.length}</span></button>
+            <button type="button" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Public sector <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
             <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
             <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
@@ -482,6 +495,23 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <details class="hid" id="hid-bc" hidden><summary>Hidden (<span class="n">0</span>)</summary><div class="hidlist"></div></details>
         </section>
 
+        <section class="view" data-view="pub" hidden>
+          <h2>Public sector</h2>
+          <p class="sub">Government co-op and student programs. Most use intake windows or a resume inventory, so they can't be pulled automatically. Open the page and check the dates in each note.</p>
+          <div class="grid">
+            {pubList.map((c) => (
+              <div class="co" data-id={`co:${c.name}`}>
+                <div class="avatar" style={`background:linear-gradient(135deg,hsl(${hue(c.name)} 70% 52%),hsl(${(hue(c.name) + 40) % 360} 65% 38%))`}>{initial(c.name)}</div>
+                <div>
+                  <a href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a>
+                  <p>{c.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <details class="hid" id="hid-pub" hidden><summary>Hidden (<span class="n">0</span>)</summary><div class="hidlist"></div></details>
+        </section>
+
         <section class="view" data-view="else" hidden>
           <h2>Elsewhere</h2>
           <p class="sub">Employers outside BC. Same idea: open the careers page and search for "intern" or "co-op".</p>
@@ -522,8 +552,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
     <dialog id="prep-dialog">
       <h3 id="prep-title">Prepare application</h3>
       <div class="warnbox">Draft only. Read it, fix anything that is not true for you, then paste it into the application.</div>
-      <label for="prep-letter">Cover letter</label>
-      <textarea id="prep-letter"></textarea>
+      <details class="dd" id="prep-letter-dd">
+        <summary><span class="ddt"><b>Cover letter</b><span class="ddp" id="prep-letter-prev"></span></span><span class="chev" aria-hidden="true"></span></summary>
+        <textarea id="prep-letter" aria-label="Cover letter"></textarea>
+      </details>
       <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button><button type="button" id="prep-pdf-letter" style="margin-left:8px">PDF</button></div>
       <div id="prep-ai" hidden>
         <label for="prep-desc">My own points to include (optional)</label>
@@ -534,8 +566,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <span class="who" id="prep-ai-status" role="status"></span>
         </div>
       </div>
-      <label style="margin-top:16px">Quick answers</label>
-      <div id="prep-qa"></div>
+      <details class="dd" id="prep-qa-dd" style="margin-top:16px">
+        <summary><span class="ddt"><b>Quick answers</b><span class="ddp" id="prep-qa-prev"></span></span><span class="chev" aria-hidden="true"></span></summary>
+        <div id="prep-qa"></div>
+      </details>
       <div class="row">
         <button type="button" id="prep-close">Close</button>
         <a class="btnlink" id="prep-open" href="#" target="_blank" rel="noopener noreferrer">Open posting</a>
@@ -1141,10 +1175,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           ].join('\n\n');
         }
         var prepJob = null;
+        function fitLetter() {
+          var ta = $('prep-letter'), t = ta.value.replace(/\s+/g, ' ').trim();
+          $('prep-letter-prev').textContent = t;
+          if ($('prep-letter-dd').open) { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; }
+        }
+        $('prep-letter-dd').addEventListener('toggle', fitLetter);
+        $('prep-letter').addEventListener('input', fitLetter);
         function openPrep(j) {
           var app = PROFILE.application || {};
           $('prep-title').textContent = 'Prepare application: ' + j.title + (j.company ? ' at ' + j.company : '');
-          $('prep-letter').value = buildLetter(j);
+          $('prep-letter').value = buildLetter(j); $('prep-letter-dd').open = false; $('prep-qa-dd').open = false; fitLetter();
           prepJob = j; $('prep-desc').value = ''; $('prep-ai-status').textContent = '';
           $('prep-ai').hidden = !(API && pass); $('prep-ai-btn').disabled = false;
           var qa = $('prep-qa'); qa.textContent = '';
@@ -1160,6 +1201,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             b.addEventListener('click', function () { copyText(r[1], b); });
             row.appendChild(b); qa.appendChild(row);
           });
+          $('prep-qa-prev').textContent = qa.children.length + ' fields: ' + rows.filter(function (r) { return r[1]; }).map(function (r) { return r[0]; }).join(', ');
           $('prep-open').href = j.url;
           var d = $('prep-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
         }
@@ -1176,7 +1218,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
             .then(function (res) {
               if (res.ok && res.d.letter) {
-                $('prep-letter').value = frameLetter(j, res.d.letter, { greeting: res.d.greeting, closing: res.d.closing });
+                $('prep-letter').value = frameLetter(j, res.d.letter, { greeting: res.d.greeting, closing: res.d.closing }); fitLetter();
                 st.textContent = 'AI draft. Read it carefully and fix anything that is not true. ' + (res.d.postingRead === 'page' ? 'Read the posting page. ' : res.d.postingRead === 'stored' ? 'Used the short description we have (the page could not be read). ' : 'No description found for this job. ') + (res.d.usedPoints ? 'Worked in your points. ' : '') + (res.d.usedResume ? 'Used your saved resume facts. ' : 'Tip: add your resume under My resume so letters use your real details. ') + (res.d.left != null ? res.d.left + ' left today.' : '');
               } else if (res.status === 401) {
                 st.textContent = 'Please log in again.';
@@ -1483,7 +1525,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             }
             node2.appendChild(row);
           }
-          ['bc', 'else'].forEach(function (vw) {
+          ['bc', 'pub', 'else'].forEach(function (vw) {
             var panel = $('hid-' + vw), list = panel.querySelector('.hidlist'), n = 0;
             list.textContent = '';
             EMPL.hidden.forEach(function (nm) {
@@ -1840,7 +1882,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
 
         // ---- top-level tabs ----
         function showView(v) {
-          if (v !== 'jobs' && v !== 'bc' && v !== 'else') v = 'jobs';
+          if (v !== 'jobs' && v !== 'pub' && v !== 'bc' && v !== 'else') v = 'jobs';
           var secs = document.querySelectorAll('.view');
           for (var i = 0; i < secs.length; i++) secs[i].hidden = secs[i].getAttribute('data-view') !== v;
           $('sidejobs').hidden = v !== 'jobs'; $('app').classList.remove('show-detail');
