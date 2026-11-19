@@ -575,6 +575,33 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #resume-dialog .pick input[type=file] { flex: 1 1 100%; width: 100%; min-width: 0; max-width: 100%; }
       #resume-dialog * { max-width: 100%; }
       #resume-dialog .pick > * { min-width: 0; }
+      @media (min-width: 961px) {
+        /* desktop: one page scroll. Filters become a toolbar across the top, no inner scroll bars */
+        .layout { grid-template-columns: minmax(0, 1fr); }
+        .side { position: static; max-height: none; overflow: visible; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 14px; padding: 4px 40px 8px; }
+        #sidejobs { display: contents; }
+        #sideemp, #sidejobs > .search { order: 1; flex: 0 1 320px; width: 320px; }
+        .nav { order: 2; display: flex; flex-direction: row; gap: 6px; }
+        .nav button, .nav button + button { padding: 9px 16px; gap: 10px; font-size: .92rem; }
+        .pills { order: 3; display: flex; gap: 6px; }
+        .pills button { padding: 9px 16px !important; gap: 10px; font-size: .92rem; }
+        .progress { order: 4; flex: 1 1 280px; flex-wrap: nowrap; align-items: center; gap: 12px; }
+        .progress::before { order: -2; flex: none; font-size: .95rem; }
+        #progress-text { order: -1; flex: none; white-space: nowrap; }
+        .progress .bar { flex: 1 1 120px; }
+        .fbox { order: 5; flex: 1 1 100%; }
+        .fbox > summary { display: flex; align-items: center; gap: 10px; width: fit-content; padding: 4px 0; }
+        .fbox .fchecks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 28px; margin-top: 10px; }
+        .built { order: 6; flex: 1 1 100%; margin: 0; }
+        .main { padding: 16px 40px 100px; }
+        .cols { grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr); gap: 56px; }
+        #list { max-height: none; overflow: visible; }
+        .detail { position: sticky; top: 104px; max-height: calc(100vh - 124px); overflow: auto; scrollbar-width: none; }
+        .detail::-webkit-scrollbar { display: none; }
+        .detail .dbody { overflow: visible; }
+        .exp .full { max-height: none; overflow: visible; }
+        .grid { max-width: 820px; }
+      }
       /* ===== END THEME v2 ===== */
     </style>
   </head>
@@ -625,12 +652,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             </div>
             <div class="progress" id="progress"><span id="progress-text"></span><span class="bar"><i id="progress-bar"></i></span></div>
             <div class="sep"></div>
-            <details class="fbox" id="fbox" open>
+            <div class="search">
+              <span class="ico" data-i="search"></span>
+              <input type="search" id="q" placeholder="Search" aria-label="Search jobs" />
+            </div>
+            <details class="fbox" id="fbox">
               <summary>Filters</summary>
-              <div class="search">
-                <span class="ico" data-i="search"></span>
-                <input type="search" id="q" placeholder="Search" aria-label="Search jobs" />
-              </div>
               <div class="fchecks" id="fchecks" role="group" aria-label="Filters, in order of priority (tick one or more to narrow the list)"></div>
               <button type="button" class="linkbtn" id="clear" hidden>Reset filters</button>
             </details>
@@ -2075,7 +2102,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         });
         $('menu-logout').addEventListener('click', function () { $('menu').hidden = true; logout(); });
         $('clear-top').addEventListener('click', function () { $('clear').click(); });
-        $('fbox').open = !isNarrow();
+        $('fbox').open = false;
 
         // ---- close (X) button, top left of every pop-up window ----
         Array.prototype.forEach.call(document.querySelectorAll('dialog'), function (d) {
