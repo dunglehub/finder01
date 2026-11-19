@@ -824,7 +824,19 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
         // US jobs stay hidden until the US box is ticked.
-        function usHidden(j) { return stateOf(j.id) !== 'shortlist' && !$('f10').checked && flags(j)[4]; }
+        // The Shortlist has its own filters (they start empty); every other tab shares one set.
+        var curGroup = 's', fsave = { s: null, o: null };
+        function usShown() { return curGroup === 'o' ? $('f10').checked : !!(fsave.o && fsave.o.checks[4]); }
+        function syncGroup() {
+          var ng = tab === 'shortlist' ? 's' : 'o';
+          if (ng === curGroup) return;
+          fsave[curGroup] = { checks: CRITERIA.map(function (c) { return $(c.id).checked; }), q: $('q').value };
+          var st = fsave[ng];
+          CRITERIA.forEach(function (c, i) { $(c.id).checked = st ? !!st.checks[i] : false; });
+          $('q').value = st ? st.q : '';
+          curGroup = ng;
+        }
+        function usHidden(j) { return stateOf(j.id) !== 'shortlist' && !usShown() && flags(j)[4]; }
         function byPriority(a, b) {
           var fa = flags(a), fb = flags(b), i;
           for (i = 0; i <= 10; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
@@ -1399,7 +1411,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             if (s !== tab) return false;
             var f = flags(j);
             if (usHidden(j)) return false;
-            if (tab !== 'shortlist') for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
+            for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
             if (q && (j.title + ' ' + j.company + ' ' + j.location).toLowerCase().indexOf(q) === -1) return false;
             return true;
           }).sort(SORTS[$('sort').value] || SORTS.priority);
@@ -1522,7 +1534,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             .then(function () { btn.disabled = false; });
         });
 
-        function renderAll() { renderTabs(); renderStatus(); renderJobs(); renderEmployers(); }
+        function renderAll() { syncGroup(); renderTabs(); renderStatus(); renderJobs(); renderEmployers(); }
 
         $('tabs').addEventListener('click', function (e) {
           var b = e.target.closest('button[data-tab]');
@@ -1843,7 +1855,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           try { history.replaceState(null, '', '#' + v); } catch (err) {}
         });
         $('home').addEventListener('click', function () {
-          tab = 'shortlist'; $('clear').click(); showView('jobs');
+          tab = 'shortlist'; syncGroup(); fsave.o = null; fsave.s = null; $('clear').click(); showView('jobs');
           $('menu').hidden = true;
           try { history.replaceState(null, '', location.pathname + location.search); } catch (err) {}
           renderAll(); window.scrollTo(0, 0);
