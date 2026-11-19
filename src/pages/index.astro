@@ -339,7 +339,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         background: var(--bg2); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
       #prep-dialog #prep-desc { min-height: 90px; }
       #prep-dialog .dd { border-top: 1px solid var(--line); margin-top: 6px; }
-      #prep-dialog .dd:last-of-type { border-bottom: 1px solid var(--line); }
+      #prep-dialog #prep-qa-dd { border-bottom: 1px solid var(--line); }
       #prep-dialog .dd > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; font-weight: 600; }
       #prep-dialog .dd > summary::-webkit-details-marker { display: none; }
       #prep-dialog .ddt { flex: 1; min-width: 0; }
