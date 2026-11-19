@@ -824,7 +824,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         ];
         function flags(j) { if (!j._f) j._f = CRITERIA.map(function (c) { return !!c.test(j); }); return j._f; }
         // US jobs stay hidden until the US box is ticked.
-        function usHidden(j) { return !$('f10').checked && flags(j)[4]; }
+        function usHidden(j) { return stateOf(j.id) !== 'shortlist' && !$('f10').checked && flags(j)[4]; }
         function byPriority(a, b) {
           var fa = flags(a), fb = flags(b), i;
           for (i = 0; i <= 10; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
@@ -1399,7 +1399,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             if (s !== tab) return false;
             var f = flags(j);
             if (usHidden(j)) return false;
-            for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
+            if (tab !== 'shortlist') for (var k = 0; k < on.length; k++) if (on[k] && !f[k]) return false;
             if (q && (j.title + ' ' + j.company + ' ' + j.location).toLowerCase().indexOf(q) === -1) return false;
             return true;
           }).sort(SORTS[$('sort').value] || SORTS.priority);
