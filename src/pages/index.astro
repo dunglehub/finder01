@@ -123,7 +123,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .progress { display: flex; align-items: center; gap: 10px; font-size: .8rem; color: var(--muted); flex-wrap: wrap; }
       .progress .bar { flex: 1 1 100%; height: 6px; border-radius: 999px; background: var(--grey-soft); overflow: hidden; }
       .progress .bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width .3s; }
-      .fbox > summary { display: none; cursor: pointer; font-weight: 600; color: var(--blue); padding: 4px 0 10px; }
+      .fbox > summary { display: none; cursor: pointer; font-weight: 600; color: var(--blue); padding: 4px 0 10px; list-style: none; }
+      .fbox > summary::-webkit-details-marker, .hid > summary::-webkit-details-marker, .exp summary::-webkit-details-marker { display: none; }
+      .fbox > summary::after, .hid > summary::after, .exp summary::after { content: ''; width: 9px; height: 9px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin: -4px 6px 0 0; transition: transform .15s; flex: 0 0 auto; }
+      .fbox[open] > summary::after, .hid[open] > summary::after, .exp details[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
       .search { position: relative; }
       .search .ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.05rem; }
       .search input { width: 100%; padding: 6px 12px 6px 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; }
@@ -203,7 +206,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .exp ul { margin: 10px 0 0; padding-left: 20px; }
       .exp li { margin-bottom: 4px; }
       .exp details { margin-top: 10px; }
-      .exp summary { cursor: pointer; color: var(--blue); font-size: .9rem; width: fit-content; }
+      .exp summary { cursor: pointer; color: var(--text); font-weight: 600; width: 100%; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
       .exp .full { margin-top: 8px; max-height: 240px; overflow: auto; white-space: pre-wrap; font-size: .88rem; color: var(--muted);
         background: var(--bg2); border-radius: 8px; padding: 10px 12px; }
       .detail .dbar { border-top: 1px solid var(--line); padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -238,7 +241,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .nav { gap: 2px; overflow-x: visible; }
         .nav button { white-space: nowrap; width: auto; padding: 8px 9px; gap: 5px; font-size: .92rem; }
         .nav button .ico { display: none; }
-        .fbox > summary { display: block; }
+        .fbox > summary { display: flex; justify-content: space-between; align-items: center; }
         .main { padding: 14px; }
         .cols { grid-template-columns: minmax(0, 1fr); }
         #list { max-height: none; overflow: visible; }
@@ -313,8 +316,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #emp-dialog select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
       .emptools { margin: 0 0 14px; }
       .co .actions .rm + .rm { margin-left: 0; }
-      .hid { margin-top: 18px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px 14px; }
-      .hid summary { cursor: pointer; color: var(--muted); font-size: .92rem; }
+      .hid { margin-top: 18px; border-top: 1px solid var(--line); padding: 0; }
+      .hid summary { cursor: pointer; color: var(--text); font-weight: 600; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
       .hidrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); margin-top: 8px; }
       .hidrow span { flex: 1; font-weight: 600; }
       .hidrow button { font: inherit; font-size: .86rem; padding: 4px 9px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); }
@@ -335,15 +338,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #prep-dialog textarea { width: 100%; min-height: 300px; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
         background: var(--bg2); color: var(--text); font: inherit; line-height: 1.5; resize: vertical; }
       #prep-dialog #prep-desc { min-height: 90px; }
-      #prep-dialog .dd { background: var(--bg2); border: 1px solid var(--line); border-radius: 22px 22px 6px 22px; padding: 0 16px; }
-      #prep-dialog .dd > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+      #prep-dialog .dd { border-top: 1px solid var(--line); margin-top: 6px; }
+      #prep-dialog .dd:last-of-type { border-bottom: 1px solid var(--line); }
+      #prep-dialog .dd > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; font-weight: 600; }
       #prep-dialog .dd > summary::-webkit-details-marker { display: none; }
-      #prep-dialog .ddt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-      #prep-dialog .ddp { color: var(--muted); font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      #prep-dialog .dd[open] .ddp { display: none; }
-      #prep-dialog .chev { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin: -4px 4px 0 0; transition: transform .15s; flex: 0 0 auto; }
+      #prep-dialog .ddt { flex: 1; min-width: 0; }
+      #prep-dialog .ddp { display: none; }
+      #prep-dialog .chev { width: 9px; height: 9px; border-right: 2px solid var(--text); border-bottom: 2px solid var(--text); transform: rotate(45deg); margin: -4px 6px 0 0; transition: transform .15s; flex: 0 0 auto; }
       #prep-dialog .dd[open] .chev { transform: rotate(-135deg); margin-top: 4px; }
       #prep-dialog .dd textarea { border: 0; background: transparent; padding: 4px 0 12px; min-height: 120px; overflow: hidden; resize: none; outline: none; }
+      #prep-dialog .dd #prep-desc { border: 1px solid var(--line); background: var(--bg2); padding: 12px; min-height: 90px; overflow: auto; resize: vertical; }
+      #prep-dialog .dd > .row { margin-bottom: 14px; }
       #prep-dialog .dd .qa:first-child { border-top: 0; }
       #prep-dialog #prep-qa { padding-bottom: 6px; }
       #prep-dialog .hint { color: var(--muted); font-size: .86rem; margin: 4px 0 0; }
@@ -427,10 +432,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <div class="layout">
         <aside class="side">
           <nav class="nav" id="nav" aria-label="Sections">
-            <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Jobs <span class="cnt" id="jobs-count">{jobs.length}</span></button>
-            <button type="button" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Public sector <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
-            <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employers <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
-            <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
+            <button type="button" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Found <span class="cnt" id="jobs-count">{jobs.length}</span></button>
+            <button type="button" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Gov <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
+            <button type="button" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Empl <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+            <button type="button" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Else <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
           <div id="sidejobs">
             <div class="sep"></div>
@@ -558,15 +563,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       </details>
       <div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" id="prep-copy-letter">Copy letter</button><button type="button" id="prep-pdf-letter" style="margin-left:8px">PDF</button></div>
       <div id="prep-ai" hidden>
-        <label for="prep-desc">My own points to include (optional)</label>
+        <details class="dd" id="prep-ai-dd">
+        <summary><span class="ddt">My own points to include (optional)</span><span class="chev" aria-hidden="true"></span></summary>
         <textarea id="prep-desc" maxlength="1500" placeholder="Anything you want said in the letter, in your own words. For example: I built a small wind turbine last summer, and I can start in May."></textarea>
         <div class="hint">The AI reads the job posting page by itself and works your points into the letter.</div>
         <div class="row" style="justify-content:flex-start;align-items:center;margin-top:8px">
           <button type="button" class="primary" id="prep-ai-btn">AI write</button>
           <span class="who" id="prep-ai-status" role="status"></span>
         </div>
+        </details>
       </div>
-      <details class="dd" id="prep-qa-dd" style="margin-top:16px">
+      <details class="dd" id="prep-qa-dd">
         <summary><span class="ddt"><b>Quick answers</b><span class="ddp" id="prep-qa-prev"></span></span><span class="chev" aria-hidden="true"></span></summary>
         <div id="prep-qa"></div>
       </details>
@@ -1185,7 +1192,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         function openPrep(j) {
           var app = PROFILE.application || {};
           $('prep-title').textContent = 'Prepare application: ' + j.title + (j.company ? ' at ' + j.company : '');
-          $('prep-letter').value = buildLetter(j); $('prep-letter-dd').open = false; $('prep-qa-dd').open = false; fitLetter();
+          $('prep-letter').value = buildLetter(j); $('prep-letter-dd').open = false; $('prep-qa-dd').open = false; $('prep-ai-dd').open = false; fitLetter();
           prepJob = j; $('prep-desc').value = ''; $('prep-ai-status').textContent = '';
           $('prep-ai').hidden = !(API && pass); $('prep-ai-btn').disabled = false;
           var qa = $('prep-qa'); qa.textContent = '';
