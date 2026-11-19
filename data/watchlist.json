@@ -1,134 +1,459 @@
 [
-  { "name": "Moment Energy", "region": "BC", "type": "Startup", "system": "Greenhouse", "mode": "auto",
+  {
+    "name": "Moment Energy",
+    "region": "BC",
+    "type": "Startup",
+    "system": "Greenhouse",
+    "mode": "auto",
     "url": "https://job-boards.greenhouse.io/momentenergy",
-    "feed": { "type": "greenhouse", "board": "momentenergy" },
-    "note": "Second-life battery energy storage. Surrey, BC. Feed is pulled automatically." },
-  { "name": "Ballard Power Systems", "region": "BC", "type": "Company", "system": "Paycor", "mode": "link",
+    "feed": {
+      "type": "greenhouse",
+      "board": "momentenergy"
+    },
+    "note": "Second-life battery energy storage. Surrey, BC. Feed is pulled automatically."
+  },
+  {
+    "name": "Ballard Power Systems",
+    "region": "BC",
+    "type": "Company",
+    "system": "Paycor",
+    "mode": "link",
     "url": "https://www.ballard.com/careers/",
-    "note": "Fuel cells, Burnaby. Research co-op seen on careers page." },
-  { "name": "E-One Moli Energy (Molicel)", "region": "BC", "type": "Company", "system": "BambooHR", "mode": "link",
+    "note": "Fuel cells, Burnaby. Research co-op seen on careers page."
+  },
+  {
+    "name": "E-One Moli Energy (Molicel)",
+    "region": "BC",
+    "type": "Company",
+    "system": "BambooHR",
+    "mode": "link",
     "url": "https://www.molicel.com/career/canada-site/",
-    "note": "Lithium-ion cells, Pitt Meadows. Canada site careers page." },
-  { "name": "Corvus Energy", "region": "BC", "type": "Company", "system": "Teamtailor", "mode": "link",
+    "note": "Lithium-ion cells, Pitt Meadows. Canada site careers page."
+  },
+  {
+    "name": "Corvus Energy",
+    "region": "BC",
+    "type": "Company",
+    "system": "Teamtailor",
+    "mode": "link",
     "url": "https://corvusenergy.teamtailor.com/jobs",
-    "note": "Marine battery systems, Richmond. Feed may be automatable later." },
-  { "name": "Invinity Energy Systems", "region": "BC", "type": "Company", "system": "Lever", "mode": "auto",
+    "note": "Marine battery systems, Richmond. Feed may be automatable later."
+  },
+  {
+    "name": "Invinity Energy Systems",
+    "region": "BC",
+    "type": "Company",
+    "system": "Lever",
+    "mode": "auto",
     "url": "https://jobs.lever.co/invinity",
-    "feed": { "type": "lever", "board": "invinity" },
-    "note": "Flow batteries, Vancouver. Feed is pulled automatically." },
-  { "name": "Sanctuary AI", "region": "BC", "type": "Startup", "system": "Lever", "mode": "auto",
+    "feed": {
+      "type": "lever",
+      "board": "invinity"
+    },
+    "note": "Flow batteries, Vancouver. Feed is pulled automatically."
+  },
+  {
+    "name": "Sanctuary AI",
+    "region": "BC",
+    "type": "Startup",
+    "system": "Lever",
+    "mode": "auto",
     "url": "https://jobs.lever.co/sanctuary",
-    "feed": { "type": "lever", "board": "sanctuary" },
-    "note": "Humanoid robots, Vancouver. Mechanical and hardware R&D interns, including May starts, seen in past terms." },
-  { "name": "Apera AI", "region": "BC", "type": "Startup", "system": "Greenhouse", "mode": "auto",
+    "feed": {
+      "type": "lever",
+      "board": "sanctuary"
+    },
+    "note": "Humanoid robots, Vancouver. Mechanical and hardware R&D interns, including May starts, seen in past terms."
+  },
+  {
+    "name": "Apera AI",
+    "region": "BC",
+    "type": "Startup",
+    "system": "Greenhouse",
+    "mode": "auto",
     "url": "https://job-boards.greenhouse.io/aperaaiinc",
-    "feed": { "type": "greenhouse", "board": "aperaaiinc" },
-    "note": "Robot vision, Vancouver. Roboticist co-op seen." },
-  { "name": "Zaber Technologies", "region": "BC", "type": "Company", "system": "Workable", "mode": "auto",
+    "feed": {
+      "type": "greenhouse",
+      "board": "aperaaiinc"
+    },
+    "note": "Robot vision, Vancouver. Roboticist co-op seen."
+  },
+  {
+    "name": "Zaber Technologies",
+    "region": "BC",
+    "type": "Company",
+    "system": "Workable",
+    "mode": "link",
     "url": "https://apply.workable.com/zaber/",
-    "feed": { "type": "workable", "board": "zaber" },
-    "note": "Precision motion control, Vancouver. Mechanical and firmware co-ops. Feed is pulled automatically." },
-  { "name": "Blue Robotics", "region": "BC", "type": "Company", "system": "Rippling", "mode": "link",
+    "note": "Motion control, Vancouver. Mechanical Design co-op seen."
+  },
+  {
+    "name": "Blue Robotics",
+    "region": "BC",
+    "type": "Company",
+    "system": "Rippling",
+    "mode": "link",
     "url": "https://ats.rippling.com/blue-robotics/jobs",
-    "note": "Underwater robotics, Victoria. Mechanical Design co-ops seen." },
-  { "name": "AtkinsRéalis (SNC-Lavalin)", "region": "BC", "type": "Company", "system": "Own site", "mode": "link",
+    "note": "Underwater robotics, Victoria. Mechanical Design co-ops seen."
+  },
+  {
+    "name": "AtkinsRéalis (SNC-Lavalin)",
+    "region": "BC",
+    "type": "Company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers.atkinsrealis.com/",
-    "note": "Engineering consulting. Mechanical or Electrical Co-op Student postings, incl. Vancouver." },
-  { "name": "BC Hydro", "region": "BC", "type": "Utility", "system": "Own site", "mode": "link",
+    "note": "Engineering consulting. Mechanical or Electrical Co-op Student postings, incl. Vancouver."
+  },
+  {
+    "name": "BC Hydro",
+    "region": "BC",
+    "type": "Utility",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.bchydro.com/work-with-us/Careers/apprenticeships-training-coops/coop-educational-program.html",
-    "note": "Four-month co-op terms (extendable to 8). Summer (May) term postings go up in January, so watch from January 2027. Mechanical, electrical and EV roles across BC." },
-  { "name": "FortisBC", "region": "BC", "type": "Utility", "system": "Own site", "mode": "link",
+    "note": "Four-month co-op terms (extendable to 8). Summer (May) term postings go up in January, so watch from January 2027. Mechanical, electrical and EV roles across BC."
+  },
+  {
+    "name": "FortisBC",
+    "region": "BC",
+    "type": "Utility",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers.fortisbc.com/",
-    "note": "Energy utility. Engineering Co-op, Mechanical postings in Surrey and an LNG co-op in Delta seen." },
-  { "name": "Svante", "region": "BC", "type": "Company", "system": "Job board (Getro)", "mode": "link",
+    "note": "Energy utility. Engineering Co-op, Mechanical postings in Surrey and an LNG co-op in Delta seen."
+  },
+  {
+    "name": "Svante",
+    "region": "BC",
+    "type": "Company",
+    "system": "Job board (Getro)",
+    "mode": "link",
     "url": "https://jobs.unreasonablegroup.com/companies/svante-2",
-    "note": "Carbon capture hardware, Burnaby. Many co-ops: mechanical, manufacturing, test station design." },
-  { "name": "General Fusion", "region": "BC", "type": "Startup", "system": "Job board (Getro)", "mode": "link",
+    "note": "Carbon capture hardware, Burnaby. Many co-ops: mechanical, manufacturing, test station design."
+  },
+  {
+    "name": "General Fusion",
+    "region": "BC",
+    "type": "Startup",
+    "system": "Job board (Getro)",
+    "mode": "link",
     "url": "https://jobs.unreasonablegroup.com/companies/general-fusion-2",
-    "note": "Fusion energy, Richmond. Mechanical Engineer roles; has taken local co-op students." },
-  { "name": "EnerSys", "region": "BC", "type": "Company", "system": "Own site", "mode": "link",
+    "note": "Fusion energy, Richmond. Mechanical Engineer roles; has taken local co-op students."
+  },
+  {
+    "name": "EnerSys",
+    "region": "BC",
+    "type": "Company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://jobs.enersys.com/",
-    "note": "Industrial batteries, Burnaby. Electronics Engineering co-op seen." },
-  { "name": "Westport Fuel Systems", "region": "BC", "type": "Company", "system": "iCIMS", "mode": "link",
+    "note": "Industrial batteries, Burnaby. Electronics Engineering co-op seen."
+  },
+  {
+    "name": "Westport Fuel Systems",
+    "region": "BC",
+    "type": "Company",
+    "system": "iCIMS",
+    "mode": "link",
     "url": "https://c-3745-20130717-www-westport-com.i.icims.com/company/careers",
-    "note": "Clean fuel and engine systems, Vancouver. Listed on UBC Engineering's employer pages." },
-  { "name": "Nano One Materials", "region": "BC", "type": "Company", "system": "CareerBeacon", "mode": "link",
+    "note": "Clean fuel and engine systems, Vancouver. Listed on UBC Engineering's employer pages."
+  },
+  {
+    "name": "Nano One Materials",
+    "region": "BC",
+    "type": "Company",
+    "system": "CareerBeacon",
+    "mode": "link",
     "url": "https://nanoone.ca/",
-    "note": "Battery cathode materials, Burnaby. Mechanical Engineer and battery technician roles seen." },
-  { "name": "Rivian", "region": "BC", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Battery cathode materials, Burnaby. Mechanical Engineer and battery technician roles seen."
+  },
+  {
+    "name": "Rivian",
+    "region": "BC",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers.rivian.com/",
-    "note": "Vancouver office. Co-op roles seen were software and controls, so check for hardware roles." },
-  { "name": "Boeing", "region": "BC", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Vancouver office. Co-op roles seen were software and controls, so check for hardware roles."
+  },
+  {
+    "name": "Boeing",
+    "region": "BC",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://jobs.boeing.com/",
-    "note": "Richmond, BC listings exist." },
-  { "name": "Tesla", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Richmond, BC listings exist."
+  },
+  {
+    "name": "Tesla",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.tesla.com/careers/students",
-    "note": "Cell engineering internships in Canada (Ontario, Langley BC area for some roles)." },
-  { "name": "SpaceX", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Cell engineering internships in Canada (Ontario, Langley BC area for some roles)."
+  },
+  {
+    "name": "SpaceX",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.spacex.com/internships",
-    "note": "Rockets and Starlink. Their intern page mentions U.S. work-authorization rules (ITAR) and no F-1 sponsorship, so check eligibility as a Canadian citizen before applying. Sites are in the U.S." },
-  { "name": "Amazon", "region": "BC", "type": "Big company", "system": "amazon.jobs", "mode": "link",
+    "note": "Rockets and Starlink. Their intern page mentions U.S. work-authorization rules (ITAR) and no F-1 sponsorship, so check eligibility as a Canadian citizen before applying. Sites are in the U.S."
+  },
+  {
+    "name": "Amazon",
+    "region": "BC",
+    "type": "Big company",
+    "system": "amazon.jobs",
+    "mode": "link",
     "url": "https://www.amazon.jobs/",
-    "note": "Vancouver office. Search 'intern' and filter to Canada." },
-  { "name": "Microsoft", "region": "BC", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Vancouver office. Search 'intern' and filter to Canada."
+  },
+  {
+    "name": "Microsoft",
+    "region": "BC",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers.microsoft.com/",
-    "note": "Vancouver office." },
-  { "name": "AMD", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Vancouver office."
+  },
+  {
+    "name": "AMD",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers.amd.com/",
-    "note": "Summer 2027 intern/co-op postings already appearing (Markham, ON)." },
-  { "name": "NVIDIA", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Summer 2027 intern/co-op postings already appearing (Markham, ON)."
+  },
+  {
+    "name": "NVIDIA",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.nvidia.com/en-us/about-nvidia/careers/",
-    "note": "2027 hardware internships. SolidWorks use not confirmed." },
-  { "name": "Meta", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "2027 hardware internships. SolidWorks use not confirmed."
+  },
+  {
+    "name": "Meta",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.metacareers.com/",
-    "note": "Mechanical Engineer Intern postings. SolidWorks use not confirmed." },
-  { "name": "Google", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Mechanical Engineer Intern postings. SolidWorks use not confirmed."
+  },
+  {
+    "name": "Google",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.google.com/about/careers/applications/",
-    "note": "Hardware product design roles. SolidWorks use not confirmed." },
-  { "name": "General Motors", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Hardware product design roles. SolidWorks use not confirmed."
+  },
+  {
+    "name": "General Motors",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://search-careers.gm.com/",
-    "note": "Many co-op postings, incl. 2027 Winter." },
-  { "name": "Ford Canada", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Many co-op postings, incl. 2027 Winter."
+  },
+  {
+    "name": "Ford Canada",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.careers.ford.com/en/locations/north-america/ford-canada-careers-EN/canada-student-programs.html",
-    "note": "Student programs page. Mostly Ontario." },
-  { "name": "Kia Canada", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Student programs page. Mostly Ontario."
+  },
+  {
+    "name": "Kia Canada",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers-americas.kia.com/kaga/go/Co-Ops-and-Internships/9736700/",
-    "note": "Co-ops and internships. Mississauga." },
-  { "name": "Toyota (TMMC)", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Co-ops and internships. Mississauga."
+  },
+  {
+    "name": "Toyota (TMMC)",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://tmmc.ca/en/coop-jobs",
-    "note": "Co-op jobs, Ontario plants." },
-  { "name": "Honda Canada Manufacturing", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Co-op jobs, Ontario plants."
+  },
+  {
+    "name": "Honda Canada Manufacturing",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://www.hondacanadamfg.ca/?p=71",
-    "note": "Alliston, ON." },
-  { "name": "Celestica", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link",
+    "note": "Alliston, ON."
+  },
+  {
+    "name": "Celestica",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
     "url": "https://careers.celestica.com/",
-    "note": "Electronics manufacturing. Student intern roles, e.g. Newmarket ON process and manufacturing engineer." },
-  {"name": "IBM", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://www.ibm.com/careers/internships", "note": "Tech giant. Posts co-op and intern roles, mostly in the U.S.; filter for Canada and check eligibility before applying."},
-  {"name": "Rocket Lab", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://rocketlabcorp.com/careers/internships/", "note": "Rockets and satellites. U.S. sites need U.S.-person status (ITAR), but the Toronto site is open to people entitled to work in Canada. Look for Toronto roles."},
-  {"name": "Moderna", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://www.modernatx.com/careers", "note": "Biotech. Co-ops and interns are mostly in Massachusetts and postings ask for U.S. work authorization, so check eligibility first."},
-  {"name": "General Electric (GE Aerospace, GE Vernova)", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://careers.geaerospace.com/global/en/us-internships", "note": "Jet engines and power. GE Aerospace internships are mostly U.S. sites. GE Vernova posts separately at careers.gevernova.com/early-careers."},
-  {"name": "Siemens Canada", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://jobs.siemens.com/", "note": "Industrial technology. Siemens Canada posts co-ops, including mechanical R&D (Peterborough) and Ontario sites. Search 'co-op' and filter to Canada."},
-  {"name": "Hitachi Energy / Hitachi Rail", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://www.hitachienergy.com/careers", "note": "Power grids and rail. Student roles are mostly U.S. and Europe. Hitachi Rail has its own early-careers page at hitachirail.com/careers/early-careers."},
-  {"name": "Bosch Canada", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://jobs.bosch.com", "note": "Automotive and industrial tech. Bosch Canada posts 8 to 12 month co-ops and interns (Burlington, Mississauga). Filter to Canada."},
-  {"name": "ExxonMobil", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://corporate.exxonmobil.com/about-us/careers/internship-opportunities", "note": "Energy. Internship page is for U.S. roles and most recruiting runs August to November. Check eligibility as a Canadian citizen."},
-  {"name": "Chevron", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://careers.chevron.com/internship", "note": "Energy. Summer internships are at U.S. sites. Check eligibility as a Canadian citizen before applying."},
-  {"name": "Shell Canada", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://shell.ca/en_ca/careers/about-careers-at-shell/assessed-internships.html", "note": "Energy. Assessed internships and co-ops at Calgary and Scotford (Fort Saskatchewan), Alberta. Terms of 4 to 16 months."},
-  {"name": "BP Canada", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://www.bp.com/en/global/bp-careers/students-and-graduates/locations/canada.html", "note": "Energy. Head office in Calgary. Paid engineering, science and business intern programs. You can apply to one BP early-careers role per year."},
-  {"name": "TotalEnergies", "region": "Elsewhere", "type": "Big company", "system": "Own site", "mode": "link", "url": "https://careers.totalenergies.com/en/who-are-we/company-supporting-new-graduates/make-right-choice-totalenergies-internship", "note": "Energy. Many internships, mostly France and the U.S. Gulf Coast. Check location and work eligibility on each posting."},
-  { "name": "Dialog", "region": "BC", "type": "Company", "system": "Lever", "mode": "auto",
-    "url": "https://jobs.lever.co/dialogdesign",
-    "feed": { "type": "lever", "board": "dialogdesign" },
-    "note": "Engineering and design firm. Mechanical (building systems) student roles in Vancouver. Feed is pulled automatically." },
-  { "name": "Kardium", "region": "BC", "type": "Company", "system": "Dayforce", "mode": "link",
-    "url": "https://can242.dayforcehcm.com/CandidatePortal/en-CA/kardium",
-    "note": "Medical devices, Burnaby. Many 4 to 8 month co-ops each term (manufacturing, equipment, test, mechanical)." },
-  { "name": "MistyWest", "region": "BC", "type": "Company", "system": "Own site", "mode": "link",
-    "url": "https://www.mistywest.com/careers/",
-    "note": "Hardware engineering consultancy, Vancouver. Mechatronics and mechanical co-ops. Co-op inquiries by email." },
-  { "name": "Cellula Robotics", "region": "BC", "type": "Company", "system": "Own site", "mode": "link",
-    "url": "https://www.cellula.com/careers/",
-    "note": "Underwater robotics (AUVs), Burnaby. Has posted engineering co-ops." },
-  { "name": "Semios", "region": "BC", "type": "Company", "system": "Own site", "mode": "link",
-    "url": "https://www.semios.com/careers/",
-    "note": "Agtech sensors and IoT, Vancouver and Burnaby. Has posted test engineering co-ops." }
+    "note": "Electronics manufacturing. Student intern roles, e.g. Newmarket ON process and manufacturing engineer."
+  },
+  {
+    "name": "IBM",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.ibm.com/careers/internships",
+    "note": "Tech giant. Posts co-op and intern roles, mostly in the U.S.; filter for Canada and check eligibility before applying."
+  },
+  {
+    "name": "Rocket Lab",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://rocketlabcorp.com/careers/internships/",
+    "note": "Rockets and satellites. U.S. sites need U.S.-person status (ITAR), but the Toronto site is open to people entitled to work in Canada. Look for Toronto roles."
+  },
+  {
+    "name": "Moderna",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.modernatx.com/careers",
+    "note": "Biotech. Co-ops and interns are mostly in Massachusetts and postings ask for U.S. work authorization, so check eligibility first."
+  },
+  {
+    "name": "General Electric (GE Aerospace, GE Vernova)",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://careers.geaerospace.com/global/en/us-internships",
+    "note": "Jet engines and power. GE Aerospace internships are mostly U.S. sites. GE Vernova posts separately at careers.gevernova.com/early-careers."
+  },
+  {
+    "name": "Siemens Canada",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://jobs.siemens.com/",
+    "note": "Industrial technology. Siemens Canada posts co-ops, including mechanical R&D (Peterborough) and Ontario sites. Search 'co-op' and filter to Canada."
+  },
+  {
+    "name": "Hitachi Energy / Hitachi Rail",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.hitachienergy.com/careers",
+    "note": "Power grids and rail. Student roles are mostly U.S. and Europe. Hitachi Rail has its own early-careers page at hitachirail.com/careers/early-careers."
+  },
+  {
+    "name": "Bosch Canada",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://jobs.bosch.com",
+    "note": "Automotive and industrial tech. Bosch Canada posts 8 to 12 month co-ops and interns (Burlington, Mississauga). Filter to Canada."
+  },
+  {
+    "name": "ExxonMobil",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://corporate.exxonmobil.com/about-us/careers/internship-opportunities",
+    "note": "Energy. Internship page is for U.S. roles and most recruiting runs August to November. Check eligibility as a Canadian citizen."
+  },
+  {
+    "name": "Chevron",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://careers.chevron.com/internship",
+    "note": "Energy. Summer internships are at U.S. sites. Check eligibility as a Canadian citizen before applying."
+  },
+  {
+    "name": "Shell Canada",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://shell.ca/en_ca/careers/about-careers-at-shell/assessed-internships.html",
+    "note": "Energy. Assessed internships and co-ops at Calgary and Scotford (Fort Saskatchewan), Alberta. Terms of 4 to 16 months."
+  },
+  {
+    "name": "BP Canada",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.bp.com/en/global/bp-careers/students-and-graduates/locations/canada.html",
+    "note": "Energy. Head office in Calgary. Paid engineering, science and business intern programs. You can apply to one BP early-careers role per year."
+  },
+  {
+    "name": "TotalEnergies",
+    "region": "Elsewhere",
+    "type": "Big company",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://careers.totalenergies.com/en/who-are-we/company-supporting-new-graduates/make-right-choice-totalenergies-internship",
+    "note": "Energy. Many internships, mostly France and the U.S. Gulf Coast. Check location and work eligibility on each posting."
+  },
+  {
+    "name": "Government of Canada (FSWEP)",
+    "region": "Public",
+    "type": "Federal government",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.canada.ca/en/public-service-commission/jobs/services/recruitment/students/federal-student-work-program.html",
+    "note": "Federal Student Work Experience Program. You add your resume to a student inventory, then departments hire from it. Intake windows are usually winter to spring. Also check UBC's co-op portal for federal co-op postings."
+  },
+  {
+    "name": "Government of Alberta",
+    "region": "Public",
+    "type": "Provincial government",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.alberta.ca/internships-and-student-employment.aspx",
+    "note": "Summer student intake across ministries, usually posted around late February. You need to be in Alberta during the term. Internships and co-ops are on the jobs board all year."
+  },
+  {
+    "name": "BC Public Service co-op",
+    "region": "Public",
+    "type": "Provincial government",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.postsecondarybc.ca/knowledgebase/the-bc-public-service-co-op-employment-program",
+    "note": "Co-op terms of 4, 8 or 12 months, with a May to August summer term. You must be in a recognized co-op program, so apply through UBC co-op."
+  },
+  {
+    "name": "City of Calgary",
+    "region": "Public",
+    "type": "Municipal government",
+    "system": "Own site",
+    "mode": "link",
+    "url": "https://www.calgary.ca/careers/entry-level.html",
+    "note": "Student and entry-level jobs page. Search for engineering student or co-op roles. Postings come and go, so check often."
+  }
 ]
