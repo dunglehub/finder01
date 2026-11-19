@@ -113,7 +113,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .nav button .cnt { margin-left: auto; color: var(--muted); font-size: .85rem; }
       .nav button[aria-pressed=true] { background: var(--grey-soft); font-weight: 600; }
       #sidejobs { display: flex; flex-direction: column; gap: 14px; }
-      .pills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .pills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+      .pills button { padding-left: 6px !important; padding-right: 6px !important; font-size: .88rem; }
       .pills button { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 9px;
         border: 1px solid var(--line); background: var(--card); font: inherit; font-size: .88rem; color: var(--text); cursor: pointer; }
       .pills button .ico { display: none; }
@@ -234,7 +235,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .chip .avatar { width: 24px; height: 24px; font-size: .75rem; }
         .layout { grid-template-columns: minmax(0, 1fr); }
         .side, .main, .listcol, .cols, .app { min-width: 0; max-width: 100%; }
-        .pills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .pills { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .nav { max-width: 100%; }
         .side { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--line); padding: 14px; }
         .nav { flex-direction: row; overflow-x: auto; }
@@ -448,10 +449,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <div id="sidejobs">
             <div class="sep"></div>
             <div class="pills" id="tabs" role="group" aria-label="Show postings">
-              <button type="button" data-tab="review" aria-pressed="false"><span class="ico" data-i="refresh"></span>Review <span class="n"></span></button>
-              <button type="button" data-tab="shortlist" aria-pressed="true"><span class="ico" data-i="star"></span>Shortlist <span class="n"></span></button>
-              <button type="button" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>Applied <span class="n"></span></button>
-              <button type="button" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Skipped <span class="n"></span></button>
+              <button type="button" title="Review" aria-label="Review" data-tab="review" aria-pressed="false"><span class="ico" data-i="refresh"></span>Rev <span class="n"></span></button>
+              <button type="button" title="Shortlist" aria-label="Shortlist" data-tab="shortlist" aria-pressed="true"><span class="ico" data-i="star"></span>Sho <span class="n"></span></button>
+              <button type="button" title="Applied" aria-label="Applied" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>App <span class="n"></span></button>
+              <button type="button" title="Skipped" aria-label="Skipped" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Ski <span class="n"></span></button>
             </div>
             <div class="progress" id="progress"><span id="progress-text"></span><span class="bar"><i id="progress-bar"></i></span></div>
             <div class="sep"></div>
