@@ -631,6 +631,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       /* non-active action buttons: light grey like the other chips */
       .addbtn:not(.outline), .btn1 { background: #f4f4f4; color: #171a20; border: 0; }
       .addbtn:not(.outline):hover, .btn1:hover { background: #e8e8e8; color: #171a20; filter: none; }
+      dialog button.primary, #prep-dialog a.btnlink { background: #f4f4f4 !important; color: #171a20 !important; border: 0; font-weight: 600; }
+      dialog button.primary:hover, #prep-dialog a.btnlink:hover { background: #e8e8e8 !important; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
