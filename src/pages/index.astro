@@ -618,6 +618,16 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .brand .usermenu { margin-left: 0; order: 4; }
         .brand > h1 { order: 1; } .brand > .live { order: 2; }
       }
+      /* darker, slightly larger text; search clear button */
+      :root { --muted: #2b2e33; --line: #b9bcc1; }
+      .co p { font-size: 1rem; color: #23262b; }
+      .meta, .why, .card .why { color: #2b2e33; }
+      .built { font-size: .86rem; color: #2b2e33; }
+      .search input::placeholder { color: #55595f; opacity: 1; }
+      .search input { font-size: 1rem; padding-right: 40px; }
+      .search input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+      .sclear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; border-radius: 50%; background: #e2e3e5; color: #171a20; font-size: 1.2rem; line-height: 1; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+      .sclear[hidden] { display: none; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
@@ -658,6 +668,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             <div class="search">
               <span class="ico" data-i="search"></span>
               <input type="search" id="empq" placeholder="Search" aria-label="Search this list" />
+              <button type="button" class="sclear" data-for="empq" aria-label="Clear search" hidden>&times;</button>
             </div>
           </div>
           <div id="sidejobs">
@@ -673,6 +684,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             <div class="search">
               <span class="ico" data-i="search"></span>
               <input type="search" id="q" placeholder="Search" aria-label="Search jobs" />
+              <button type="button" class="sclear" data-for="q" aria-label="Clear search" hidden>&times;</button>
             </div>
             <details class="fbox" id="fbox">
               <summary>Filters</summary>
@@ -1780,6 +1792,14 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           for (var k = 0; k < cards.length; k++) cards[k].classList.toggle('nomatch', !!q && cards[k].textContent.toLowerCase().indexOf(q) < 0);
         }
         $('empq').addEventListener('input', applyEmpFilter);
+        document.querySelectorAll('.sclear').forEach(function (b) {
+          var inp = $(b.getAttribute('data-for'));
+          function sync() { b.hidden = !inp.value; }
+          inp.addEventListener('input', sync);
+          b.addEventListener('click', function () { inp.value = ''; sync(); inp.dispatchEvent(new Event('input', { bubbles: true })); inp.focus(); });
+          sync();
+        });
+
 
         function openEmp(region) {
           if (!pass) { openSetup(function () { openEmp(region); }); return; }
