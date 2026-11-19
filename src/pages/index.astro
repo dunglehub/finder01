@@ -561,6 +561,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .chip { padding: 3px 12px 3px 3px; font-size: .85rem; }
         .detail h2 { font-size: 1.6rem; }
       }
+      .co.nomatch { display: none !important; }
+      #sideemp .search input { width: 100%; }
       /* nav = 4 pill buttons like Rev/Sho/App/Ski */
       .nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; text-align: left; }
       .nav button, .nav button + button { flex-direction: row; justify-content: space-between; align-items: center; gap: 4px; background: #f4f4f4; border: 0; border-radius: 999px; padding: 9px 6px; font-size: .86rem; font-weight: 400; color: #393c41; }
@@ -607,6 +609,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             <button type="button" title="Employers" aria-label="Employers" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Emp <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
             <button type="button" title="Elsewhere" aria-label="Elsewhere" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Els <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
+          <div id="sideemp" hidden>
+            <div class="search">
+              <span class="ico" data-i="search"></span>
+              <input type="search" id="empq" placeholder="Search" aria-label="Search this list" />
+            </div>
+          </div>
           <div id="sidejobs">
             <div class="sep"></div>
             <div class="pills" id="tabs" role="group" aria-label="Show postings">
@@ -1720,7 +1728,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           });
           var adds = document.querySelectorAll('[data-emp-add]');
           for (i = 0; i < adds.length; i++) adds[i].classList.toggle('show', logged);
+          applyEmpFilter();
         }
+        function applyEmpFilter() {
+          var q = ($('empq').value || '').toLowerCase().trim(), cards = document.querySelectorAll('.co[data-id]');
+          for (var k = 0; k < cards.length; k++) cards[k].classList.toggle('nomatch', !!q && cards[k].textContent.toLowerCase().indexOf(q) < 0);
+        }
+        $('empq').addEventListener('input', applyEmpFilter);
 
         function openEmp(region) {
           if (!pass) { openSetup(function () { openEmp(region); }); return; }
@@ -2076,7 +2090,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (v !== 'jobs' && v !== 'pub' && v !== 'bc' && v !== 'else') v = 'jobs';
           var secs = document.querySelectorAll('.view');
           for (var i = 0; i < secs.length; i++) secs[i].hidden = secs[i].getAttribute('data-view') !== v;
-          $('sidejobs').hidden = v !== 'jobs'; $('app').classList.remove('show-detail');
+          $('sidejobs').hidden = v !== 'jobs'; $('sideemp').hidden = v === 'jobs'; $('app').classList.remove('show-detail');
           var nb = $('nav').querySelectorAll('button');
           for (var k = 0; k < nb.length; k++) nb[k].setAttribute('aria-pressed', nb[k].getAttribute('data-view') === v ? 'true' : 'false');
         }
