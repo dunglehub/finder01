@@ -56,14 +56,10 @@
     "name": "Sanctuary AI",
     "region": "BC",
     "type": "Startup",
-    "system": "Lever",
-    "mode": "auto",
-    "url": "https://jobs.lever.co/sanctuary",
-    "feed": {
-      "type": "lever",
-      "board": "sanctuary"
-    },
-    "note": "Humanoid robots, Vancouver. Mechanical and hardware R&D interns, including May starts, seen in past terms."
+    "system": "Kula",
+    "mode": "link",
+    "url": "https://careers.kula.ai/sanctuary-ai",
+    "note": "Humanoid robots, Vancouver. Moved from Lever to Kula careers site; check for hardware interns and May starts."
   },
   {
     "name": "Apera AI",
