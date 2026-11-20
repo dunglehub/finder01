@@ -189,9 +189,13 @@ let polledNow = false;
   const key = process.env.JSEARCH_API_KEY;
   if (cfg && key) {
     const now = new Date();
-    const day = Math.floor(now.getTime() / 864e5);
+    // Poll when "everyDays" days have passed since the last poll recorded in data/status.json (the scheduled
+    // runs land at varying hours, so a fixed hour-of-day check never matched). 2 h of slack so a 6-hour cycle never slips a day.
+    let lastPolled = 0;
+    try { lastPolled = Date.parse(JSON.parse(await readFile(new URL('../data/status.json', import.meta.url), 'utf8')).polled) || 0; } catch {}
+    const everyMs = (cfg.everyDays || 3) * 864e5 - 2 * 36e5;
     const due = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' || old.length === 0 ||
-      (now.getUTCHours() === 17 && day % (cfg.everyDays || 3) === 0);
+      !lastPolled || now.getTime() - lastPolled >= everyMs;
     if (due) {
       try {
         const found = await jsearchRun(cfg, key);
