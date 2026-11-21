@@ -636,6 +636,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       /* review progress removed; user menu opens under the chip, aligned to its right edge */
       #progress, .progress { display: none !important; }
       .menu { left: auto !important; right: 0 !important; min-width: 170px; max-width: calc(100vw - 24px); }
+      /* full description: plain dropdown section, no box */
+      .exp .full { background: none !important; border-radius: 0; padding: 0; max-height: none; overflow: visible; font-size: 1rem; color: #23262b; }
+      @media (max-width:960px){ .nav button, .pills button { font-size:.8rem !important; padding-left:6px !important; padding-right:6px !important; gap:3px !important; } .nav button .cnt, .pills button .n { font-size:.78rem; } }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
@@ -657,8 +660,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         </div>
         <div class="topright">
           <button type="button" class="linkbtn" id="clear-top" title="Untick all filters and empty the search box">Reset filters</button>
-          <a class="addbtn outline" id="resume-dl" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/Resume_Minh_Le.pdf`} download="Resume_Minh_Le.pdf" title="Download Benny's resume (PDF)" aria-label="Resume download"><span class="lbl">Res</span><span class="ico" data-i="down"></span></a>
-          <button type="button" class="addbtn outline" id="resume-up" title="Upload a new resume" aria-label="Resume upload"><span class="lbl">Res</span><span class="ico" data-i="up"></span></button>
+          <a class="addbtn outline" id="resume-dl" href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/Resume_Minh_Le.pdf`} download="Resume_Minh_Le.pdf" title="Download Benny's resume (PDF)" aria-label="Resume download"><span class="lbl">Resume</span><span class="ico" data-i="down"></span></a>
+          <button type="button" class="addbtn outline" id="resume-up" title="Upload a new resume" aria-label="Resume upload"><span class="lbl">Resume</span><span class="ico" data-i="up"></span></button>
           <button type="button" class="addbtn" id="add-open"><span class="ico" data-i="plus"></span><span class="lbl">Post</span></button>
         </div>
       </header>
@@ -667,10 +670,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       <div class="layout">
         <aside class="side">
           <nav class="nav" id="nav" aria-label="Sections">
-            <button type="button" title="Found" aria-label="Found" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Fou <span class="cnt" id="jobs-count">{jobs.length}</span></button>
-            <button type="button" title="Gov" aria-label="Gov" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Gov <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
-            <button type="button" title="Employers" aria-label="Employers" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Emp <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
-            <button type="button" title="Elsewhere" aria-label="Elsewhere" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Els <span class="cnt" id="cnt-else">{elseList.length}</span></button>
+            <button type="button" title="Found" aria-label="Found" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Found <span class="cnt" id="jobs-count">{jobs.length}</span></button>
+            <button type="button" title="Gov" aria-label="Gov" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Government <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
+            <button type="button" title="Employers" aria-label="Employers" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employer <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+            <button type="button" title="Elsewhere" aria-label="Elsewhere" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
           <div id="sideemp" hidden>
             <div class="search">
@@ -682,10 +685,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           <div id="sidejobs">
             <div class="sep"></div>
             <div class="pills" id="tabs" role="group" aria-label="Show postings">
-              <button type="button" title="Review" aria-label="Review" data-tab="review" aria-pressed="false"><span class="ico" data-i="refresh"></span>Rev <span class="n"></span></button>
-              <button type="button" title="Shortlist" aria-label="Shortlist" data-tab="shortlist" aria-pressed="true"><span class="ico" data-i="star"></span>Sho <span class="n"></span></button>
-              <button type="button" title="Applied" aria-label="Applied" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>App <span class="n"></span></button>
-              <button type="button" title="Skipped" aria-label="Skipped" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Ski <span class="n"></span></button>
+              <button type="button" title="Review" aria-label="Review" data-tab="review" aria-pressed="false"><span class="ico" data-i="refresh"></span>Review <span class="n"></span></button>
+              <button type="button" title="Shortlist" aria-label="Shortlist" data-tab="shortlist" aria-pressed="true"><span class="ico" data-i="star"></span>Selected <span class="n"></span></button>
+              <button type="button" title="Applied" aria-label="Applied" data-tab="applied" aria-pressed="false"><span class="ico" data-i="check"></span>Applied <span class="n"></span></button>
+              <button type="button" title="Skipped" aria-label="Skipped" data-tab="skip" aria-pressed="false"><span class="ico" data-i="x"></span>Skipped <span class="n"></span></button>
             </div>
             <div class="progress" id="progress"><span id="progress-text"></span><span class="bar"><i id="progress-bar"></i></span></div>
             <div class="sep"></div>
