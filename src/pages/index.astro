@@ -639,6 +639,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       /* full description: plain dropdown section, no box */
       .exp .full { background: none !important; border-radius: 0; padding: 0; max-height: none; overflow: visible; font-size: 1rem; color: #23262b; }
       @media (max-width:960px){ .nav button, .pills button { font-size:.8rem !important; padding-left:6px !important; padding-right:6px !important; gap:3px !important; } .nav button .cnt, .pills button .n { font-size:.78rem; } }
+      .exp-head { font-weight: 600; color: var(--text); padding: 0; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
@@ -671,9 +672,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <aside class="side">
           <nav class="nav" id="nav" aria-label="Sections">
             <button type="button" title="Found" aria-label="Found" data-view="jobs" aria-pressed="true"><span class="ico" data-i="briefcase"></span>Found <span class="cnt" id="jobs-count">{jobs.length}</span></button>
-            <button type="button" title="Gov" aria-label="Gov" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Government <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
-            <button type="button" title="Employers" aria-label="Employers" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Employer <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
-            <button type="button" title="Elsewhere" aria-label="Elsewhere" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Elsewhere <span class="cnt" id="cnt-else">{elseList.length}</span></button>
+            <button type="button" title="Gov" aria-label="Gov" data-view="pub" aria-pressed="false"><span class="ico" data-i="briefcase"></span>Gov’nt <span class="cnt" id="cnt-pub">{pubList.length}</span></button>
+            <button type="button" title="Employers" aria-label="Employers" data-view="bc" aria-pressed="false"><span class="ico" data-i="people"></span>Hirer <span class="cnt" id="cnt-bc">{bcList.length}</span></button>
+            <button type="button" title="Elsewhere" aria-label="Elsewhere" data-view="else" aria-pressed="false"><span class="ico" data-i="pin"></span>Others <span class="cnt" id="cnt-else">{elseList.length}</span></button>
           </nav>
           <div id="sideemp" hidden>
             <div class="search">
@@ -1611,14 +1612,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (mt.tier && mt.why.length) body.appendChild(drow('Why', mt.why.join(' · ')));
           body.appendChild(el('hr'));
           var exp = el('div', 'exp');
-          var tg = el('button', 'exp-toggle'); tg.type = 'button'; tg.setAttribute('aria-expanded', 'true');
-          tg.appendChild(el('span', null, 'Expanded info')); tg.appendChild(icon('chev'));
+          exp.appendChild(el('div', 'exp-head', 'Post Info'));
           var inner = el('div');
-          tg.addEventListener('click', function () {
-            var open = tg.getAttribute('aria-expanded') !== 'true';
-            tg.setAttribute('aria-expanded', open ? 'true' : 'false'); inner.hidden = !open;
-          });
-          exp.appendChild(tg);
           var ul = el('ul');
           function li(t) { ul.appendChild(el('li', null, t)); }
           if (j.kind === 'event') li('Event date: ' + (j.eventDate || 'not listed'));
