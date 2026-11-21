@@ -647,6 +647,25 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .nav button, .nav button + button, .pills button { font-size: .84rem !important; justify-content: center !important; gap: 5px !important; }
       .nav button .cnt, .pills button .n { margin-left: 0 !important; font-size: .8rem !important; }
       @media (max-width:960px){ .nav button, .nav button + button, .pills button { font-size: .76rem !important; gap: 4px !important; } .nav button .cnt, .pills button .n { font-size: .74rem !important; } }
+      /* Prepare application: full-page workspace instead of a pop-up */
+      #prep-dialog { position: fixed !important; inset: 0 !important; width: 100vw !important; max-width: none !important; height: 100vh !important; height: 100dvh !important; max-height: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: #fff !important; overflow-y: auto; padding: 20px max(20px, calc((100vw - 760px) / 2)) 90px !important; }
+      #prep-dialog::backdrop { background: transparent !important; }
+      #prep-dialog .xclose { display: none !important; }
+      #prep-dialog .pback { font: inherit; font-size: .95rem; background: none; border: 0; color: var(--blue); cursor: pointer; padding: 8px 0 16px; }
+      #prep-dialog h3 { font-size: 1.7rem; margin: 4px 0 6px; font-weight: 600; }
+      #prep-dialog .psub { font-size: 1.05rem; line-height: 1.45; margin-bottom: 18px; color: #23262b; }
+      #prep-dialog .warnbox { margin: 0 0 8px; }
+      #prep-dialog .dd { border-top: 1px solid var(--line); margin-top: 28px; }
+      #prep-dialog .dd > summary { pointer-events: none; cursor: default; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; padding: 18px 0 6px; }
+      #prep-dialog .dd > summary b { font-weight: 600; }
+      #prep-dialog .chev, #prep-dialog .ddp { display: none !important; }
+      #prep-dialog .dd textarea { font-size: 1rem; line-height: 1.65; min-height: 220px; }
+      #prep-dialog #prep-letter { min-height: 360px; }
+      #prep-dialog #prep-desc { min-height: 130px !important; font-size: 1rem; }
+      #prep-dialog #prep-qa-dd { border-bottom: 0; }
+      #prep-dialog > .row:last-child { margin-top: 32px; gap: 10px; }
+      #prep-dialog button, #prep-dialog a.btnlink { padding: 10px 20px !important; border-radius: 999px !important; }
+      #prep-dialog button.pback { padding: 8px 0 16px !important; border-radius: 0 !important; background: none !important; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
@@ -809,7 +828,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
     </dialog>
 
     <dialog id="prep-dialog">
-      <h3 id="prep-title">Prepare application</h3>
+      <button type="button" class="pback" id="prep-back">← Back to job posting</button>
+      <h3 id="prep-title">Prepare your application</h3>
+      <div class="psub" id="prep-sub"></div>
       <div class="warnbox">Draft only. Read it, fix anything that is not true for you, then paste it into the application.</div>
       <details class="dd" id="prep-letter-dd">
         <summary><span class="ddt"><b>Cover letter</b><span class="ddp" id="prep-letter-prev"></span></span><span class="chev" aria-hidden="true"></span></summary>
@@ -832,7 +853,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         <div id="prep-qa"></div>
       </details>
       <div class="row">
-        <button type="button" id="prep-close">Close</button>
+        <button type="button" id="prep-close">Back to job posting</button>
         <a class="btnlink" id="prep-open" href="#" target="_blank" rel="noopener noreferrer">Open posting</a>
       </div>
     </dialog>
@@ -1445,8 +1466,11 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         $('prep-letter').addEventListener('input', fitLetter);
         function openPrep(j) {
           var app = PROFILE.application || {};
-          $('prep-title').textContent = 'Prepare application: ' + j.title + (j.company ? ' at ' + j.company : '');
-          $('prep-letter').value = buildLetter(j); $('prep-letter-dd').open = false; $('prep-qa-dd').open = false; $('prep-ai-dd').open = true; fitLetter();
+          var ps = $('prep-sub'); ps.textContent = '';
+          ps.appendChild(el('b', null, j.title));
+          if (j.company && String(j.title).toLowerCase().indexOf(String(j.company).toLowerCase()) < 0) { ps.appendChild(document.createElement('br')); ps.appendChild(document.createTextNode(j.company)); }
+          $('prep-letter-dd').open = true; $('prep-qa-dd').open = true; $('prep-ai-dd').open = true;
+          $('prep-letter').value = buildLetter(j); fitLetter();
           prepJob = j; $('prep-desc').value = ''; $('prep-ai-status').textContent = '';
           $('prep-ai').hidden = !(API && pass); $('prep-ai-btn').disabled = false;
           var qa = $('prep-qa'); qa.textContent = '';
@@ -1465,6 +1489,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           $('prep-qa-prev').textContent = qa.children.length + ' fields: ' + rows.filter(function (r) { return r[1]; }).map(function (r) { return r[0]; }).join(', ');
           $('prep-open').href = j.url;
           var d = $('prep-dialog'); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+          d.scrollTop = 0; fitLetter();
+          try { history.pushState({ prep: 1 }, ''); } catch (e) {}
         }
         $('prep-ai-btn').addEventListener('click', function () {
           var j = prepJob; if (!j || !API || !pass) return;
@@ -1536,7 +1562,11 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
         });
         $('prep-copy-letter').addEventListener('click', function () { copyText($('prep-letter').value, $('prep-copy-letter')); });
-        $('prep-close').addEventListener('click', function () { var d = $('prep-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); });
+        function closePrep() { var d = $('prep-dialog'); if (d.close) d.close(); else d.removeAttribute('open'); }
+        $('prep-close').addEventListener('click', closePrep);
+        $('prep-back').addEventListener('click', closePrep);
+        $('prep-dialog').addEventListener('close', function () { try { if (history.state && history.state.prep) history.back(); } catch (e) {} });
+        window.addEventListener('popstate', function () { var d = $('prep-dialog'); if (d.open) closePrep(); });
 
         // Tag colours follow the filter order: red, orange, yellow, green, teal, blue, indigo, purple.
         function jobTags(j) {
