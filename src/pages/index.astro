@@ -640,6 +640,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .exp .full { background: none !important; border-radius: 0; padding: 0; max-height: none; overflow: visible; font-size: 1rem; color: #23262b; }
       @media (max-width:960px){ .nav button, .pills button { font-size:.8rem !important; padding-left:6px !important; padding-right:6px !important; gap:3px !important; } .nav button .cnt, .pills button .n { font-size:.78rem; } }
       .exp-head { font-weight: 600; color: var(--text); padding: 0; }
+      /* smaller button text, tighter label-to-number gap (all pages) */
+      .actions button, .detail .dbar .actions button, .btn2, .btn1, .addbtn, .addbtn:not(.outline), .rm, dialog button, #prep-dialog a.btnlink { font-size: .82rem !important; }
+      .addbtn .lbl { font-size: .82rem; }
+      .chip { font-size: .78rem !important; }
+      .nav button, .nav button + button, .pills button { font-size: .84rem !important; justify-content: center !important; gap: 5px !important; }
+      .nav button .cnt, .pills button .n { margin-left: 0 !important; font-size: .8rem !important; }
+      @media (max-width:960px){ .nav button, .nav button + button, .pills button { font-size: .76rem !important; gap: 4px !important; } .nav button .cnt, .pills button .n { font-size: .74rem !important; } }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
