@@ -216,6 +216,35 @@ let polledNow = false;
   }
 }
 
+// One-off diagnostic (data/jsearch-debug.json): runs a few JSearch test queries once per "id" and stores a short summary in status.json.
+let debugResult = null;
+{
+  let dbg = null, st0 = {};
+  try { dbg = JSON.parse(await readFile(new URL('../data/jsearch-debug.json', import.meta.url), 'utf8')); } catch {}
+  try { st0 = JSON.parse(await readFile(new URL('../data/status.json', import.meta.url), 'utf8')); } catch {}
+  const key = process.env.JSEARCH_API_KEY;
+  if (dbg && key && (!st0.debug || st0.debug.id !== dbg.id)) {
+    const results = [];
+    for (const t of dbg.tests) {
+      try {
+        const qs = new URLSearchParams({ query: t.query, country: t.country || 'ca', date_posted: t.date_posted || 'all', num_pages: '1' });
+        if (t.employment_types) qs.set('employment_types', t.employment_types);
+        let res = await fetch(`https://api.openwebninja.com/jsearch/search?${qs}`, { headers: { ...UA, 'x-api-key': key } });
+        if (res.status === 401 || res.status === 403) res = await fetch(`https://jsearch.p.rapidapi.com/search?${qs}`, { headers: { ...UA, 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'jsearch.p.rapidapi.com' } });
+        if (!res.ok) { results.push({ test: t, error: 'HTTP ' + res.status }); continue; }
+        const data = (await res.json()).data || [];
+        const re = new RegExp(dbg.match, 'i');
+        results.push({
+          test: t, count: data.length,
+          matches: data.filter((j) => re.test(j.employer_name || '') || re.test(j.job_title || '')).map((j) => ({ title: j.job_title, employer: j.employer_name, posted: j.job_posted_at_datetime_utc, types: j.job_employment_types, city: j.job_city, via: j.job_publisher })),
+          top: data.slice(0, 10).map((j) => `${j.employer_name} | ${j.job_title} | ${String(j.job_posted_at_datetime_utc || '').slice(0, 10)}`),
+        });
+      } catch (err) { results.push({ test: t, error: String(err.message) }); }
+    }
+    debugResult = { id: dbg.id, results };
+  }
+}
+
 // If every feed failed, keep the previous file instead of wiping the site.
 if (feeds.length && problems.length === feeds.length) {
   console.error('All feeds failed; leaving data/jobs.json unchanged.');
@@ -249,6 +278,7 @@ await writeFile(new URL('../data/jobs.json', import.meta.url), jobsText);
   const next = { ...st };
   if (jobsText !== oldText || !st.updated) next.updated = nowIso;
   if (polledNow) next.polled = nowIso;
+  if (debugResult) next.debug = debugResult;
   if (JSON.stringify(next) !== JSON.stringify(st)) {
     await writeFile(new URL('../data/status.json', import.meta.url), JSON.stringify(next, null, 2) + '\n');
   }
