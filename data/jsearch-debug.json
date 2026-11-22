@@ -1,0 +1,22 @@
+{
+  "id": "ems-1",
+  "match": "EMS-Tech|EMS Tech",
+  "tests": [
+    {
+      "query": "mechanical engineering co-op Burnaby BC",
+      "country": "ca",
+      "date_posted": "all"
+    },
+    {
+      "query": "mechanical engineering co-op Burnaby BC",
+      "country": "ca",
+      "date_posted": "all",
+      "employment_types": "INTERN"
+    },
+    {
+      "query": "mechanical engineering co-op Burnaby BC",
+      "country": "ca",
+      "date_posted": "month"
+    }
+  ]
+}
