@@ -5,10 +5,46 @@
     "renewable energy student",
     "SolidWorks intern",
     "clean energy co-op",
-    "EV mechanical engineering intern"
+    "EV mechanical engineering intern",
+    {
+      "query": "mechanical engineering co-op Vancouver BC",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Burnaby BC",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Calgary AB",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Edmonton AB",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Toronto ON",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Ottawa ON",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Montreal QC",
+      "country": "ca"
+    },
+    {
+      "query": "mechanical engineering co-op Waterloo ON",
+      "country": "ca"
+    }
   ],
-  "countries": ["ca", "us"],
-  "datePosted": "month",
+  "countries": [
+    "ca",
+    "us"
+  ],
+  "datePosted": "all",
   "pages": 1,
-  "everyDays": 3
+  "everyDays": 3,
+  "pollNow": "2026-11-22a"
 }
