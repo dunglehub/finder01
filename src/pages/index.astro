@@ -1158,7 +1158,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           for (i = 0; i <= 10; i++) if (fa[i] !== fb[i]) return fa[i] ? -1 : 1;
           var cr = byCompanyRank(a, b); if (cr) return cr; // then well-known companies, best-ranked first
           if ((a.fitsMay === false) !== (b.fitsMay === false)) return a.fitsMay === false ? 1 : -1; // earlier start dates go last
-          return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b);
+          return String(b.posted || '').localeCompare(String(a.posted || '')) || SORTS.best(a, b);
         }
 
         // ---- sorting ----
@@ -1166,9 +1166,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         var SORTS = {
           priority: function (a, b) { return (ratingOf(b.id) - ratingOf(a.id)) || byPriority(a, b); },
           best: function (a, b) {
-            return rank(a) - rank(b) || (fitScore(b) - fitScore(a)) || (b.score - a.score) || String(b.posted).localeCompare(String(a.posted));
+            return rank(a) - rank(b) || (fitScore(b) - fitScore(a)) || (b.score - a.score) || String(b.posted || '').localeCompare(String(a.posted || ''));
           },
-          new: function (a, b) { return String(b.posted).localeCompare(String(a.posted)) || SORTS.best(a, b); },
+          new: function (a, b) { return String(b.posted || '').localeCompare(String(a.posted || '')) || SORTS.best(a, b); },
           company: function (a, b) { return byCompanyRank(a, b) || String(a.company).localeCompare(String(b.company)) || SORTS.best(a, b); },
         };
 
