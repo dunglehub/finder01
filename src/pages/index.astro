@@ -666,6 +666,9 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       #prep-dialog #prep-qa-dd { border-bottom: 0; }
       #prep-dialog > .row:last-child { margin-top: 32px; gap: 10px; }
       #prep-dialog button, #prep-dialog a.btnlink { padding: 10px 20px !important; border-radius: 999px !important; }
+      /* selected card keeps a bottom line (light grey); no lines inside the detail panel */
+      @media (min-width:961px){ .card.sel { border-bottom: 1px solid #ededed; border-radius: 14px 14px 0 0; } }
+      .detail hr { border: 0; height: 0; margin: 12px 0; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
