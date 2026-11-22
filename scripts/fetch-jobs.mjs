@@ -148,9 +148,13 @@ async function jsearchRun(cfg, key) {
   ];
   let host = 0;
   const seen = new Map();
-  for (const country of cfg.countries) {
-    for (const query of cfg.queries) {
-      const qs = new URLSearchParams({ query, country, employment_types: 'INTERN', date_posted: cfg.datePosted || 'month', num_pages: String(cfg.pages || 1) });
+  // "queries" entries are plain strings (run for every country in "countries") or { query, country } for one country.
+  const plan = [];
+  for (const country of cfg.countries) for (const q of cfg.queries) if (typeof q === 'string') plan.push({ query: q, country });
+  for (const q of cfg.queries) if (typeof q !== 'string') plan.push({ query: q.query, country: q.country || 'ca' });
+  {
+    for (const { query, country } of plan) {
+      const qs = new URLSearchParams({ query, country, employment_types: 'INTERN', date_posted: cfg.datePosted || 'all', num_pages: String(cfg.pages || 1) });
       let res = await fetch(`${hosts[host].url}?${qs}`, { headers: { ...UA, ...hosts[host].headers } });
       if ((res.status === 401 || res.status === 403) && host === 0) {
         host = 1;
@@ -162,6 +166,8 @@ async function jsearchRun(cfg, key) {
         if (seen.has(j.job_id)) continue;
         const types = (j.job_employment_types || [j.job_employment_type]).join(' ');
         if (!isEarlyCareer(j.job_title) && !/INTERN/i.test(types)) continue;
+        // Many postings have no date at all (kept); drop ones that clearly are old.
+        if (j.job_posted_at_datetime_utc && Date.now() - Date.parse(j.job_posted_at_datetime_utc) > 120 * 864e5) continue;
         seen.set(j.job_id, enrich({
           id: `js-${j.job_id}`.slice(0, 120),
           title: String(j.job_title || '').trim(),
@@ -180,6 +186,7 @@ async function jsearchRun(cfg, key) {
 }
 
 let polledNow = false;
+let pollNowId = null;
 {
   let previous = [];
   try { previous = JSON.parse(await readFile(new URL('../data/jobs.json', import.meta.url), 'utf8')); } catch {}
@@ -194,7 +201,12 @@ let polledNow = false;
     let lastPolled = 0;
     try { lastPolled = Date.parse(JSON.parse(await readFile(new URL('../data/status.json', import.meta.url), 'utf8')).polled) || 0; } catch {}
     const everyMs = (cfg.everyDays || 3) * 864e5 - 2 * 36e5;
-    const due = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' || old.length === 0 ||
+    // "pollNow" in data/jsearch.json: change its value to force one extra poll on the next run (done once per value).
+    let pollNowDone = null;
+    try { pollNowDone = JSON.parse(await readFile(new URL('../data/status.json', import.meta.url), 'utf8')).pollNowDone || null; } catch {}
+    const forced = !!cfg.pollNow && cfg.pollNow !== pollNowDone;
+    if (forced) pollNowId = cfg.pollNow;
+    const due = forced || process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' || old.length === 0 ||
       !lastPolled || now.getTime() - lastPolled >= everyMs;
     if (due) {
       try {
@@ -277,7 +289,7 @@ await writeFile(new URL('../data/jobs.json', import.meta.url), jobsText);
   const nowIso = new Date().toISOString();
   const next = { ...st };
   if (jobsText !== oldText || !st.updated) next.updated = nowIso;
-  if (polledNow) next.polled = nowIso;
+  if (polledNow) { next.polled = nowIso; if (pollNowId) next.pollNowDone = pollNowId; }
   if (debugResult) next.debug = debugResult;
   if (JSON.stringify(next) !== JSON.stringify(st)) {
     await writeFile(new URL('../data/status.json', import.meta.url), JSON.stringify(next, null, 2) + '\n');
