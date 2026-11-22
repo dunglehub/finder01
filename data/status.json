@@ -1,4 +1,129 @@
 {
   "updated": "2026-11-21T19:08:37.088Z",
-  "polled": "2026-11-20T13:32:55.796Z"
+  "polled": "2026-11-20T13:32:55.796Z",
+  "debug": {
+    "id": "ems-1",
+    "results": [
+      {
+        "test": {
+          "query": "mechanical engineering co-op Burnaby BC",
+          "country": "ca",
+          "date_posted": "all"
+        },
+        "count": 10,
+        "matches": [
+          {
+            "title": "Mechanical Engineering Co-Op/Internship - Apply",
+            "employer": "EMS-Tech Inc",
+            "posted": null,
+            "types": [
+              "INTERN"
+            ],
+            "city": "Burnaby",
+            "via": "Jobs"
+          },
+          {
+            "title": "Civil/Structural Engineering Internship",
+            "employer": "EMS-Tech",
+            "posted": null,
+            "types": [
+              "INTERN"
+            ],
+            "city": "Burnaby",
+            "via": "Jobs.ca"
+          },
+          {
+            "title": "Electrical Engineering - Co-Op / Internship",
+            "employer": "EMS-Tech Inc",
+            "posted": null,
+            "types": [
+              "FULLTIME",
+              "INTERN"
+            ],
+            "city": "Burnaby",
+            "via": "Indeed"
+          }
+        ],
+        "top": [
+          "EMS-Tech Inc | Mechanical Engineering Co-Op/Internship - Apply | ",
+          "AME Consulting Group Ltd | Mechanical Co-Op / Mechanical Intern | 2026-11-04",
+          "Parkland Corporation | Mechanical Engineering Co-op Student | 2026-11-20",
+          "Parkland Refining BC Ltd. | Mechanical Engineering Co-op Student - May 2027 | ",
+          "EMS-Tech | Civil/Structural Engineering Internship | ",
+          "Osimaritime | Lead Mechanical Engineer for Marine Systems | 2026-11-10",
+          "Dometic Marine Canada, Inc. | Co-op Manufacturing Engineering – Machining | ",
+          "EMS-Tech Inc | Electrical Engineering - Co-Op / Internship | ",
+          "Stech Technology UK Limited | Civil Engineering Co-op: Structures, CAD & Global Projects | 2026-11-11",
+          "Stantec | Engineering Student – Power Delivery | "
+        ]
+      },
+      {
+        "test": {
+          "query": "mechanical engineering co-op Burnaby BC",
+          "country": "ca",
+          "date_posted": "all",
+          "employment_types": "INTERN"
+        },
+        "count": 8,
+        "matches": [
+          {
+            "title": "Mechanical Engineering Co-Op/Internship - Apply",
+            "employer": "EMS-Tech Inc",
+            "posted": null,
+            "types": [
+              "INTERN"
+            ],
+            "city": "Burnaby",
+            "via": "Jobs"
+          },
+          {
+            "title": "Electrical Engineering - Co-Op / Internship",
+            "employer": "EMS-Tech Inc",
+            "posted": null,
+            "types": [
+              "FULLTIME",
+              "INTERN"
+            ],
+            "city": "Burnaby",
+            "via": "Indeed"
+          },
+          {
+            "title": "Civil/Structural Engineering Internship",
+            "employer": "EMS-Tech",
+            "posted": null,
+            "types": [
+              "INTERN"
+            ],
+            "city": "Burnaby",
+            "via": "Jobs.ca"
+          }
+        ],
+        "top": [
+          "EMS-Tech Inc | Mechanical Engineering Co-Op/Internship - Apply | ",
+          "AME Consulting Group Ltd | Mechanical Co-Op / Mechanical Intern | 2026-11-04",
+          "Parkland Corporation | Mechanical Engineering Co-op Student | 2026-11-20",
+          "Parkland Refining BC Ltd. | Mechanical Engineering Co-op Student - May 2027 | ",
+          "EMS-Tech Inc | Electrical Engineering - Co-Op / Internship | ",
+          "Dometic Marine Canada, Inc. | Co-op Manufacturing Engineering – Machining | ",
+          "Stech Technology UK Limited | Civil Engineering Co-op: Structures, CAD & Global Projects | 2026-11-11",
+          "EMS-Tech | Civil/Structural Engineering Internship | "
+        ]
+      },
+      {
+        "test": {
+          "query": "mechanical engineering co-op Burnaby BC",
+          "country": "ca",
+          "date_posted": "month"
+        },
+        "count": 4,
+        "matches": [],
+        "top": [
+          "AME Consulting Group Ltd | Mechanical Co-Op / Mechanical Intern | 2026-11-04",
+          "Parkland Corporation | Mechanical Engineering Co-op Student | 2026-11-20",
+          "Osimaritime | Lead Mechanical Engineer for Marine Systems | 2026-11-10",
+          "Stech Technology UK Limited | Civil Engineering Co-op: Structures, CAD & Global Projects | 2026-11-11"
+        ]
+      }
+    ]
+  }
 }
