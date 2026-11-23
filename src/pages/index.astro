@@ -674,7 +674,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .hid, .hidrow, .detail .dbar, .qa, #prep-dialog .dd { border-top-color: #dedfe2 !important; }
       .foldbtn, #prep-dialog #prep-qa-dd, .side, .brand, header { border-bottom-color: #dedfe2 !important; }
       .sep { background: #dedfe2 !important; }
-      @media (min-width:961px){ .card.sel { border-bottom: 1px solid #dedfe2 !important; border-radius: 0 !important; } }
+      @media (min-width:961px){ .card.sel { border-bottom: 1px solid #dedfe2 !important; border-radius: 0 !important; }
+        .card:has(+ .card.sel) { margin: 0 -16px; padding-left: 16px; padding-right: 16px; } }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
