@@ -676,6 +676,13 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .sep { background: #dedfe2 !important; }
       @media (min-width:961px){ .card.sel { border-bottom: 1px solid #dedfe2 !important; border-radius: 0 !important; }
         .card:has(+ .card.sel) { margin: 0 -16px; padding-left: 16px; padding-right: 16px; } }
+      /* phone: stars live at the bottom of the job detail page, not on the list cards */
+      .dstars { display: none; }
+      @media (max-width: 960px) {
+        .card .stars { display: none !important; }
+        .dstars { display: block; flex: 0 0 100%; width: 100%; margin-top: 6px; }
+        .dstars .stars { flex-direction: row; justify-content: flex-start; gap: 2px; margin: 0; }
+      }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
@@ -1693,6 +1700,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             var pb = el('button', 'btn1', 'Prepare'); pb.type = 'button';
             pb.addEventListener('click', function () { openPrep(j); }); bar.appendChild(pb);
           }
+          var sr = el('div', 'dstars'); sr.appendChild(starsEl(j)); bar.appendChild(sr);
           box.appendChild(bar);
         }
 
