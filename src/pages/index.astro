@@ -683,6 +683,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .dstars { display: block; flex: 0 0 100%; width: 100%; margin-top: 6px; }
         .dstars .stars { flex-direction: row; justify-content: flex-start; gap: 2px; margin: 0; }
       }
+      /* Full description: arrow right next to the label; only the label + arrow are clickable */
+      .exp summary { width: fit-content !important; justify-content: flex-start !important; gap: 10px; }
+      .exp summary::after { margin: -4px 0 0 0 !important; }
+      .exp details[open] > summary::after { margin: 4px 0 0 0 !important; }
       .brand { flex-wrap: nowrap; }
       .brand .usermenu { flex: none; }
       /* ===== END THEME v2 ===== */
