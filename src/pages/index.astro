@@ -1688,6 +1688,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (desc.length > short.length) {
             var dt = el('details'); dt.appendChild(el('summary', null, 'Full description'));
             dt.appendChild(el('div', 'full', desc)); inner.appendChild(dt);
+            if (window.__descOpenId === j.id) dt.open = true;
+            dt.addEventListener('toggle', function () { if (dt.open) window.__descOpenId = j.id; else if (window.__descOpenId === j.id) window.__descOpenId = null; });
           }
           exp.appendChild(inner);
           body.appendChild(exp);
