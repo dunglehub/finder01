@@ -211,7 +211,23 @@ let pollNowId = null;
     if (due) {
       try {
         const found = await jsearchRun(cfg, key);
+        // Search results vary from run to run, so keep earlier postings that this poll did not return for 21 days
+        // (the "seen" date is when a posting was last returned by a search).
+        const today = now.toISOString().slice(0, 10);
+        const norm = (x) => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const keyOf = (j) => [j.company, j.title, j.location].map(norm).join('|');
+        for (const j of found) j.seen = today;
+        const have = new Set(found.map(keyOf));
+        let carried = 0;
+        for (const j of old) {
+          if (have.has(keyOf(j))) continue;
+          const seenAt = j.seen || today;
+          if (Date.now() - Date.parse(seenAt) > 21 * 864e5) continue;
+          out.push({ ...j, seen: seenAt });
+          carried++;
+        }
         out.push(...found);
+        console.log(`JSearch: carried over ${carried} earlier jobs not returned this time`);
         polledNow = true;
         console.log(`JSearch: ${found.length} early-career jobs`);
       } catch (err) {
