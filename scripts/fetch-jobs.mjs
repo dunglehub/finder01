@@ -211,21 +211,41 @@ let pollNowId = null;
     if (due) {
       try {
         const found = await jsearchRun(cfg, key);
-        // Search results vary from run to run, so keep earlier postings that this poll did not return for 21 days
+        // Search results vary from run to run, so keep earlier postings that this poll did not return for 30 days
         // (the "seen" date is when a posting was last returned by a search).
         const today = now.toISOString().slice(0, 10);
         const norm = (x) => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
         const keyOf = (j) => [j.company, j.title, j.location].map(norm).join('|');
         for (const j of found) j.seen = today;
-        // The same posting gets a new id from every search; reuse the id it already had so shortlists/stars/skips stay attached.
-        const idByKey = new Map(old.map((j) => [keyOf(j), j.id]));
-        for (const j of found) { const prev = idByKey.get(keyOf(j)); if (prev) j.id = prev; }
+        // Permanent id registry (data/idmap.json): the first id a posting (company + title + location) ever got is reused
+        // every time it comes back, so shortlist / applied / skip marks and stars stay attached for good.
+        let reg = {};
+        try { reg = JSON.parse(await readFile(new URL('../data/idmap.json', import.meta.url), 'utf8')) || {}; } catch {}
+        for (const j of old) { const k = keyOf(j); if (!reg[k]) reg[k] = { id: j.id, first: j.firstSeen || j.seen || today, last: j.seen || today }; }
+        const oldById = new Map(old.map((j) => [j.id, j]));
+        for (const j of found) {
+          const k = keyOf(j), e = reg[k];
+          if (e) {
+            const prev = oldById.get(e.id);
+            j.id = e.id;
+            j.firstSeen = e.first;
+            // Back after being dropped from the site: flag it so the page can say "seen before".
+            if (!prev || prev.repost) j.repost = true;
+            e.last = today;
+          } else {
+            reg[k] = { id: j.id, first: today, last: today };
+            j.firstSeen = today;
+          }
+        }
+        // Forget registry entries not seen for a year (and, in the page, marks older than a year are cleared).
+        for (const k of Object.keys(reg)) if (Date.now() - Date.parse(reg[k].last || today) > 365 * 864e5) delete reg[k];
+        await writeFile(new URL('../data/idmap.json', import.meta.url), JSON.stringify(reg, null, 1) + '\n');
         const have = new Set(found.map(keyOf));
         let carried = 0;
         for (const j of old) {
           if (have.has(keyOf(j))) continue;
           const seenAt = j.seen || today;
-          if (Date.now() - Date.parse(seenAt) > 21 * 864e5) continue;
+          if (Date.now() - Date.parse(seenAt) > 30 * 864e5) continue;
           out.push({ ...j, seen: seenAt });
           carried++;
         }
