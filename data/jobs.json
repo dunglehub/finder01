@@ -561,7 +561,8 @@
     "startLabel": "January 2027",
     "fitsMay": false,
     "score": 2,
-    "seen": "2026-11-25"
+    "seen": "2026-11-25",
+    "firstSeen": "2026-11-25"
   },
   {
     "id": "js-M1ZpSzgtYThmVi05dW5MVEFBQUFBQT09OkVzc0JDb3dCUVVSRVlsZGxXa1ZQY2pBelQycHFiMWN3YzNCaldIWm9ZVVpMTjB4QlRrcEhka0kxWmpGRldra",
@@ -778,6 +779,24 @@
     "firstSeen": "2026-11-25"
   },
   {
+    "id": "js-ODZjQ2JLd1pmRUZSclJmdkFBQUFBQT09OkVzd0JDb3dCUVVSRVlsZGxZVWxWUkdsVU1qVXRVVVZRU0hkYWQyZFZXR2szVUVSVE1tUmtia2hUTVc1emRXR",
+    "title": "Operations Engineering Intern/Co-op (Stagiaire en ingénierie)",
+    "location": "Edmonton, Alberta, CA",
+    "url": "https://www.jobs.ca/bunge/jobs/operations-engineering-intern-co-op-stagiaire-en-ingenierie-edmonton-ab-fead320fa51d",
+    "posted": null,
+    "company": "Bunge",
+    "source": "auto",
+    "via": "Jobs.ca",
+    "description": "City : Becancour State : Quebec (CA-QC) Country : Canada (CA) Requisition Number : 48689 Day in the Life: The Bunge Engineering Internship Program is looking for collaborative results oriented candidates with strong critical thinking and communication skills. The internship is designed to give you an understanding of the operations and processes of businesses across Bunge’s value chain. During the internship, you will receive cross functional exposure to a number of Bunge’s business units while performing various operational (e.g. EHS, Material Handling, Crush, Refine, Lab, Warehouse, Process Engineering) functions. You will develop the skills and knowledge needed to provide a solid foundation in all aspects of operational processes. Position Details: Winter Work Term: Approximately 15 weeks What You'll Be Doing: Participate fully in the day-to-day operation of a Bunge facility. This will follow the program governance of 70/20/10 (70% hands on, 20% informal learning, 10% formal learning) Develop a thorough understanding of plant operations Demonstrate your level of understanding by responding to verbal or written inquiries from supervisors, mentors, or program manager Travel to other Bunge locations for training and exposure purposes if necessary Assist location and corporate staff in evaluating changing operational conditions Ability to communicate effectively with Bunge internal and external customers Qualifications: Pursuing a Bachelor's degree in Engineering from an accredited university, Mechanical, Electrical, Instrumentation & Controls required. Must be collaborative, results oriented and possess strong critical thinking skills Ability to adjust to multiple demands, shifting priorities, ambiguity, adversity, and constant change Exceptional verbal and written communication skills (English is an asset) Analytical problem solving skills Proficiency in standard PC applications Standard internships hours 8 AM – 5 PM subject to modification as required by assignment and/or location Ability to travel Une journée dans la vie : Le programme de stages en ingénierie de Bunge est à la recherche de candidats collaboratifs, axés sur les résultats et possédant de solides aptitudes en réflexion critique et en communication. Ce stage est conçu pour vous permettre d'acquérir une compréhension des opérations et des processus d'affaires à travers la chaîne de valeur de Bunge. Au cours du stage, vous serez exposé à plusieurs unités d'affaires de Bunge tout en participant à diverses fonctions opérationnelles (par exemple : SSE, manutention des matériaux, trituration, raffinage, laboratoire, entreposage et génie des procédés). Vous développerez les compétences et les connaissances nécessaires afin d'acquérir une solide base dans tous les aspects des processus opérationnels. Détails du poste : Session de travail d'hiver : environ 15 semaines. Ce que vous ferez : Participer pleinement aux activités quotidiennes d'une installation de Bunge. Le programme suivra le modèle de développement 70/20/10 (70 % d'apprentissage pratique, 20 % d'apprentissage informel et 10 % d'apprentissage formel). Développer une compréhension approfondie des opérations de l'usine. Démontrer votre niveau de compréhension en répondant aux questions verbales ou écrites des superviseurs, mentors ou du gestionnaire du programme. Se déplacer vers d'autres sites de Bunge à des fins de formation et d'acquisition d'expérience si nécessaire. Aider le personnel local et corporatif à évaluer l'évolution des conditions opérationnelles. Communiquer efficacement avec les clients internes et externes de Bunge. Qualifications : Être inscrit à un programme de baccalauréat en ingénierie dans une université accrédité dans l'un des domaines suivants : génie mécanique, génie électrique ou instrumentation et contrôle. Être collaboratif, axé sur les résultats et posséder de solides aptitudes en réflexion critique. Capacité à s'adapter à de multiples demandes, à des priorités changeantes, à l'am",
+    "bc": false,
+    "solidworks": false,
+    "startLabel": null,
+    "fitsMay": null,
+    "score": 2,
+    "seen": "2026-11-25",
+    "firstSeen": "2026-11-25"
+  },
+  {
     "id": "js-OF9GZmczSXQzNGV5ZVRfTEFBQUFBQT09OkVzd0JDb3dCUVVSRVlsZGxZVVozZUcxU2N6RkNiSHBHVEc5eVN6WXRhVEp0U2xSS1UwVklOVmd3VlhablFtU",
     "title": "Co-op Winter 2027 - Mechanical Engineering - 8 Months",
     "location": "Calgary, Alberta, CA",
@@ -864,7 +883,8 @@
     "startLabel": null,
     "fitsMay": null,
     "score": 6,
-    "seen": "2026-11-25"
+    "seen": "2026-11-25",
+    "firstSeen": "2026-11-25"
   },
   {
     "id": "js-QkEzM214WU5ISVdiNlFYTEFBQUFBQT09OkVzd0JDb3dCUVVSRVlsZGxXVGN6VVhKM1dGVnVUREJKT0hsS1NWOVlTVkJ1UTFGV1lscFZlVXBuWnpoUGJtZ",
@@ -1006,7 +1026,8 @@
     "startLabel": null,
     "fitsMay": null,
     "score": 2,
-    "seen": "2026-11-25"
+    "seen": "2026-11-25",
+    "firstSeen": "2026-11-25"
   },
   {
     "id": "js-SGp2OG01LUtxTVNibGgxZkFBQUFBQT09OkVzd0JDb3dCUVVSRVlsZGxXVGg0UVdWNlptRXdNRmxsUzBvM01uUnFSVkZxYUY5S1JHRlVPR0ZyWVRodU1VW",
@@ -1095,7 +1116,8 @@
     "startLabel": null,
     "fitsMay": null,
     "score": 0,
-    "seen": "2026-11-25"
+    "seen": "2026-11-25",
+    "firstSeen": "2026-11-25"
   },
   {
     "id": "js-T1FHVldoZkRKYXBCY3A2WEFBQUFBQT09OkVzd0JDb3dCUVVSRVlsZGxXVWxNYUMxSVozVTFUa2RWTUdkV1lXTXRXVVpPZDBSclZqZEtja05OTkV0WGRtO",
