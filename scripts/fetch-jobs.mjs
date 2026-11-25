@@ -217,6 +217,9 @@ let pollNowId = null;
         const norm = (x) => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
         const keyOf = (j) => [j.company, j.title, j.location].map(norm).join('|');
         for (const j of found) j.seen = today;
+        // The same posting gets a new id from every search; reuse the id it already had so shortlists/stars/skips stay attached.
+        const idByKey = new Map(old.map((j) => [keyOf(j), j.id]));
+        for (const j of found) { const prev = idByKey.get(keyOf(j)); if (prev) j.id = prev; }
         const have = new Set(found.map(keyOf));
         let carried = 0;
         for (const j of old) {
