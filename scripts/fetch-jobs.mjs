@@ -277,6 +277,20 @@ if (problems.length) {
 
 // Stable order so the file only changes when jobs actually change.
 out.sort((a, b) => a.id.localeCompare(b.id));
+// The same posting can come back from different searches with different ids; keep one per company + title + location.
+{
+  const norm = (x) => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const seenKey = new Set();
+  const kept = [];
+  for (const j of out) {
+    const k = [j.company, j.title, j.location].map(norm).join('|');
+    if (seenKey.has(k)) continue;
+    seenKey.add(k);
+    kept.push(j);
+  }
+  out.length = 0;
+  out.push(...kept);
+}
 const jobsText = JSON.stringify(out, null, 2) + '\n';
 let oldText = '';
 try { oldText = await readFile(new URL('../data/jobs.json', import.meta.url), 'utf8'); } catch {}
