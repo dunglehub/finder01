@@ -1309,6 +1309,17 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
             return r.json();
           }).then(function (d) {
             marks = d.marks || {}; saveLocal();
+            // Clean-up: marks older than a year are removed (a few per visit), so the shared list does not grow forever.
+            (function () {
+              var cutoff = Date.now() - 365 * 864e5, n = 0;
+              Object.keys(marks).forEach(function (k) {
+                var m = marks[k];
+                if (!m || !m.ts || m.ts >= cutoff || n >= 25 || k.indexOf('post-') === 0) return;
+                n++; delete marks[k];
+                fetch(API + '/marks', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Passcode': pass }, body: JSON.stringify({ id: k, state: null }) }).catch(function () {});
+              });
+              if (n) saveLocal();
+            })();
             if (d.employers) setEmployers(d.employers);
             if (Array.isArray(d.posts)) { posts = d.posts; lsSet('cf_posts', JSON.stringify(posts)); }
             rebuildJobs();
@@ -1606,6 +1617,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (tt.mech) t.appendChild(tag('Mechanical', 't-blue'));
           if (tt.battery) t.appendChild(tag('Battery', 't-indigo'));
           if (j.solidworks) t.appendChild(tag('SolidWorks', 't-purple'));
+          if (j.repost) t.appendChild(tag('Seen before' + (j.firstSeen ? ' \u00b7 first found ' + j.firstSeen : '') + (j.posted ? ' \u00b7 posted ' + j.posted : ''), 'warn'));
           if (j.source === 'manual') t.appendChild(tag('Hand-picked', 'info'));
           if (j.source === 'added') t.appendChild(tag('Added' + (j.addedBy ? ' by ' + j.addedBy : ''), 'info'));
           return t;
@@ -1677,6 +1689,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           if (j.kind === 'event') li('Event date: ' + (j.eventDate || 'not listed'));
           else li('Start: ' + (j.startLabel || 'not listed') + (j.fitsMay === true ? ' (May 2027 or later: fits)' : j.fitsMay === false ? ' (before May 2027)' : ' (assumed to fit)'));
           if (j.posted) li('Posted: ' + j.posted);
+          if (j.firstSeen) li('First found here: ' + j.firstSeen + (j.repost ? ' (this posting was seen before and came back)' : ''));
+          if (j.seen) li('Last seen in search: ' + j.seen);
           if (j.location) li('Location: ' + j.location);
           li('Source: ' + (j.source === 'manual' ? 'hand-picked' : j.source === 'added' ? 'added by ' + (j.addedBy || 'someone') : 'found automatically'));
           var en = j.company !== 'Event' ? (EMP[j.company] || '') : '';
