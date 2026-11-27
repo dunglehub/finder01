@@ -594,7 +594,7 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
         .fbox .fchecks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 28px; margin-top: 10px; }
         .built { order: 6; flex: 1 1 100%; margin: 0; }
         .main { padding: 16px 40px 100px; }
-        .cols { grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr); gap: 56px; }
+        .cols { grid-template-columns: clamp(360px, 29%, 620px) minmax(0, 1fr); gap: 56px; }
         #list { max-height: none; overflow: visible; }
         .detail { position: sticky; top: 104px; max-height: calc(100vh - 124px); overflow: auto; scrollbar-width: none; }
         .detail::-webkit-scrollbar { display: none; }
