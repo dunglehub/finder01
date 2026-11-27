@@ -1763,7 +1763,12 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           return box;
         }
 
+        // Default sort per tab (Review = Best match, Applied = Newest); a sort the person picks is remembered per tab.
+        var TAB_SORT = { review: 'best', applied: 'new' };
+        var userSort = {};
+        var sortTab = null;
         function renderJobs() {
+          if (sortTab !== tab) { sortTab = tab; $('sort').value = userSort[tab] || TAB_SORT[tab] || 'priority'; }
           var q = $('q').value.trim().toLowerCase();
           var on = CRITERIA.map(function (c) { return $(c.id).checked; });
           var prevIndex = -1;
@@ -1919,10 +1924,10 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
           renderAll();
         });
         ['q', 'sort'].forEach(function (id) {
-          $(id).addEventListener(id === 'q' ? 'input' : 'change', renderJobs);
+          $(id).addEventListener(id === 'q' ? 'input' : 'change', function () { if (id === 'sort') userSort[tab] = $('sort').value; renderJobs(); });
         });
         $('clear').addEventListener('click', function () {
-          $('q').value = ''; CRITERIA.forEach(function (c) { $(c.id).checked = false; }); $('sort').value = 'priority';
+          $('q').value = ''; CRITERIA.forEach(function (c) { $(c.id).checked = false; }); delete userSort[tab]; $('sort').value = TAB_SORT[tab] || 'priority';
           renderJobs();
         });
 
