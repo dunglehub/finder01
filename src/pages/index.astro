@@ -675,7 +675,8 @@ const hue = (name) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 
       .foldbtn, #prep-dialog #prep-qa-dd, .side, .brand, header { border-bottom-color: #dedfe2 !important; }
       .sep { background: #dedfe2 !important; }
       @media (min-width:961px){ .card.sel { border-bottom: 1px solid #dedfe2 !important; border-radius: 0 !important; }
-        .card:has(+ .card.sel) { margin: 0 -16px; padding-left: 16px; padding-right: 16px; } }
+        .card:has(+ .card.sel) { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+        .card.sel { background: #e8e9ec !important; } }
       /* phone: stars live at the bottom of the job detail page, not on the list cards */
       .dstars { display: none; }
       @media (max-width: 960px) {
